@@ -2,11 +2,9 @@ const express = require('express');
 const app = express();
 const path = require('path');
 
-app.get('/', (req, res) => {
-    const htmlPath = path.join(__dirname, 'index.html');
+const staticPath = path.join(__dirname, '..', 'resources', 'html');
 
-    res.sendFile(htmlPath);
-});
+app.use(express.static(staticPath));
 
 class MyServer {
 
