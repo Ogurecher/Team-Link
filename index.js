@@ -1,1 +1,35 @@
-// TODO: Start prototyping here
+const express = require('express');
+const app = express();
+const path = require('path');
+
+app.get('/', (req, res) => {
+    const htmlPath = path.join(__dirname, 'index.html');
+
+    res.sendFile(htmlPath);
+});
+
+class MyServer {
+
+    listen () {
+        const portNum = '3000';
+
+        return new Promise((resolve, reject) => {
+            this.server = app.listen(portNum, () => resolve()).on('error', reject);
+            console.log(`Listening on port ${portNum}`);
+        });
+    }
+
+    close () {
+        return new Promise((resolve, reject) => {
+            this.server = this.server.close(() => resolve()).on('error', reject);
+        });
+    }
+}
+
+if (require.main === module) {
+    const server = new MyServer();
+
+    server.listen();
+}
+
+exports.MyServer = MyServer;
