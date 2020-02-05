@@ -2,7 +2,10 @@ const path = require('path');
 const express = require('express');
 const config = require('./config.js').config();
 const path = require('path');
-const debug = require('debug')('server');
+const debug = require('debug');
+
+const info = debug('info');
+const error = debug('error');
 
 const app = express();
 
@@ -14,14 +17,19 @@ class MyServer {
 
     listen (port = config.port, host = config.host) {
         return new Promise((resolve, reject) => {
-            this.server = app.listen(portNum, () => resolve()).on('error', reject);
-            debug(`Listening on port ${portNum}`);
+            this.server = app.listen(portNum, () => {
+                info(`Listening on port ${portNum}`);
+                resolve();
+            }).on('error', err => {
+                error(err);
+                reject();
+            });
         });
     }
 
     close () {
-        return new Promise((resolve, reject) => {
-            this.server = this.server.close(() => resolve()).on('error', reject);
+        return new Promise(resolve => {
+            this.server = this.server.close(() => resolve());
         });
     }
 }
