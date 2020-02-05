@@ -1,4 +1,4 @@
-const app = require('../index.js');
+const app = require('../src/index.js');
 const { expect } = require('chai');
 const got = require('got');
 
