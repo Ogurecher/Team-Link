@@ -20,7 +20,7 @@ class MyServer {
             this.server = app.listen(portNum, () => {
                 info(`Listening on port ${portNum}`);
                 resolve();
-            }).on('error', err => {
+            }).once('error', err => {
                 error(err);
                 reject();
             });
@@ -28,8 +28,11 @@ class MyServer {
     }
 
     close () {
-        return new Promise(resolve => {
-            this.server = this.server.close(() => resolve());
+        return new Promise((resolve, reject) => {
+            this.server = this.server.close(() => resolve()).once('error', err => {
+                error(err);
+                reject();
+            });
         });
     }
 }
