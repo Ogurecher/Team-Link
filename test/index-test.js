@@ -3,14 +3,14 @@ const app = require('../src/index.js');
 const { expect } = require('chai');
 const got = require('got');
 
-require('dotenv').config({ path: path.join(__dirname, '../config/.env') });
-
 describe('Server', () => {
     const myServer = new app.MyServer();
-    const rootPath = path.join(`http://${process.env.TEST_HOST}:${process.env.TEST_PORT}`);
+    const host = 'localhost';
+    const port = '3000';
+    const rootPath = path.join(`http://${host}:${port}`);
 
     before(() => {
-        myServer.listen(process.env.TEST_PORT, process.env.TEST_HOST);
+        myServer.listen(port, host);
     });
 
     after(() => {
