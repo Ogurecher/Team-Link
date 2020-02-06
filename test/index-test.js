@@ -12,11 +12,11 @@ describe('Server', () => {
     const rootPath = path.join(`http://${config.host}:${config.port}`);
 
     before(async () => {
-        return await myServer.listen();
+        await myServer.listen();
     });
 
     after(async () => {
-        return await myServer.close();
+        await myServer.close();
     });
 
     it('Listens on default host and port if no .env configuration file is provided', () => {
