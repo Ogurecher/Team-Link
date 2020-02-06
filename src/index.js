@@ -1,7 +1,6 @@
 const path = require('path');
 const express = require('express');
 const config = require('./config.js').config();
-const path = require('path');
 const debug = require('debug');
 
 const info = debug('info');

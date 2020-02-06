@@ -11,11 +11,11 @@ describe('Server', () => {
 
     const rootPath = path.join(`http://${config.host}:${config.port}`);
 
-    before(() => {
-        myServer.listen(config.port, config.host);
+    beforeEach(() => {
+        myServer.listen();
     });
 
-    after(() => {
+    afterEach(() => {
         myServer.close();
     });
 
@@ -36,6 +36,10 @@ describe('Server', () => {
         const expectedConfig = { port: process.env.PORT, host: process.env.HOST };
 
         expect(nonDefaultConfig).eql(expectedConfig);
+        
+    it('Resolves server.listen()', async () => {
+        await myServer.close();
+        return await myServer.listen();
     });
 
     it(`Sends response from endpoint '/'`, async () => {
@@ -46,7 +50,7 @@ describe('Server', () => {
         expect(response.statusCode).equal(expectedStatus);
     });
 
-    it(`Sends the correct html`, async () => {
+    it('Sends the correct html', async () => {
         const expectedBody = 'Hello Node.js';
         const bodyRegex = /<body.*?>([\s\S]*)<\/body>/;
 
@@ -54,5 +58,9 @@ describe('Server', () => {
         const actualBody = bodyRegex.exec(response.body)[1].trim();
 
         expect(actualBody).equal(expectedBody);
+    });
+
+    it('Resolves server.close()', async () => {
+        return await myServer.close();
     });
 });
