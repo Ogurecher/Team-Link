@@ -11,12 +11,12 @@ describe('Server', () => {
 
     const rootPath = path.join(`http://${config.host}:${config.port}`);
 
-    beforeEach(() => {
-        myServer.listen();
+    before(async () => {
+        return await myServer.listen();
     });
 
-    afterEach(() => {
-        myServer.close();
+    after(async () => {
+        return await myServer.close();
     });
 
     it('Listens on default host and port if no .env configuration file is provided', () => {
@@ -36,6 +36,7 @@ describe('Server', () => {
         const expectedConfig = { port: process.env.PORT, host: process.env.HOST };
 
         expect(nonDefaultConfig).eql(expectedConfig);
+    });
         
     it('Resolves server.listen()', async () => {
         await myServer.close();
@@ -58,9 +59,5 @@ describe('Server', () => {
         const actualBody = bodyRegex.exec(response.body)[1].trim();
 
         expect(actualBody).equal(expectedBody);
-    });
-
-    it('Resolves server.close()', async () => {
-        return await myServer.close();
     });
 });
