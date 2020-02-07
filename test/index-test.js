@@ -1,18 +1,16 @@
 const path = require('path');
-const app = require('../src/index.js');
+const { MyServer } = require('../src/MyServer.js');
 const { expect } = require('chai');
 const got = require('got');
 const configImport = require('../src/config.js');
 
 describe('Server', () => {
-    const myServer = new app.MyServer();
-    const config = configImport.config();
+    const myServer = new MyServer();
     const defaults = configImport.defaults;
+    const rootPath = path.join(`http://${configImport.config().host}:${configImport.config().port}`);
 
-    const rootPath = path.join(`http://${config.host}:${config.port}`);
-
-    before(() => {
-        myServer.listen(config.port, config.host);
+    before(async () => {
+        await myServer.listen();
     });
 
     after(() => {
@@ -36,6 +34,18 @@ describe('Server', () => {
         const expectedConfig = { port: process.env.PORT, host: process.env.HOST };
 
         expect(nonDefaultConfig).eql(expectedConfig);
+    });
+
+    it(`Listens on host and port provided by MyServer's constructor`, () => {
+        process.env.PORT = 'nondefault';
+        process.env.HOST = 'nondefault';
+        const constructorPort = '8000';
+        const constructorHost = 'localhost';
+
+        const constructedServer = new MyServer(constructorPort, constructorHost);
+
+        expect({ port: constructedServer.port, host: constructedServer.host })
+            .eql({ port: constructorPort, host: constructorHost });
     });
 
     it(`Sends response from endpoint '/'`, async () => {
