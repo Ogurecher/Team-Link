@@ -8,15 +8,14 @@ describe('Server', () => {
     const myServer = new app.MyServer();
     const config = configImport.config();
     const defaults = configImport.defaults;
-
     const rootPath = path.join(`http://${config.host}:${config.port}`);
 
-    before(() => {
-        myServer.listen(config.port, config.host);
+    before(async () => {
+        await myServer.listen(config.port, config.host);
     });
 
-    after(() => {
-        myServer.close();
+    after(async () => {
+        await myServer.close();
     });
 
     it('Listens on default host and port if no .env configuration file is provided', () => {
@@ -46,7 +45,7 @@ describe('Server', () => {
         expect(response.statusCode).equal(expectedStatus);
     });
 
-    it(`Sends the correct html`, async () => {
+    it('Sends the correct html', async () => {
         const expectedBody = 'Hello Node.js';
         const bodyRegex = /<body.*?>([\s\S]*)<\/body>/;
 
