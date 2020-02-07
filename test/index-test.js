@@ -8,15 +8,14 @@ describe('Server', () => {
     const myServer = new app.MyServer();
     const config = configImport.config();
     const defaults = configImport.defaults;
-
     const rootPath = path.join(`http://${config.host}:${config.port}`);
 
-    before(async () => {
-        await myServer.listen();
+    before(() => {
+        myServer.listen(config.port, config.host);
     });
 
-    after(async () => {
-        await myServer.close();
+    after(() => {
+        myServer.close();
     });
 
     it('Listens on default host and port if no .env configuration file is provided', () => {
@@ -36,11 +35,6 @@ describe('Server', () => {
         const expectedConfig = { port: process.env.PORT, host: process.env.HOST };
 
         expect(nonDefaultConfig).eql(expectedConfig);
-    });
-        
-    it('Resolves server.listen()', async () => {
-        await myServer.close();
-        return await myServer.listen();
     });
 
     it(`Sends response from endpoint '/'`, async () => {

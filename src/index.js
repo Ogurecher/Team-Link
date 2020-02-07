@@ -16,8 +16,8 @@ class MyServer {
 
     listen (port = config.port, host = config.host) {
         return new Promise((resolve, reject) => {
-            this.server = app.listen(portNum, () => {
-                info(`Listening on port ${portNum}`);
+            this.server = app.listen(port, host, () => {
+                info(`Listening on port ${port}`);
                 resolve();
             }).once('error', err => {
                 error(err);
