@@ -17,12 +17,13 @@ class MyServer {
 
     async listen (port = config.port, host = config.host) {
         try {
-            this.server = await app.listen(port, host);
+            this.server = app.listen(port, host);
             await once(this.server, 'listening');
             info(`Listening on port ${port}`);
         }
         catch (err) {
             error(err);
+            throw err;
         }
     }
 
@@ -32,6 +33,7 @@ class MyServer {
         }
         catch (err) {
             error(err);
+            throw err;
         }
     }
 }
