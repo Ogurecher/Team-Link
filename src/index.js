@@ -1,3 +1,4 @@
+const { once } = require('events');
 const path = require('path');
 const express = require('express');
 const config = require('./config.js').config();
@@ -14,25 +15,24 @@ app.use(express.static(staticPath));
 
 class MyServer {
 
-    listen (port = config.port, host = config.host) {
-        return new Promise((resolve, reject) => {
-            this.server = app.listen(port, host, () => {
-                info(`Listening on port ${port}`);
-                resolve();
-            }).once('error', err => {
-                error(err);
-                reject();
-            });
-        });
+    async listen (port = config.port, host = config.host) {
+        try {
+            this.server = await app.listen(port, host);
+            await once(this.server, 'listening');
+            info(`Listening on port ${port}`);
+        }
+        catch (err) {
+            error(err);
+        }
     }
 
-    close () {
-        return new Promise((resolve, reject) => {
-            this.server = this.server.close(() => resolve()).once('error', err => {
-                error(err);
-                reject();
-            });
-        });
+    async close () {
+        try {
+            await once(this.server.close(), 'close');
+        }
+        catch (err) {
+            error(err);
+        }
     }
 }
 
