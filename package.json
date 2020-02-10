@@ -1,7 +1,7 @@
 {
-  "name": "nodejs-katas",
+  "name": "team-link",
   "version": "1.0.0",
-  "description": "Basic Node.js exercises",
+  "description": "Provides convenient interface to call all online team members via MS Teams",
   "main": "src/index.js",
   "scripts": {
     "start": "node src/index.js",
