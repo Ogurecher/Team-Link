@@ -8,7 +8,7 @@ const info = debug('info');
 const error = debug('error');
 
 class App {
-    constructor({ staticPath = '../resources/html' } = {}) {
+    constructor({ staticPath = config.staticPath } = {}) {
         this.app = express();
         this.staticPath = path.join(__dirname, staticPath);
 

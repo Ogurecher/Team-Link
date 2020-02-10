@@ -58,10 +58,11 @@ describe('Server', () => {
 
 
         const nonDefaultConfig = configImport.config();
-        const expectedConfig = { port: process.env.PORT, host: process.env.HOST };
+        const nonDefaultPortHost = { port: nonDefaultConfig.port, host: nonDefaultConfig.host };
+        const expectedPortHost = { port: process.env.PORT, host: process.env.HOST };
 
 
-        expect(nonDefaultConfig).eql(expectedConfig);
+        expect(nonDefaultPortHost).eql(expectedPortHost);
     });
 
     it(`Listens on host and port provided in App.listen()`, async () => {
