@@ -8,14 +8,14 @@ const info = debug('info');
 const error = debug('error');
 
 class App {
-    constructor(staticPath = '../resources/html') {
+    constructor({ staticPath = '../resources/html' } = {}) {
         this.app = express();
         this.staticPath = path.join(__dirname, staticPath);
 
         this.app.use(express.static(this.staticPath));
     }
 
-    async listen (port = config.port, host = config.host) {
+    async listen ({ port = config.port, host = config.host } = {}) {
         let server;
         try {
             server = this.app.listen(port, host);

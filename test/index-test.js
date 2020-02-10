@@ -62,7 +62,7 @@ describe('Server', () => {
         const constructorHost = '127.0.0.1';
 
         await server.close();
-        const constructedServer = await myApp.listen(constructorPort, constructorHost);
+        const constructedServer = await myApp.listen({ port: constructorPort, host: constructorHost });
         const address = await constructedServer.address();
 
         await constructedServer.close();
