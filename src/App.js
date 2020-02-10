@@ -1,9 +1,10 @@
 const { once } = require('events');
 const path = require('path');
 const express = require('express');
-const config = require('./config.js').config();
+const configImport = require('./config.js');
 const debug = require('debug');
 
+const config = configImport.config();
 const info = debug('info');
 const error = debug('error');
 
