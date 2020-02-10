@@ -22,7 +22,7 @@ describe('Server', () => {
     it(`Sends response from endpoint '/'`, async () => {
         const expectedStatus = 200;
 
-        
+
         const response = await got(rootPath);
 
 
