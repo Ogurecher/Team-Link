@@ -1,20 +1,39 @@
 const path = require('path');
-const { MyServer } = require('../src/MyServer.js');
+const { App } = require('../src/App.js');
 const { expect } = require('chai');
 const got = require('got');
 const configImport = require('../src/config.js');
 
 describe('Server', () => {
-    const myServer = new MyServer();
+    const myApp = new App();
     const defaults = configImport.defaults;
     const rootPath = path.join(`http://${configImport.config().host}:${configImport.config().port}`);
+    let server;
 
     before(async () => {
-        await myServer.listen();
+        server = await myApp.listen();
     });
 
-    after(() => {
-        myServer.close();
+    after(async () => {
+        await server.close();
+    });
+
+    it(`Sends response from endpoint '/'`, async () => {
+        const expectedStatus = 200;
+
+        const response = await got(rootPath);
+
+        expect(response.statusCode).equal(expectedStatus);
+    });
+
+    it(`Sends the correct html`, async () => {
+        const expectedBody = 'Hello Node.js';
+        const bodyRegex = /<body.*?>([\s\S]*)<\/body>/;
+
+        const response = await got(rootPath);
+        const actualBody = bodyRegex.exec(response.body)[1].trim();
+
+        expect(actualBody).equal(expectedBody);
     });
 
     it('Listens on default host and port if no .env configuration file is provided', () => {
@@ -36,33 +55,19 @@ describe('Server', () => {
         expect(nonDefaultConfig).eql(expectedConfig);
     });
 
-    it(`Listens on host and port provided by MyServer's constructor`, () => {
+    it(`Listens on host and port provided in App.listen()`, async () => {
         process.env.PORT = 'nondefault';
         process.env.HOST = 'nondefault';
         const constructorPort = '8000';
-        const constructorHost = 'localhost';
+        const constructorHost = '127.0.0.1';
 
-        const constructedServer = new MyServer(constructorPort, constructorHost);
+        await server.close();
+        const constructedServer = await myApp.listen(constructorPort, constructorHost);
+        const address = await constructedServer.address();
 
-        expect({ port: constructedServer.port, host: constructedServer.host })
+        await constructedServer.close();
+
+        expect({ port: address.port.toString(), host: address.address })
             .eql({ port: constructorPort, host: constructorHost });
-    });
-
-    it(`Sends response from endpoint '/'`, async () => {
-        const expectedStatus = 200;
-
-        const response = await got(rootPath);
-
-        expect(response.statusCode).equal(expectedStatus);
-    });
-
-    it(`Sends the correct html`, async () => {
-        const expectedBody = 'Hello Node.js';
-        const bodyRegex = /<body.*?>([\s\S]*)<\/body>/;
-
-        const response = await got(rootPath);
-        const actualBody = bodyRegex.exec(response.body)[1].trim();
-
-        expect(actualBody).equal(expectedBody);
     });
 });
