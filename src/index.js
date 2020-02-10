@@ -1,47 +1,12 @@
-const { once } = require('events');
-const path = require('path');
-const express = require('express');
-const config = require('./config.js').config();
-const debug = require('debug');
-
-const info = debug('info');
-const error = debug('error');
-
-const app = express();
-
-const staticPath = path.join(__dirname, '../resources/html');
-
-app.use(express.static(staticPath));
-
-class MyServer {
-
-    async listen (port = config.port, host = config.host) {
-        try {
-            this.server = app.listen(port, host);
-            await once(this.server, 'listening');
-            info(`Listening on port ${port}`);
-        }
-        catch (err) {
-            error(err);
-            throw err;
-        }
-    }
-
-    async close () {
-        try {
-            await once(this.server.close(), 'close');
-        }
-        catch (err) {
-            error(err);
-            throw err;
-        }
-    }
-}
-
 if (require.main === module) {
-    const server = new MyServer();
+    const { App } = require('./App.js');
 
-    server.listen();
+    const app = new App();
+
+    app.listen();
 }
 
-exports.MyServer = MyServer;
+module.exports = {
+    App:    require('../src/App'),
+    config: require('../src/config')
+};
