@@ -8,6 +8,7 @@ describe('Server', () => {
     const myApp = new App();
     const defaults = configImport.defaults;
     const rootPath = path.join(`http://${configImport.config().host}:${configImport.config().port}`);
+
     let server;
 
     before(async () => {
@@ -21,7 +22,9 @@ describe('Server', () => {
     it(`Sends response from endpoint '/'`, async () => {
         const expectedStatus = 200;
 
+        
         const response = await got(rootPath);
+
 
         expect(response.statusCode).equal(expectedStatus);
     });
@@ -30,8 +33,10 @@ describe('Server', () => {
         const expectedBody = 'Hello Node.js';
         const bodyRegex = /<body.*?>([\s\S]*)<\/body>/;
 
+
         const response = await got(rootPath);
         const actualBody = bodyRegex.exec(response.body)[1].trim();
+
 
         expect(actualBody).equal(expectedBody);
     });
@@ -40,7 +45,9 @@ describe('Server', () => {
         process.env.PORT = '';
         process.env.HOST = '';
 
+
         const defaultConfig = configImport.config();
+
 
         expect(defaultConfig).eql(defaults);
     });
@@ -49,8 +56,10 @@ describe('Server', () => {
         process.env.PORT = 'nondefault';
         process.env.HOST = 'nondefault';
 
+
         const nonDefaultConfig = configImport.config();
         const expectedConfig = { port: process.env.PORT, host: process.env.HOST };
+
 
         expect(nonDefaultConfig).eql(expectedConfig);
     });
@@ -58,14 +67,18 @@ describe('Server', () => {
     it(`Listens on host and port provided in App.listen()`, async () => {
         process.env.PORT = 'nondefault';
         process.env.HOST = 'nondefault';
+
         const constructorPort = '8000';
         const constructorHost = '127.0.0.1';
 
+
         await server.close();
+
         const constructedServer = await myApp.listen({ port: constructorPort, host: constructorHost });
         const address = await constructedServer.address();
 
         await constructedServer.close();
+
 
         expect({ port: address.port.toString(), host: address.address })
             .eql({ port: constructorPort, host: constructorHost });
