@@ -33,4 +33,4 @@ class App {
     }
 }
 
-module.exports.App = App;
+module.exports = App;

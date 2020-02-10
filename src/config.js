@@ -12,5 +12,11 @@ const config = () => {
     }
 }
 
-exports.config = config;
-exports.defaults = {port, host, staticPath};
+module.exports = {
+    config,
+    defaults: {
+        port, 
+        host, 
+        staticPath
+    }
+}

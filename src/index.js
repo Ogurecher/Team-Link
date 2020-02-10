@@ -5,3 +5,8 @@ if (require.main === module) {
 
     app.listen();
 }
+
+module.exports = {
+    App:    require('../src/App'),
+    config: require('../src/config')
+};
