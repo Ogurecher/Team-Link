@@ -7,6 +7,7 @@
     "start": "node src/index.js",
     "lint": "eslint src/index.js test/**/*-test.js",
     "test": "npm run lint && mocha test/**/*-test.js",
+    "debug": "node --inspect-brk src/index.js",
     "watch": "npm test -- -w"
   },
   "repository": {

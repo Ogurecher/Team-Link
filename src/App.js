@@ -2,35 +2,40 @@ const { once } = require('events');
 const path = require('path');
 const express = require('express');
 const debug = require('debug');
-const configImport = require('./config.js');
+const Server = require('./Server');
+const configImport = require('./config');
 
 const config = configImport.config();
-const info = debug('team-link: info');
-const error = debug('team-link: error');
+const info = debug('team-link:info');
+const error = debug('team-link:error');
 
 class App {
-    constructor({ staticPath = config.staticPath } = {}) {
+    constructor() {
         this.app = express();
-        this.staticPath = path.join(__dirname, staticPath);
-
-        this.app.use(express.static(this.staticPath));
     }
 
-    async listen ({ port = config.port, host = config.host } = {}) {
-        let server;
-
+    async createServer ({ port = config.port, host = config.host, staticPath = config.staticPath } = {}) {
         try {
-            server = this.app.listen(port, host);
-
-            await once(server, 'listening');
-            info(`Listening on port ${port}`);
+            this.server = new Server(this.app, port, host, staticPath);
+            await this.server.listen();
+            info(`Server created, port: ${port}, host: ${host}, static path: ${staticPath}`);
         }
         catch (err) {
             error(err);
             throw err;
         }
-        
-        return server;
+
+        return this.server;
+    }
+
+    async closeServer () {
+        try {
+            await this.server.close();
+        }
+        catch (err) {
+            error(err);
+            throw err;
+        }
     }
 }
 

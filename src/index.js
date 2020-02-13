@@ -1,12 +1,13 @@
 if (require.main === module) {
-    const { App } = require('./App.js');
+    const App = require('./App.js');
 
     const app = new App();
 
-    app.listen();
+    app.createServer();
 }
 
 module.exports = {
     App:    require('./App'),
+    Server: require('./Server'),
     config: require('./config')
 };
