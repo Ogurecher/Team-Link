@@ -5,8 +5,8 @@ const debug = require('debug');
 const configImport = require('./config.js');
 
 const config = configImport.config();
-const info = debug('info');
-const error = debug('error');
+const info = debug('team-link: info');
+const error = debug('team-link: error');
 
 class App {
     constructor({ staticPath = config.staticPath } = {}) {
