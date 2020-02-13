@@ -4,7 +4,7 @@ const path = require('path');
 const express = require('express');
 const debug = require('debug');
 const configImport = require('./config.js');
-const router = require('./routes/router');
+const { router } = require('./routes/router');
 
 const config = configImport.config();
 const info = debug('team-link:info');
@@ -19,7 +19,7 @@ class Server {
 
         this.app.use(express.static(this.staticPath));
 
-        this.app.use('/users', router);
+        this.app.use('/', router);
     }
 
     async listen () {

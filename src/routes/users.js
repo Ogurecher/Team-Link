@@ -1,5 +1,11 @@
+const got = require('got');
+const path = require('path');
+const configImport = require('../config');
+
+const config = configImport.config();
+
 module.exports = {
-    getUsers: async function getUsers(req, res) {
+    getUsers: async function (req, res) {
         const groupQuery = `/groups?$filter=startswith(displayName,'dxdeveloper')&$select=displayName,id`;
         const groupURL = path.join(config.apiBaseURL, groupQuery);
         
