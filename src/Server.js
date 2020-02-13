@@ -22,10 +22,8 @@ class Server {
         try {
             this.server = await this.app.listen(this.port, this.host);
 
-            await once(this.server, 'listening')
-            .then(() => {
-                info(`Server listening on port ${this.port}, host: ${this.host}`);
-            });
+            await once(this.server, 'listening');
+            info(`Server listening on port ${this.port}, host: ${this.host}`);
         }
         catch (err) {
             error(err);
