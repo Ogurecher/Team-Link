@@ -1,8 +1,8 @@
 const { once } = require('events');
 const path = require('path');
 const express = require('express');
-const configImport = require('./config.js');
 const debug = require('debug');
+const configImport = require('./config.js');
 
 const config = configImport.config();
 const info = debug('info');

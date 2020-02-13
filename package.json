@@ -11,14 +11,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/AndreyBelym/nodejs-katas.git"
+    "url": "git+https://github.com/Ogurecher/Team-Link.git"
   },
   "author": "Developer Express Inc.",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/AndreyBelym/nodejs-katas/issues"
+    "url": "https://github.com/Ogurecher/Team-Link/issues"
   },
-  "homepage": "https://github.com/AndreyBelym/nodejs-katas#readme",
+  "homepage": "https://github.com/Ogurecher/Team-Link#readme",
   "devDependencies": {
     "chai": "^4.2.0",
     "eslint": "^6.8.0",

@@ -7,6 +7,6 @@ if (require.main === module) {
 }
 
 module.exports = {
-    App:    require('../src/App'),
-    config: require('../src/config')
+    App:    require('./App'),
+    config: require('./config')
 };
