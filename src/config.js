@@ -1,8 +1,10 @@
-require('dotenv').config();
+const dotenv = require('dotenv');
 
 const port = '8080';
 const host = 'localhost';
 const staticPath = '../resources/html'
+
+dotenv.config();
 
 const config = () => {
     return {

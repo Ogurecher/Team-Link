@@ -8,14 +8,12 @@ describe('Server', () => {
     const defaults = config.defaults;
     const rootPath = path.join(`http://${config.config().host}:${config.config().port}`);
 
-    let server;
-
     before(async () => {
-        server = await myApp.listen();
+        await myApp.createServer();
     });
 
     after(async () => {
-        await server.close();
+        await myApp.closeServer();
     });
 
     it(`Sends response from endpoint '/'`, async () => {
@@ -72,15 +70,11 @@ describe('Server', () => {
         const constructorHost = '127.0.0.1';
 
 
-        await server.close();
+        await myApp.closeServer();
 
-        const constructedServer = await myApp.listen({ port: constructorPort, host: constructorHost });
-        const address = await constructedServer.address();
+        const constructedServer = await myApp.createServer({ port: constructorPort, host: constructorHost });
+        const address = { port: constructedServer.port, host: constructedServer.host };
 
-        await constructedServer.close();
-
-
-        expect({ port: address.port.toString(), host: address.address })
-            .eql({ port: constructorPort, host: constructorHost });
+        expect(address).eql({ port: constructorPort, host: constructorHost });
     });
 });
