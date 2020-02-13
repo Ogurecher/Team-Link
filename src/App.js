@@ -17,8 +17,10 @@ class App {
     async createServer ({ port = config.port, host = config.host, staticPath = config.staticPath } = {}) {
         try {
             this.server = new Server(this.app, port, host, staticPath);
-            await this.server.listen();
-            info(`Server created, port: ${port}, host: ${host}, static path: ${staticPath}`);
+            await this.server.listen()
+            .then(() => {
+                info(`Server created, port: ${port}, host: ${host}, static path: ${staticPath}`)
+            });
         }
         catch (err) {
             error(err);
@@ -30,7 +32,10 @@ class App {
 
     async closeServer () {
         try {
-            await this.server.close();
+            await this.server.close()
+            .then(() => {
+                info('Server closed');
+            });
         }
         catch (err) {
             error(err);
