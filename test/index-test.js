@@ -46,7 +46,7 @@ describe('Server', () => {
         const defaultConfig = config.config();
 
 
-        expect(defaultConfig).eql(defaults);
+        expect({ port: defaultConfig.port, host: defaultConfig.host }).eql({ port: defaults.port, host: defaults.host });
     });
 
     it('Listens on host and port provided in a .env file', () => {
