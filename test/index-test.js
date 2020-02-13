@@ -26,7 +26,7 @@ describe('Server', () => {
         expect(response.statusCode).equal(expectedStatus);
     });
 
-    it(`Sends the correct html`, async () => {
+    /*it(`Sends the correct html`, async () => {
         const expectedBody = 'Hello Node.js';
         const bodyRegex = /<body.*?>([\s\S]*)<\/body>/;
 
@@ -36,7 +36,7 @@ describe('Server', () => {
 
 
         expect(actualBody).equal(expectedBody);
-    });
+    });*/
 
     it('Listens on default host and port if no .env configuration file is provided', () => {
         process.env.PORT = '';
