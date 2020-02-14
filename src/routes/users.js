@@ -1,8 +1,10 @@
 const got = require('got');
 const path = require('path');
+const debugModule = require('debug');
 const configImport = require('../config');
 
 const config = configImport.config();
+const debug = debugModule('team-link:debug');
 
 module.exports = {
     getUsers: async function (req, res) {
@@ -45,7 +47,8 @@ module.exports = {
                 onlineUsers.push(userStatus);
             };
         };
-        console.log(onlineUsers);
+
+        debug(onlineUsers);
     
         res.send(onlineUsers);
     }

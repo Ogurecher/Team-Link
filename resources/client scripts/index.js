@@ -1,6 +1,9 @@
-fetch('http://localhost:3000/users')
-.then((res) => res.json())
-.then((onlineUsers) => {
+
+async function getOnlineUsers () {
+    const response = await fetch('http://localhost:3000/users');
+
+    const onlineUsers = response.json();
+
     const userTable = document.createElement('table');
     userTable.style.border = '2px solid #000';
 
@@ -12,7 +15,7 @@ fetch('http://localhost:3000/users')
 
     userTable.appendChild(headerRow);
 
-    for (let user of onlineUsers) {
+    for (let user of await onlineUsers) {
         const userRow = document.createElement('tr');
 
         createTableCell(user.displayName, userRow);
@@ -20,10 +23,10 @@ fetch('http://localhost:3000/users')
         createTableCell(user.status, userRow);
 
         userTable.appendChild(userRow);
-    }
+    };
 
     document.getElementById('root').appendChild(userTable);
-});
+}
 
 function createTableCell(text, parent) {
     const cell = document.createElement('td');
