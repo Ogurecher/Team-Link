@@ -1,7 +1,7 @@
 const express = require('express');
 const debug = require('debug');
 const Server = require('./Server');
-const Config = require('./config');
+const Config = require('./Config');
 
 const configInstance = new Config();
 const config = configInstance.config();

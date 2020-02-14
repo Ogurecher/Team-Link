@@ -23,7 +23,10 @@ class Config {
             apiBaseURL:           process.env.API_BASE_URL || this.defaults.apiBaseURL,
             authorizationBaseURL: process.env.OAUTH_BASE_URL || this.defaults.authorizationBaseURL,
             oauthVersion:         process.env.OAUTH_VERSION || this.defaults.oauthVersion,
-            tenantId:             process.env.OAUTH_TENANT_ID
+            tenantId:             process.env.OAUTH_TENANT_ID,
+            clientId:             process.env.OAUTH_CLIENT_ID,
+            clientSecret:         process.env.OAUTH_CLIENT_SECRET,
+            refreshToken:         process.env.OAUTH_REFRESH_TOKEN_USER
         };
     }
 }

@@ -9,5 +9,5 @@ if (require.main === module) {
 module.exports = {
     App:    require('./App'),
     Server: require('./Server'),
-    Config: require('./config')
+    Config: require('./Config')
 };
