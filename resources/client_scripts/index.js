@@ -4,20 +4,18 @@ async function getOnlineUsers () {
 
     const onlineUsers = response.json();
 
-    const headerRow = `<tr>
-        <th>Display name</th>
-        <th>ID</th>
-        <th>Status</th>
-    </tr>`;
+    const rowTemplate = ({ displayName = 'Display Name', id = 'ID', status = 'Status', cellType = 'td' } = {}) => `
+    <tr>
+        <${cellType}>${displayName}</${cellType}>
+        <${cellType}>${id}</${cellType}>
+        <${cellType}>${status}</${cellType}>
+    </tr>
+    `;
 
-    const rows = [ headerRow ];
+    const rows = [ rowTemplate({ cellType: 'th' }) ];
 
     for (let user of await onlineUsers) {
-        const userRow = `<tr>
-            <td>${user.displayName}</td>
-            <td>${user.id}</td>
-            <td>${user.status}</td>
-        </tr>`;
+        const userRow = rowTemplate({ displayName: user.displayName, id: user.id, status: user.status });
         
         rows.push(userRow);
     };
