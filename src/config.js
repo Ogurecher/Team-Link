@@ -3,7 +3,6 @@ const dotenv = require('dotenv');
 const port = '8080';
 const host = 'localhost';
 const staticPath = '../resources';
-const accessType = 'Bearer';
 const accessToken = '';
 const apiBaseURL = 'https://graph.microsoft.com/beta';
 
@@ -14,7 +13,6 @@ const config = () => {
         port: process.env.PORT? process.env.PORT : port,
         host: process.env.HOST? process.env.HOST : host,
         staticPath: process.env.STATIC_PATH? process.env.STATIC_PATH : staticPath,
-        accessType: process.env.OAUTH_ACCESS_TYPE? process.env.OAUTH_ACCESS_TYPE : accessType,
         accessToken: process.env.OAUTH_ACCESS_TOKEN_USER? process.env.OAUTH_ACCESS_TOKEN_USER : accessToken,
         apiBaseURL: process.env.API_BASE_URL? process.env.API_BASE_URL : apiBaseURL
     }
@@ -26,7 +24,6 @@ module.exports = {
         port, 
         host, 
         staticPath,
-        accessType,
         accessToken,
         apiBaseURL
     }
