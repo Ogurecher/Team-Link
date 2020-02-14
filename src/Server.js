@@ -8,7 +8,7 @@ const info = debug('team-link:info');
 const error = debug('team-link:error');
 
 class Server {
-    constructor (app, port, host, staticPath) {
+    constructor ({ app, port, host, staticPath }) {
         this.app = app;
         this.host = host;
         this.port = port;

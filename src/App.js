@@ -14,7 +14,7 @@ class App {
 
     async createServer ({ port = config.port, host = config.host, staticPath = config.staticPath } = {}) {
         try {
-            this.server = new Server(this.app, port, host, staticPath);
+            this.server = new Server({ app: this.app, port, host, staticPath });
             await this.server.listen();
             info(`Server created, port: ${port}, host: ${host}, static path: ${staticPath}`);
         }

@@ -7,7 +7,7 @@ const { attachCORSHeaders } = require('./headers');
 const config = configImport.config();
 const debug = debugModule('team-link:debug');
 
-async function getGroup (displayName) {
+async function getGroup ({ displayName }) {
     const groupQuery = `/groups?$filter=startswith(displayName,'${displayName}')&$select=displayName,id`;
     const groupURL = path.join(config.apiBaseURL, groupQuery);
 
@@ -16,7 +16,7 @@ async function getGroup (displayName) {
     return JSON.parse(groupRes.body).value[0];
 }
 
-async function getChannel (group, displayName) {
+async function getChannel ({ group, displayName }) {
     const channelQuery = `/teams/${group.id}/channels?$filter=startswith(displayName, '${displayName}')&select=displayName,id`;
     const channelURL = path.join(config.apiBaseURL, channelQuery);
 
@@ -25,7 +25,7 @@ async function getChannel (group, displayName) {
     return JSON.parse(channelRes.body).value[0];
 }
 
-async function getAllUsers (group, channel) {
+async function getAllUsers ({ group, channel }) {
     const usersQuery = `/teams/${group.id}/channels/${channel.id}/members`;
     const usersURL = path.join(config.apiBaseURL, usersQuery);
 
@@ -39,7 +39,7 @@ async function getAllUsers (group, channel) {
     });
 }
 
-async function getUserStatus (user) {
+async function getUserStatus ({ user }) {
     const userStatusQuery = `/users/${user.id}/presence`;
     const userStatusURL = path.join(config.apiBaseURL, userStatusQuery);
 
@@ -53,16 +53,16 @@ async function getUserStatus (user) {
 }
 
 async function getOnlineUsers (req, res) {
-    res = attachCORSHeaders(res);
+    res = attachCORSHeaders({ res });
 
-    const group = await getGroup('dxdeveloper');
-    const channel = await getChannel(group, 'General');
-    const users = await getAllUsers(group, channel);
+    const group = await getGroup({ displayName: 'dxdeveloper' });
+    const channel = await getChannel({ group, displayName: 'General' });
+    const users = await getAllUsers({ group, channel });
 
     const onlineUsers = [];
 
     for (const user of users) {
-        const userStatus = await getUserStatus(user);
+        const userStatus = await getUserStatus({ user });
 
         if (userStatus.status === 'Available')
             onlineUsers.push(userStatus);
