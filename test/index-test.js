@@ -26,17 +26,17 @@ describe('Server', () => {
         expect(response.statusCode).equal(expectedStatus);
     });
 
-    /*it(`Sends the correct html`, async () => {
-        const expectedBody = 'Hello Node.js';
-        const bodyRegex = /<body.*?>([\s\S]*)<\/body>/;
+    it(`Sends the correct html`, async () => {
+        const expectedTitle = 'Available users';
+        const TitleRegex = /<title.*?>([\s\S]*)<\/title>/;
 
 
         const response = await got(rootPath);
-        const actualBody = bodyRegex.exec(response.body)[1].trim();
+        const actualTitle = TitleRegex.exec(response.body)[1].trim();
 
 
-        expect(actualBody).equal(expectedBody);
-    });*/
+        expect(actualTitle).equal(expectedTitle);
+    });
 
     it('Listens on default host and port if no .env configuration file is provided', () => {
         process.env.PORT = '';
