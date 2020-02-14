@@ -2,12 +2,15 @@ const got = require('got');
 const path = require('path');
 const debugModule = require('debug');
 const configImport = require('../config');
+const { attachCORSHeaders } = require('./headers');
 
 const config = configImport.config();
 const debug = debugModule('team-link:debug');
 
 module.exports = {
     getUsers: async function (req, res) {
+        res = attachCORSHeaders(res);
+
         const groupQuery = `/groups?$filter=startswith(displayName,'dxdeveloper')&$select=displayName,id`;
         const groupURL = path.join(config.apiBaseURL, groupQuery);
         
