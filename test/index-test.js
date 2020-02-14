@@ -4,18 +4,18 @@ const { expect } = require('chai');
 const got = require('got');
 
 describe('Server', () => {
-    const myApp = new App();
+    const app = new App();
 
     const configInstance = new Config();
     const defaults = configInstance.defaults;
     const rootPath = path.join(`http://${configInstance.config().host}:${configInstance.config().port}`);
 
     before(async () => {
-        await myApp.createServer();
+        await app.createServer();
     });
 
     after(async () => {
-        await myApp.closeServer();
+        await app.closeServer();
     });
 
     it(`Sends response from endpoint '/'`, async () => {
@@ -72,9 +72,9 @@ describe('Server', () => {
         const constructorHost = '127.0.0.1';
 
 
-        await myApp.closeServer();
+        await app.closeServer();
 
-        const constructedServer = await myApp.createServer({ port: constructorPort, host: constructorHost });
+        const constructedServer = await app.createServer({ port: constructorPort, host: constructorHost });
         const address = { port: constructedServer.port, host: constructedServer.host };
 
         expect(address).eql({ port: constructorPort, host: constructorHost });

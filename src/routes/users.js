@@ -41,16 +41,16 @@ async function getAllUsers ({ group, channel, accessToken = config.accessToken }
     });
 }
 
-async function getUserStatus ({ user, accessToken = config.accessToken } = {}) {
-    const userStatusQuery = `/users/${user.id}/presence`;
-    const userStatusURL = path.join(config.apiBaseURL, userStatusQuery);
+async function getUserInfo ({ user, accessToken = config.accessToken } = {}) {
+    const userInfoQuery = `/users/${user.id}/presence`;
+    const userInfoURL = path.join(config.apiBaseURL, userInfoQuery);
 
-    const userStatusRes = await got(userStatusURL, { headers: { Authorization: `Bearer ${accessToken}` } });
+    const userInfoRes = await got(userInfoURL, { headers: { Authorization: `Bearer ${accessToken}` } });
 
     return {
         displayName: user.displayName,
         id:          user.id,
-        status:      JSON.parse(userStatusRes.body).availability
+        status:      JSON.parse(userInfoRes.body).availability
     };
 }
 
@@ -66,10 +66,10 @@ async function getOnlineUsers (req, res) {
     const onlineUsers = [];
 
     for (const user of users) {
-        const userStatus = await getUserStatus({ user, accessToken });
+        const userInfo = await getUserInfo({ user, accessToken });
 
-        if (userStatus.status === 'Available')
-            onlineUsers.push(userStatus);
+        if (userInfo.status === 'Available')
+            onlineUsers.push(userInfo);
 
     }
 
