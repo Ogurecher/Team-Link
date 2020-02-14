@@ -1,10 +1,10 @@
 const express = require('express');
-const { getUsers } = require('./users');
+const { getOnlineUsers } = require('./users');
 
 const router = express.Router();
 
-router.route('/users').get(getUsers);
+router.route('/users').get(getOnlineUsers);
 
-module.exports = { 
+module.exports = {
     router
-}
+};

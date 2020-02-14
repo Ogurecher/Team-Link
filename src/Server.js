@@ -1,17 +1,14 @@
 const { once } = require('events');
-const got = require('got');
 const path = require('path');
 const express = require('express');
 const debug = require('debug');
-const configImport = require('./config.js');
 const { router } = require('./routes/router');
 
-const config = configImport.config();
 const info = debug('team-link:info');
 const error = debug('team-link:error');
 
 class Server {
-    constructor(app, port, host, staticPath) {
+    constructor (app, port, host, staticPath) {
         this.app = app;
         this.host = host;
         this.port = port;

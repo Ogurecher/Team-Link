@@ -10,21 +10,21 @@ dotenv.config();
 
 const config = () => {
     return {
-        port: process.env.PORT? process.env.PORT : port,
-        host: process.env.HOST? process.env.HOST : host,
-        staticPath: process.env.STATIC_PATH? process.env.STATIC_PATH : staticPath,
-        accessToken: process.env.OAUTH_ACCESS_TOKEN_USER? process.env.OAUTH_ACCESS_TOKEN_USER : accessToken,
-        apiBaseURL: process.env.API_BASE_URL? process.env.API_BASE_URL : apiBaseURL
-    }
-}
+        port:        process.env.PORT ? process.env.PORT : port,
+        host:        process.env.HOST ? process.env.HOST : host,
+        staticPath:  process.env.STATIC_PATH ? process.env.STATIC_PATH : staticPath,
+        accessToken: process.env.OAUTH_ACCESS_TOKEN_USER ? process.env.OAUTH_ACCESS_TOKEN_USER : accessToken,
+        apiBaseURL:  process.env.API_BASE_URL ? process.env.API_BASE_URL : apiBaseURL
+    };
+};
 
 module.exports = {
     config,
     defaults: {
-        port, 
-        host, 
+        port,
+        host,
         staticPath,
         accessToken,
         apiBaseURL
     }
-}
+};
