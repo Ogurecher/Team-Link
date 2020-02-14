@@ -4,36 +4,25 @@ async function getOnlineUsers () {
 
     const onlineUsers = response.json();
 
-    const userTable = document.createElement('table');
-    userTable.style.border = '2px solid #000';
+    const headerRow = `<tr>
+        <th>Display name</th>
+        <th>ID</th>
+        <th>Status</th>
+    </tr>`;
 
-    const headerRow = document.createElement('tr');
-
-    createTableCell('Display name', headerRow);
-    createTableCell('ID', headerRow);
-    createTableCell('Status', headerRow);
-
-    userTable.appendChild(headerRow);
+    const rows = [ headerRow ];
 
     for (let user of await onlineUsers) {
-        const userRow = document.createElement('tr');
-
-        createTableCell(user.displayName, userRow);
-        createTableCell(user.id, userRow);
-        createTableCell(user.status, userRow);
-
-        userTable.appendChild(userRow);
+        const userRow = `<tr>
+            <td>${user.displayName}</td>
+            <td>${user.id}</td>
+            <td>${user.status}</td>
+        </tr>`;
+        
+        rows.push(userRow);
     };
 
-    document.getElementById('root').appendChild(userTable);
-}
+    const table = `<table>${rows.join('')}</table>`;
 
-function createTableCell(text, parent) {
-    const cell = document.createElement('td');
-    const textNode = document.createTextNode(text);
-
-    cell.appendChild(textNode);
-    cell.style.border = '1px solid #000';
-
-    parent.appendChild(cell);
+    document.getElementById('root').innerHTML = table;
 }
