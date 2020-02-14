@@ -5,7 +5,7 @@
   "main": "src/index.js",
   "scripts": {
     "start": "node src/index.js",
-    "lint": "eslint src/**/*.js test/**/*-test.js",
+    "lint": "eslint src test",
     "test": "npm run lint && mocha test/**/*-test.js",
     "debug": "node --inspect-brk src/index.js",
     "watch": "npm test -- -w"
