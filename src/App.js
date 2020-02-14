@@ -1,9 +1,10 @@
 const express = require('express');
 const debug = require('debug');
 const Server = require('./Server');
-const configImport = require('./config');
+const Config = require('./config');
 
-const config = configImport.config();
+const configInstance = new Config();
+const config = configInstance.config();
 const info = debug('team-link:info');
 const error = debug('team-link:error');
 

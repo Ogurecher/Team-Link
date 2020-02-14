@@ -1,30 +1,31 @@
 const dotenv = require('dotenv');
 
-const port = '8080';
-const host = 'localhost';
-const staticPath = '../resources';
-const accessToken = '';
-const apiBaseURL = 'https://graph.microsoft.com/beta';
+class Config {
+    constructor () {
+        dotenv.config();
 
-dotenv.config();
-
-const config = () => {
-    return {
-        port:        process.env.PORT ? process.env.PORT : port,
-        host:        process.env.HOST ? process.env.HOST : host,
-        staticPath:  process.env.STATIC_PATH ? process.env.STATIC_PATH : staticPath,
-        accessToken: process.env.OAUTH_ACCESS_TOKEN_USER ? process.env.OAUTH_ACCESS_TOKEN_USER : accessToken,
-        apiBaseURL:  process.env.API_BASE_URL ? process.env.API_BASE_URL : apiBaseURL
-    };
-};
-
-module.exports = {
-    config,
-    defaults: {
-        port,
-        host,
-        staticPath,
-        accessToken,
-        apiBaseURL
+        this.defaults = {
+            port:                 '8080',
+            host:                 'localhost',
+            staticPath:           '../resources',
+            apiBaseURL:           'https://graph.microsoft.com/beta',
+            authorizationBaseURL: 'https://login.microsoftonline.com',
+            oauthVersion:         '/oauth2/v2.0'
+        };
     }
-};
+
+    config () {
+        return {
+            port:                 process.env.PORT || this.defaults.port,
+            host:                 process.env.HOST || this.defaults.host,
+            staticPath:           process.env.STATIC_PATH || this.defaults.staticPath,
+            accessToken:          process.env.OAUTH_ACCESS_TOKEN_USER,
+            apiBaseURL:           process.env.API_BASE_URL || this.defaults.apiBaseURL,
+            authorizationBaseURL: process.env.OAUTH_BASE_URL || this.defaults.authorizationBaseURL,
+            oauthVersion:         process.env.OAUTH_VERSION || this.defaults.oauthVersion,
+            tenantId:             process.env.OAUTH_TENANT_ID
+        };
+    }
+}
+
+module.exports = Config;

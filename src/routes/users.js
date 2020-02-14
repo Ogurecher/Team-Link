@@ -1,10 +1,12 @@
 const got = require('got');
 const path = require('path');
 const debugModule = require('debug');
-const configImport = require('../config');
+const Config = require('../Config');
 const { attachCORSHeaders } = require('./headers');
+const { refreshAccessToken } = require('./token');
 
-const config = configImport.config();
+const configInstance = new Config();
+const config = configInstance.config();
 const debug = debugModule('team-link:debug');
 
 async function getGroup ({ displayName }) {

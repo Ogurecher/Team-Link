@@ -1,12 +1,14 @@
 const path = require('path');
-const { App, config } = require('../');
+const { App, Config } = require('../');
 const { expect } = require('chai');
 const got = require('got');
 
 describe('Server', () => {
     const myApp = new App();
-    const defaults = config.defaults;
-    const rootPath = path.join(`http://${config.config().host}:${config.config().port}`);
+
+    const configInstance = new Config();
+    const defaults = configInstance.defaults;
+    const rootPath = path.join(`http://${configInstance.config().host}:${configInstance.config().port}`);
 
     before(async () => {
         await myApp.createServer();
@@ -43,7 +45,7 @@ describe('Server', () => {
         process.env.HOST = '';
 
 
-        const defaultConfig = config.config();
+        const defaultConfig = configInstance.config();
 
 
         expect({ port: defaultConfig.port, host: defaultConfig.host }).eql({ port: defaults.port, host: defaults.host });
@@ -54,7 +56,7 @@ describe('Server', () => {
         process.env.HOST = 'nondefault';
 
 
-        const nonDefaultConfig = config.config();
+        const nonDefaultConfig = configInstance.config();
         const nonDefaultPortHost = { port: nonDefaultConfig.port, host: nonDefaultConfig.host };
         const expectedPortHost = { port: process.env.PORT, host: process.env.HOST };
 
