@@ -6,7 +6,7 @@ const configInstance = new Config();
 const config = configInstance.config();
 
 async function refreshAccessToken () {
-    const refreshURL = path.join(config.authorizationBaseURL, '/', config.tenantId, config.oauthVersion, '/token');
+    const refreshURL = path.join(config.authorizationBaseURL, config.tenantId, config.oauthVersion, '/token');
 
     const response = await got.post(refreshURL, {
         body: `client_id=${config.clientId}

@@ -12,6 +12,13 @@ describe('API', () => {
     const rootPath = path.join(`http://${config.host}:${config.port}`);
     const usersURL = path.join(rootPath, '/users');
 
+    nock(config.authorizationBaseURL)
+        .persist()
+        .post(/\/.*\/.*\/.*\/token/)
+        .reply(200, {
+            'access_token': 'token'
+        });
+
     nock(config.apiBaseURL)
         .persist()
         .get(/\/groups/)
