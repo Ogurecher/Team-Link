@@ -41,17 +41,25 @@ async function getAllUsers ({ group, channel, accessToken = config.accessToken }
     });
 }
 
-async function getUserInfo ({ user, accessToken = config.accessToken } = {}) {
-    const userInfoQuery = `/users/${user.id}/presence`;
-    const userInfoURL = path.join(config.apiBaseURL, userInfoQuery);
+async function getPresences ({ idList, accessToken = config.accessToken } = {}) {
+    const presencesQuery = `/communications/getPresencesByUserId`;
+    const presencesURL = path.join(config.apiBaseURL, presencesQuery);
 
-    const userInfoRes = await got(userInfoURL, { headers: { Authorization: `Bearer ${accessToken}` } });
+    const presencesRes = await got.post(presencesURL, {
+        headers: {
+            Authorization: `Bearer ${accessToken}`
+        },
+        json: {
+            ids: idList
+        }
+    });
 
-    return {
-        displayName: user.displayName,
-        id:          user.id,
-        status:      JSON.parse(userInfoRes.body).availability
-    };
+    return JSON.parse(presencesRes.body).value.map(data => {
+        return {
+            id:     data.id,
+            status: data.availability
+        };
+    });
 }
 
 async function getOnlineUsers (req, res) {
@@ -63,14 +71,18 @@ async function getOnlineUsers (req, res) {
     const channel = await getChannel({ group, displayName: 'General', accessToken });
     const users = await getAllUsers({ group, channel, accessToken });
 
+    const userStatuses = await getPresences({ idList: users.map(data => data.id), accessToken });
+
     const onlineUsers = [];
 
-    for (const user of users) {
-        const userInfo = await getUserInfo({ user, accessToken });
+    for (const userStatus of userStatuses) {
+        if (userStatus.status === 'Available') {
+            const matchingUser = users.find(user => {
+                return user.id === userStatus.id;
+            });
 
-        if (userInfo.status === 'Available')
-            onlineUsers.push(userInfo);
-
+            onlineUsers.push({ ...userStatus, displayName: matchingUser.displayName });
+        }
     }
 
     debug(onlineUsers);

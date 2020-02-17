@@ -59,9 +59,18 @@ describe('API', () => {
 
     nock(config.apiBaseURL)
         .persist()
-        .get(/users\/.*\/presence/)
+        .post(/\/communications\/getPresencesByUserId/)
         .reply(200, {
-            availability: 'Available'
+            value: [
+                {
+                    id:           'userId1',
+                    availability: 'Available'
+                },
+                {
+                    id:           'userId2',
+                    availability: 'Offline'
+                }
+            ]
         });
 
     before(async () => {
@@ -84,8 +93,7 @@ describe('API', () => {
 
     it(`Provides a correct response from the '/users' endpoint`, async () => {
         const expectedResponse = [
-            { displayName: 'username1', id: 'userId1', status: 'Available' },
-            { displayName: 'username2', id: 'userId2', status: 'Available' }
+            { displayName: 'username1', id: 'userId1', status: 'Available' }
         ];
 
 
