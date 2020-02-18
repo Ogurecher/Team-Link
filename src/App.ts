@@ -1,7 +1,7 @@
 import express from 'express';
 import debug from 'debug';
-import Server from './Server.js';
-import Config from './Config.js';
+import Server from './Server';
+import Config from './Config';
 
 const configInstance = new Config();
 const config = configInstance.config();
@@ -9,6 +9,9 @@ const info = debug('team-link:info');
 const error = debug('team-link:error');
 
 export default class App {
+    app;
+    server;
+
     constructor () {
         this.app = express();
     }

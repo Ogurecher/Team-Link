@@ -1,3 +1,4 @@
+import 'mocha';
 import path from 'path';
 import { expect } from 'chai';
 import got from 'got';

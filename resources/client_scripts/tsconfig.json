@@ -3,9 +3,8 @@
         "outDir": "./dist",
         "allowJs": true,
         "target": "es2018",
-        "esModuleInterop": true
-    },
-    "include": [
-        "./*"
-    ]
+        "moduleResolution": "node",
+        "esModuleInterop": true,
+        "module": "ES6"
+    }
 }

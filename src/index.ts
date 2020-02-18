@@ -1,9 +1,11 @@
-import App from './App.js';
+import App from './App';
 
-const app = new App();
+if (process.mainModule === module) {
+    const app = new App();
 
-app.createServer();
+    app.createServer();
+}
 
-export * from './App.js';
-export * from './Server.js';
-export * from './Config.js';
+export { default as App } from './App';
+export { default as Server } from './Server';
+export { default as Config } from './Config';

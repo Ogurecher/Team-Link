@@ -2,12 +2,18 @@ import { once } from 'events';
 import path from 'path';
 import express from 'express';
 import debug from 'debug';
-import { router } from './routes/router.js';
+import { router } from './routes/router';
 
 const info = debug('team-link:info');
 const error = debug('team-link:error');
 
 export default class Server {
+    app
+    host
+    port
+    staticPath
+    server
+
     constructor ({ app, port, host, staticPath }) {
         this.app = app;
         this.host = host;

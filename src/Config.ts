@@ -1,6 +1,8 @@
 import dotenv from 'dotenv';
 
 export default class Config {
+    defaults
+
     constructor () {
         dotenv.config();
 

@@ -1,6 +1,6 @@
 import path from 'path';
 import got from 'got';
-import Config from '../Config.js';
+import Config from '../Config';
 
 const configInstance = new Config();
 const config = configInstance.config();
