@@ -1,19 +1,21 @@
 const path = require('path');
-const { App, config } = require('../');
+const { App, Config } = require('../');
 const { expect } = require('chai');
 const got = require('got');
 
 describe('Server', () => {
-    const myApp = new App();
-    const defaults = config.defaults;
-    const rootPath = path.join(`http://${config.config().host}:${config.config().port}`);
+    const app = new App();
+
+    const configInstance = new Config();
+    const defaults = configInstance.defaults;
+    const rootPath = path.join(`http://${configInstance.config().host}:${configInstance.config().port}`);
 
     before(async () => {
-        await myApp.createServer();
+        await app.createServer();
     });
 
     after(async () => {
-        await myApp.closeServer();
+        await app.closeServer();
     });
 
     it(`Sends response from endpoint '/'`, async () => {
@@ -27,15 +29,15 @@ describe('Server', () => {
     });
 
     it(`Sends the correct html`, async () => {
-        const expectedBody = 'Hello Node.js';
-        const bodyRegex = /<body.*?>([\s\S]*)<\/body>/;
+        const expectedTitle = 'Available users';
+        const TitleRegex = /<title.*?>([\s\S]*)<\/title>/;
 
 
         const response = await got(rootPath);
-        const actualBody = bodyRegex.exec(response.body)[1].trim();
+        const actualTitle = TitleRegex.exec(response.body)[1].trim();
 
 
-        expect(actualBody).equal(expectedBody);
+        expect(actualTitle).equal(expectedTitle);
     });
 
     it('Listens on default host and port if no .env configuration file is provided', () => {
@@ -43,10 +45,10 @@ describe('Server', () => {
         process.env.HOST = '';
 
 
-        const defaultConfig = config.config();
+        const defaultConfig = configInstance.config();
 
 
-        expect(defaultConfig).eql(defaults);
+        expect({ port: defaultConfig.port, host: defaultConfig.host }).eql({ port: defaults.port, host: defaults.host });
     });
 
     it('Listens on host and port provided in a .env file', () => {
@@ -54,7 +56,7 @@ describe('Server', () => {
         process.env.HOST = 'nondefault';
 
 
-        const nonDefaultConfig = config.config();
+        const nonDefaultConfig = configInstance.config();
         const nonDefaultPortHost = { port: nonDefaultConfig.port, host: nonDefaultConfig.host };
         const expectedPortHost = { port: process.env.PORT, host: process.env.HOST };
 
@@ -70,9 +72,9 @@ describe('Server', () => {
         const constructorHost = '127.0.0.1';
 
 
-        await myApp.closeServer();
+        await app.closeServer();
 
-        const constructedServer = await myApp.createServer({ port: constructorPort, host: constructorHost });
+        const constructedServer = await app.createServer({ port: constructorPort, host: constructorHost });
         const address = { port: constructedServer.port, host: constructedServer.host };
 
         expect(address).eql({ port: constructorPort, host: constructorHost });

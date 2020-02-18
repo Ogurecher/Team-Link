@@ -1,23 +1,22 @@
-const { once } = require('events');
-const path = require('path');
 const express = require('express');
 const debug = require('debug');
 const Server = require('./Server');
-const configImport = require('./config');
+const Config = require('./Config');
 
-const config = configImport.config();
+const configInstance = new Config();
+const config = configInstance.config();
 const info = debug('team-link:info');
 const error = debug('team-link:error');
 
 class App {
-    constructor() {
+    constructor () {
         this.app = express();
     }
 
     async createServer ({ port = config.port, host = config.host, staticPath = config.staticPath } = {}) {
         try {
-            this.server = new Server(this.app, port, host, staticPath);
-            await this.server.listen()
+            this.server = new Server({ app: this.app, port, host, staticPath });
+            await this.server.listen();
             info(`Server created, port: ${port}, host: ${host}, static path: ${staticPath}`);
         }
         catch (err) {
@@ -30,7 +29,7 @@ class App {
 
     async closeServer () {
         try {
-            await this.server.close()
+            await this.server.close();
             info('Server closed');
         }
         catch (err) {
