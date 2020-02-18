@@ -1,9 +1,9 @@
-const got = require('got');
-const path = require('path');
-const debugModule = require('debug');
-const Config = require('../Config');
-const { attachCORSHeaders } = require('./headers');
-const { refreshAccessToken } = require('./token');
+import got from 'got';
+import path from 'path';
+import debugModule from 'debug';
+import Config from '../Config.js';
+import { attachCORSHeaders } from './headers.js';
+import { refreshAccessToken } from './token.js';
 
 const configInstance = new Config();
 const config = configInstance.config();
@@ -62,7 +62,7 @@ async function getPresences ({ idList, accessToken = config.accessToken } = {}) 
     });
 }
 
-async function getOnlineUsers (req, res) {
+export async function getOnlineUsers (req, res) {
     res = attachCORSHeaders({ res });
 
     const accessToken = await refreshAccessToken();
@@ -89,7 +89,3 @@ async function getOnlineUsers (req, res) {
 
     res.send(onlineUsers);
 }
-
-module.exports = {
-    getOnlineUsers
-};

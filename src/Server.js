@@ -1,18 +1,18 @@
-const { once } = require('events');
-const path = require('path');
-const express = require('express');
-const debug = require('debug');
-const { router } = require('./routes/router');
+import { once } from 'events';
+import path from 'path';
+import express from 'express';
+import debug from 'debug';
+import { router } from './routes/router.js';
 
 const info = debug('team-link:info');
 const error = debug('team-link:error');
 
-class Server {
+export default class Server {
     constructor ({ app, port, host, staticPath }) {
         this.app = app;
         this.host = host;
         this.port = port;
-        this.staticPath = path.join(__dirname, staticPath);
+        this.staticPath = path.join(path.resolve(), staticPath);
 
         this.app.use(express.static(this.staticPath));
 
@@ -42,5 +42,3 @@ class Server {
         }
     }
 }
-
-module.exports = Server;

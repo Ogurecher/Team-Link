@@ -1,14 +1,14 @@
-const express = require('express');
-const debug = require('debug');
-const Server = require('./Server');
-const Config = require('./Config');
+import express from 'express';
+import debug from 'debug';
+import Server from './Server.js';
+import Config from './Config.js';
 
 const configInstance = new Config();
 const config = configInstance.config();
 const info = debug('team-link:info');
 const error = debug('team-link:error');
 
-class App {
+export default class App {
     constructor () {
         this.app = express();
     }
@@ -38,5 +38,3 @@ class App {
         }
     }
 }
-
-module.exports = App;

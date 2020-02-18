@@ -1,13 +1,13 @@
-const dotenv = require('dotenv');
+import dotenv from 'dotenv';
 
-class Config {
+export default class Config {
     constructor () {
         dotenv.config();
 
         this.defaults = {
             port:                 '8080',
             host:                 'localhost',
-            staticPath:           '../resources',
+            staticPath:           '/resources',
             apiBaseURL:           'https://graph.microsoft.com/beta',
             authorizationBaseURL: 'https://login.microsoftonline.com',
             oauthVersion:         '/oauth2/v2.0'
@@ -30,5 +30,3 @@ class Config {
         };
     }
 }
-
-module.exports = Config;

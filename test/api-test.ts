@@ -1,8 +1,8 @@
-const path = require('path');
-const nock = require('nock');
-const { expect } = require('chai');
-const got = require('got');
-const { App, Config } = require('../');
+import path from 'path';
+import nock from 'nock';
+import { expect } from 'chai';
+import got from 'got';
+import { App, Config } from '../';
 
 describe('API', () => {
     const app = new App();

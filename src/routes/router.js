@@ -1,10 +1,6 @@
-const express = require('express');
-const { getOnlineUsers } = require('./users');
+import express from 'express';
+import { getOnlineUsers } from './users.js';
 
-const router = express.Router();
+export const router = express.Router();
 
 router.route('/users').get(getOnlineUsers);
-
-module.exports = {
-    router
-};

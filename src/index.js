@@ -1,13 +1,9 @@
-if (require.main === module) {
-    const App = require('./App.js');
+import App from './App.js';
 
-    const app = new App();
+const app = new App();
 
-    app.createServer();
-}
+app.createServer();
 
-module.exports = {
-    App:    require('./App'),
-    Server: require('./Server'),
-    Config: require('./Config')
-};
+export * from './App.js';
+export * from './Server.js';
+export * from './Config.js';

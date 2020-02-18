@@ -1,0 +1,12 @@
+{
+    "compilerOptions": {
+        "outDir": "dist",
+        "allowJs": true,
+        "target": "es2018",
+        "esModuleInterop": true
+    },
+    "include": [
+        "./src/**/*",
+        "./test/**/*"
+    ]
+}
