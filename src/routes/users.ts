@@ -18,8 +18,8 @@ async function getGroup ({ displayName = '', accessToken = config.accessToken }:
     return JSON.parse(groupRes.body).value[0];
 }
 
-async function getChannel ({ group, displayName = '', accessToken = config.accessToken }: { group: any; displayName: string; accessToken: string }): Promise<JSON> {
-    const channelQuery = `/teams/${group!.id}/channels?$filter=startswith(displayName, '${displayName}')&select=displayName,id`;
+async function getChannel ({ group, displayName = '', accessToken = config.accessToken }: { group: any | null; displayName: string; accessToken: string }): Promise<JSON> {
+    const channelQuery = `/teams/${group.id}/channels?$filter=startswith(displayName, '${displayName}')&select=displayName,id`;
     const channelURL = path.join(config.apiBaseURL, channelQuery);
 
     const channelRes = await got(channelURL, { headers: { Authorization: `Bearer ${accessToken}` } });
