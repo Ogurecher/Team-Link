@@ -4,7 +4,10 @@
         "target": "es2018",
         "moduleResolution": "node",
         "esModuleInterop": true,
-        "module": "commonjs"
+        "module": "commonjs",
+        "strict": true,
+        "declaration": true,
+        "declarationDir": "dist/types"
     },
     "include": [
         "./src/**/*"

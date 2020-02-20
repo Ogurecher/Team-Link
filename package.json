@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "Provides a convenient interface to call all online team members via MS Teams",
   "main": "lib/src/index.js",
+  "types": "dist/types/",
   "scripts": {
     "start": "npm run build && node lib/src/index.js",
     "lint": "eslint --ext '.ts' src test",

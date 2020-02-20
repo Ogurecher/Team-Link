@@ -5,7 +5,7 @@ import Config from '../Config';
 const configInstance = new Config();
 const config = configInstance.config();
 
-export async function refreshAccessToken () {
+export async function refreshAccessToken (): Promise<string> {
     const refreshURL = path.join(config.authorizationBaseURL, config.tenantId, config.oauthVersion, '/token');
 
     const response = await got.post(refreshURL, {
