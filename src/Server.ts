@@ -8,13 +8,13 @@ const info = debug('team-link:info');
 const error = debug('team-link:error');
 
 export default class Server {
-    app
-    host
-    port
-    staticPath
-    server
+    private app: any;
+    private host: string;
+    private port: string;
+    private staticPath: string;
+    private server: any;
 
-    constructor ({ app, port, host, staticPath }) {
+    constructor ({ app, port, host, staticPath }: { app: any; port: string; host: string; staticPath: string }) {
         this.app = app;
         this.host = host;
         this.port = port;
@@ -25,7 +25,7 @@ export default class Server {
         this.app.use('/', router);
     }
 
-    async listen () {
+    async listen (): Promise<void> {
         try {
             this.server = await this.app.listen(this.port, this.host);
 
@@ -38,7 +38,7 @@ export default class Server {
         }
     }
 
-    async close () {
+    async close (): Promise<void> {
         try {
             await this.server.close();
         }

@@ -1,7 +1,7 @@
 import dotenv from 'dotenv';
 
 export default class Config {
-    defaults
+    public defaults: any;
 
     constructor () {
         dotenv.config();
@@ -16,7 +16,7 @@ export default class Config {
         };
     }
 
-    config () {
+    config (): any {
         return {
             port:                 process.env.PORT || this.defaults.port,
             host:                 process.env.HOST || this.defaults.host,

@@ -9,14 +9,14 @@ const info = debug('team-link:info');
 const error = debug('team-link:error');
 
 export default class App {
-    app;
-    server;
+    private app: any;
+    private server!: Server;
 
     constructor () {
         this.app = express();
     }
 
-    async createServer ({ port = config.port, host = config.host, staticPath = config.staticPath } = {}) {
+    async createServer ({ port = config.port, host = config.host, staticPath = config.staticPath } = {}): Promise<any> {
         try {
             this.server = new Server({ app: this.app, port, host, staticPath });
             await this.server.listen();
@@ -30,7 +30,7 @@ export default class App {
         return this.server;
     }
 
-    async closeServer () {
+    async closeServer (): Promise<void> {
         try {
             await this.server.close();
             info('Server closed');

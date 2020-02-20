@@ -9,7 +9,7 @@ const configInstance = new Config();
 const config = configInstance.config();
 const debug = debugModule('team-link:debug');
 
-async function getGroup ({ displayName = '', accessToken = config.accessToken } = {}) {
+async function getGroup ({ displayName = '', accessToken = config.accessToken }: { displayName: string; accessToken: string }): Promise<JSON> {
     const groupQuery = `/groups?$filter=startswith(displayName,'${displayName}')&$select=displayName,id`;
     const groupURL = path.join(config.apiBaseURL, groupQuery);
 
@@ -18,8 +18,8 @@ async function getGroup ({ displayName = '', accessToken = config.accessToken } 
     return JSON.parse(groupRes.body).value[0];
 }
 
-async function getChannel ({ group = null, displayName = '', accessToken = config.accessToken } = {}) {
-    const channelQuery = `/teams/${group.id}/channels?$filter=startswith(displayName, '${displayName}')&select=displayName,id`;
+async function getChannel ({ group, displayName = '', accessToken = config.accessToken }: { group: any; displayName: string; accessToken: string }): Promise<JSON> {
+    const channelQuery = `/teams/${group!.id}/channels?$filter=startswith(displayName, '${displayName}')&select=displayName,id`;
     const channelURL = path.join(config.apiBaseURL, channelQuery);
 
     const channelRes = await got(channelURL, { headers: { Authorization: `Bearer ${accessToken}` } });
@@ -27,13 +27,13 @@ async function getChannel ({ group = null, displayName = '', accessToken = confi
     return JSON.parse(channelRes.body).value[0];
 }
 
-async function getAllUsers ({ group = null, channel = null, accessToken = config.accessToken } = {}) {
+async function getAllUsers ({ group, channel, accessToken = config.accessToken }: { group: any; channel: any; accessToken: string }): Promise<any[]> {
     const usersQuery = `/teams/${group.id}/channels/${channel.id}/members`;
     const usersURL = path.join(config.apiBaseURL, usersQuery);
 
     const usersRes = await got(usersURL, { headers: { Authorization: `Bearer ${accessToken}` } });
 
-    return JSON.parse(usersRes.body).value.map(data => {
+    return JSON.parse(usersRes.body).value.map((data: any) => {
         return {
             displayName: data.displayName,
             id:          data.userId
@@ -41,7 +41,7 @@ async function getAllUsers ({ group = null, channel = null, accessToken = config
     });
 }
 
-async function getPresences ({ idList = [], accessToken = config.accessToken } = {}) {
+async function getPresences ({ idList = [], accessToken = config.accessToken }: { idList: number[]; accessToken: string}): Promise<any[]> {
     const presencesQuery = `/communications/getPresencesByUserId`;
     const presencesURL = path.join(config.apiBaseURL, presencesQuery);
 
@@ -54,7 +54,7 @@ async function getPresences ({ idList = [], accessToken = config.accessToken } =
         }
     });
 
-    return JSON.parse(presencesRes.body).value.map(data => {
+    return JSON.parse(presencesRes.body).value.map((data: any) => {
         return {
             id:     data.id,
             status: data.availability
@@ -62,7 +62,7 @@ async function getPresences ({ idList = [], accessToken = config.accessToken } =
     });
 }
 
-export async function getOnlineUsers (req, res) {
+export async function getOnlineUsers (req: any, res: any): Promise<void> {
     res = attachCORSHeaders({ res });
 
     const accessToken = await refreshAccessToken();
@@ -71,13 +71,13 @@ export async function getOnlineUsers (req, res) {
     const channel = await getChannel({ group, displayName: 'General', accessToken });
     const users = await getAllUsers({ group, channel, accessToken });
 
-    const userStatuses = await getPresences({ idList: users.map(data => data.id), accessToken });
+    const userStatuses = await getPresences({ idList: users.map((data: any) => data.id), accessToken });
 
     const onlineUsers = [];
 
     for (const userStatus of userStatuses) {
         if (userStatus.status === 'Available') {
-            const matchingUser = users.find(user => {
+            const matchingUser = users.find((user: any) => {
                 return user.id === userStatus.id;
             });
 

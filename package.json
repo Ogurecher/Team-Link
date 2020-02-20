@@ -2,7 +2,8 @@
   "name": "team-link",
   "version": "1.0.0",
   "description": "Provides a convenient interface to call all online team members via MS Teams",
-  "main": "dist/src/index.js",
+  "main": "dist/src/index",
+  "types": "dist/types/",
   "scripts": {
     "start": "npm run build && node dist/src/index.js",
     "lint": "eslint src/**/*.ts test/**/*-test.ts",
@@ -33,6 +34,7 @@
     "typescript": "^3.7.5"
   },
   "dependencies": {
+    "@types/chai": "^4.2.9",
     "@types/mocha": "^7.0.1",
     "@typescript-eslint/eslint-plugin": "^2.20.0",
     "@typescript-eslint/parser": "^2.20.0",
