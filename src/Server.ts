@@ -18,7 +18,7 @@ export default class Server {
         this.app = app;
         this.host = host;
         this.port = port;
-        this.staticPath = path.resolve(staticPath);
+        this.staticPath = path.join(path.resolve(), staticPath);
 
         this.app.use(express.static(this.staticPath));
 
