@@ -1,13 +1,12 @@
 {
     "compilerOptions": {
-        "outDir": "dist",
+        "outDir": "dist/src",
         "target": "es2018",
         "moduleResolution": "node",
         "esModuleInterop": true,
         "module": "commonjs"
     },
     "include": [
-        "./src/**/*",
-        "./test/**/*"
+        "./src/**/*"
     ]
 }
