@@ -1,4 +1,4 @@
-import { once } from 'events';
+import events, { once } from 'events';
 import path from 'path';
 import express from 'express';
 import debug from 'debug';
@@ -7,6 +7,10 @@ import { router } from './routes/router';
 const info = debug('team-link:info');
 const error = debug('team-link:error');
 
+interface ExpressServer extends events.EventEmitter {
+    close(): void;
+}
+
 export default class Server {
     public host: string;
     public port: string;
@@ -14,13 +18,9 @@ export default class Server {
     private app: express.Express;
     private staticPath: string;
     private clientPath: string;
-    private server: any;
+    private server: ExpressServer | undefined;
 
-<<<<<<< HEAD
-    constructor ({ app, port, host, staticPath, clientPath }: { app: any; port: string; host: string; staticPath: string; clientPath: string }) {
-=======
-    constructor ({ app, port, host, staticPath }: { app: express.Express; port: string; host: string; staticPath: string }) {
->>>>>>> c3a5cdf... Mostly removed any types (apart from server). Have not created a separate module for interfaces yet
+    constructor ({ app, port, host, staticPath, clientPath }: { app: express.Express; port: string; host: string; staticPath: string; clientPath: string }) {
         this.app = app;
         this.host = host;
         this.port = port;
@@ -48,7 +48,7 @@ export default class Server {
 
     async close (): Promise<void> {
         try {
-            await this.server.close();
+            await this.server?.close();
         }
         catch (err) {
             error(err);
