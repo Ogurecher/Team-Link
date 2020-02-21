@@ -9,7 +9,7 @@ export default class Config {
         this.defaults = {
             port:                 '8080',
             host:                 'localhost',
-            staticPath:           '/resources',
+            staticPath:           'resources',
             apiBaseURL:           'https://graph.microsoft.com/beta',
             authorizationBaseURL: 'https://login.microsoftonline.com',
             oauthVersion:         '/oauth2/v2.0'
