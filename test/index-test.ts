@@ -35,8 +35,8 @@ describe('Server', () => {
 
 
         const response = await got(rootPath);
-        const regexResult: any = TitleRegex.exec(response.body);
-        const actualTitle = regexResult[1].trim();
+        const regexResult: RegExpExecArray | null = TitleRegex.exec(response.body);
+        const actualTitle = regexResult ? regexResult[1].trim() : '';
 
 
         expect(actualTitle).equal(expectedTitle);

@@ -1,7 +1,24 @@
 import dotenv from 'dotenv';
 
+interface DefaultConfiguration {
+    port: string;
+    host: string;
+    staticPath: string;
+    apiBaseURL: string;
+    authorizationBaseURL: string;
+    oauthVersion: string;
+}
+
+interface Configuration extends DefaultConfiguration{
+    accessToken: string;
+    tenantId: string;
+    clientId: string;
+    clientSecret: string;
+    refreshToken: string;
+}
+
 export default class Config {
-    public defaults: any;
+    public defaults: DefaultConfiguration;
 
     constructor () {
         dotenv.config();
@@ -16,7 +33,7 @@ export default class Config {
         };
     }
 
-    config (): any {
+    config (): Configuration { // TODO remove default 'not provided' values and set them directly in tests
         return {
             port:                 process.env.PORT || this.defaults.port,
             host:                 process.env.HOST || this.defaults.host,

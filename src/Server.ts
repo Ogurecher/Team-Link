@@ -8,13 +8,14 @@ const info = debug('team-link:info');
 const error = debug('team-link:error');
 
 export default class Server {
-    private app: any;
-    private host: string;
-    private port: string;
+    public host: string;
+    public port: string;
+
+    private app: express.Express;
     private staticPath: string;
     private server: any;
 
-    constructor ({ app, port, host, staticPath }: { app: any; port: string; host: string; staticPath: string }) {
+    constructor ({ app, port, host, staticPath }: { app: express.Express; port: string; host: string; staticPath: string }) {
         this.app = app;
         this.host = host;
         this.port = port;
@@ -27,7 +28,7 @@ export default class Server {
 
     async listen (): Promise<void> {
         try {
-            this.server = await this.app.listen(this.port, this.host);
+            this.server = await this.app.listen(parseInt(this.port, 10), this.host);
 
             await once(this.server, 'listening');
             info(`Server listening on port ${this.port}, host: ${this.host}`);
