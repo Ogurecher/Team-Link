@@ -17,7 +17,7 @@ interface Channel {
     id: string;
 }
 
-interface User {
+export interface User {
     id: string;
     userId?: string;
     displayName: string;
@@ -29,11 +29,11 @@ interface Presence {
     availability: string;
 }
 
-interface OnlineUser extends User{
+export interface OnlineUser extends User{
     status: string;
 }
 
-interface HTTPResponse {
+export interface HTTPResponse {
     header(title: string, options: string | string[]): void;
     send(body: OnlineUser[]): void;
 }

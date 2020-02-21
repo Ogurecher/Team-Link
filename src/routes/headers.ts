@@ -1,17 +1,4 @@
-interface User {
-    id: string;
-    userId?: string;
-    displayName: string;
-}
-
-interface OnlineUser extends User{
-    status: string;
-}
-
-interface HTTPResponse {
-    header(title: string, options: string | string[]): void;
-    send(body: OnlineUser[]): void;
-}
+import { HTTPResponse } from './users';
 
 export function attachCORSHeaders ({ res }: { res: HTTPResponse }): HTTPResponse {
     res.header('Access-Control-Allow-Origin', ['*']);
