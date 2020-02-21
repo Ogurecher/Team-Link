@@ -5,7 +5,7 @@
   "main": "dist/src/index.js",
   "scripts": {
     "start": "npm run build && node dist/src/index.js",
-    "lint": "eslint src/**/*.ts test/**/*-test.ts",
+    "lint": "eslint --ext '.ts' src test",
     "test": "npm run lint && mocha -r ts-node/register test/**/*-test.ts",
     "debug": "node --inspect-brk src/index.js",
     "watch": "npm test -- -w",
