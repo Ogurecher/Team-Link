@@ -9,7 +9,36 @@ const configInstance = new Config();
 const config = configInstance.config();
 const debug = debugModule('team-link:debug');
 
-async function getGroup ({ displayName = '', accessToken = config.accessToken }: { displayName: string; accessToken: string }): Promise<JSON> {
+interface Group {
+    id: string;
+}
+
+interface Channel {
+    id: string;
+}
+
+interface User {
+    id: string;
+    userId?: string;
+    displayName: string;
+}
+
+interface Presence {
+    id: string;
+    status: string;
+    availability: string;
+}
+
+interface OnlineUser extends User{
+    status: string;
+}
+
+interface HTTPResponse {
+    header(title: string, options: string | string[]): void;
+    send(body: OnlineUser[]): void;
+}
+
+async function getGroup ({ displayName = '', accessToken = config.accessToken }: { displayName: string; accessToken: string }): Promise<Group> {
     const groupQuery = `/groups?$filter=startswith(displayName,'${displayName}')&$select=displayName,id`;
     const groupURL = path.join(config.apiBaseURL, groupQuery);
 
@@ -18,7 +47,7 @@ async function getGroup ({ displayName = '', accessToken = config.accessToken }:
     return JSON.parse(groupRes.body).value[0];
 }
 
-async function getChannel ({ group, displayName = '', accessToken = config.accessToken }: { group: any | null; displayName: string; accessToken: string }): Promise<JSON> {
+async function getChannel ({ group, displayName = '', accessToken = config.accessToken }: { group: Group; displayName: string; accessToken: string }): Promise<Channel> {
     const channelQuery = `/teams/${group.id}/channels?$filter=startswith(displayName, '${displayName}')&select=displayName,id`;
     const channelURL = path.join(config.apiBaseURL, channelQuery);
 
@@ -27,13 +56,13 @@ async function getChannel ({ group, displayName = '', accessToken = config.acces
     return JSON.parse(channelRes.body).value[0];
 }
 
-async function getAllUsers ({ group, channel, accessToken = config.accessToken }: { group: any; channel: any; accessToken: string }): Promise<any[]> {
+async function getAllUsers ({ group, channel, accessToken = config.accessToken }: { group: Group; channel: Channel; accessToken: string }): Promise<User[]> {
     const usersQuery = `/teams/${group.id}/channels/${channel.id}/members`;
     const usersURL = path.join(config.apiBaseURL, usersQuery);
 
     const usersRes = await got(usersURL, { headers: { Authorization: `Bearer ${accessToken}` } });
 
-    return JSON.parse(usersRes.body).value.map((data: any) => {
+    return JSON.parse(usersRes.body).value.map((data: User) => {
         return {
             displayName: data.displayName,
             id:          data.userId
@@ -41,7 +70,7 @@ async function getAllUsers ({ group, channel, accessToken = config.accessToken }
     });
 }
 
-async function getPresences ({ idList = [], accessToken = config.accessToken }: { idList: number[]; accessToken: string}): Promise<any[]> {
+async function getPresences ({ idList = [], accessToken = config.accessToken }: { idList: string[]; accessToken: string}): Promise<Presence[]> {
     const presencesQuery = `/communications/getPresencesByUserId`;
     const presencesURL = path.join(config.apiBaseURL, presencesQuery);
 
@@ -54,7 +83,7 @@ async function getPresences ({ idList = [], accessToken = config.accessToken }: 
         }
     });
 
-    return JSON.parse(presencesRes.body).value.map((data: any) => {
+    return JSON.parse(presencesRes.body).value.map((data: Presence) => {
         return {
             id:     data.id,
             status: data.availability
@@ -62,7 +91,7 @@ async function getPresences ({ idList = [], accessToken = config.accessToken }: 
     });
 }
 
-export async function getOnlineUsers (req: any, res: any): Promise<void> {
+export async function getOnlineUsers (req: object, res: HTTPResponse): Promise<void> {
     res = attachCORSHeaders({ res });
 
     const accessToken = await refreshAccessToken();
@@ -71,17 +100,20 @@ export async function getOnlineUsers (req: any, res: any): Promise<void> {
     const channel = await getChannel({ group, displayName: 'General', accessToken });
     const users = await getAllUsers({ group, channel, accessToken });
 
-    const userStatuses = await getPresences({ idList: users.map((data: any) => data.id), accessToken });
+    const userStatuses = await getPresences({ idList: users.map((data: User) => data.id), accessToken });
 
     const onlineUsers = [];
 
     for (const userStatus of userStatuses) {
-        if (userStatus.status === 'Available') {
-            const matchingUser = users.find((user: any) => {
+        const requiredStatus = 'Available';
+
+        if (userStatus.status === requiredStatus) {
+            const matchingUser: User | undefined = users.find((user: User) => {
                 return user.id === userStatus.id;
             });
 
-            onlineUsers.push({ ...userStatus, displayName: matchingUser.displayName });
+            if (matchingUser)
+                onlineUsers.push({ ...userStatus, displayName: matchingUser.displayName });
         }
     }
 

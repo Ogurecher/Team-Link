@@ -8,14 +8,19 @@ const info = debug('team-link:info');
 const error = debug('team-link:error');
 
 export default class Server {
-    private app: any;
-    private host: string;
-    private port: string;
+    public host: string;
+    public port: string;
+
+    private app: express.Express;
     private staticPath: string;
     private clientPath: string;
     private server: any;
 
+<<<<<<< HEAD
     constructor ({ app, port, host, staticPath, clientPath }: { app: any; port: string; host: string; staticPath: string; clientPath: string }) {
+=======
+    constructor ({ app, port, host, staticPath }: { app: express.Express; port: string; host: string; staticPath: string }) {
+>>>>>>> c3a5cdf... Mostly removed any types (apart from server). Have not created a separate module for interfaces yet
         this.app = app;
         this.host = host;
         this.port = port;
@@ -30,7 +35,7 @@ export default class Server {
 
     async listen (): Promise<void> {
         try {
-            this.server = await this.app.listen(this.port, this.host);
+            this.server = await this.app.listen(parseInt(this.port, 10), this.host);
 
             await once(this.server, 'listening');
             info(`Server listening on port ${this.port}, host: ${this.host}`);

@@ -9,14 +9,14 @@ const info = debug('team-link:info');
 const error = debug('team-link:error');
 
 export default class App {
-    private app: any;
+    private app: express.Express;
     private server!: Server;
 
     constructor () {
         this.app = express();
     }
 
-    async createServer ({ port = config.port, host = config.host, staticPath = config.staticPath, clientPath = config.clientPath } = {}): Promise<any> {
+    async createServer ({ port = config.port, host = config.host, staticPath = config.staticPath, clientPath = config.clientPath } = {}): Promise<Server> {
         try {
             this.server = new Server({ app: this.app, port, host, staticPath, clientPath });
             await this.server.listen();
