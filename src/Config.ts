@@ -10,6 +10,7 @@ export default class Config {
             port:                 '8080',
             host:                 'localhost',
             staticPath:           'resources',
+            clientPath:           'lib/client',
             apiBaseURL:           'https://graph.microsoft.com/beta',
             authorizationBaseURL: 'https://login.microsoftonline.com',
             oauthVersion:         '/oauth2/v2.0'
@@ -21,6 +22,7 @@ export default class Config {
             port:                 process.env.PORT || this.defaults.port,
             host:                 process.env.HOST || this.defaults.host,
             staticPath:           process.env.STATIC_PATH || this.defaults.staticPath,
+            clientPath:           process.env.CLIENT_PATH || this.defaults.clientPath,
             apiBaseURL:           process.env.API_BASE_URL || this.defaults.apiBaseURL,
             authorizationBaseURL: process.env.OAUTH_BASE_URL || this.defaults.authorizationBaseURL,
             oauthVersion:         process.env.OAUTH_VERSION || this.defaults.oauthVersion,

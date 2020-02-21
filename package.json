@@ -2,9 +2,9 @@
   "name": "team-link",
   "version": "1.0.0",
   "description": "Provides a convenient interface to call all online team members via MS Teams",
-  "main": "dist/src/index.js",
+  "main": "lib/src/index.js",
   "scripts": {
-    "start": "npm run build && node dist/src/index.js",
+    "start": "npm run build && node lib/src/index.js",
     "lint": "eslint --ext '.ts' src test",
     "test": "npm run lint && mocha -r ts-node/register test/**/*-test.ts",
     "debug": "node --inspect-brk src/index.js",

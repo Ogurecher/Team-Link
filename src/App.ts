@@ -16,9 +16,9 @@ export default class App {
         this.app = express();
     }
 
-    async createServer ({ port = config.port, host = config.host, staticPath = config.staticPath } = {}) {
+    async createServer ({ port = config.port, host = config.host, staticPath = config.staticPath, clientPath = config.clientPath } = {}) {
         try {
-            this.server = new Server({ app: this.app, port, host, staticPath });
+            this.server = new Server({ app: this.app, port, host, staticPath, clientPath });
             await this.server.listen();
             info(`Server created, port: ${port}, host: ${host}, static path: ${staticPath}`);
         }

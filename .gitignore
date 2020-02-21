@@ -104,5 +104,4 @@ dist
 .tern-port
 
 # Built
-dist
-resources/client_scripts/dist
+lib

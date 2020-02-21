@@ -12,15 +12,19 @@ export default class Server {
     host
     port
     staticPath
+    clientPath
     server
 
-    constructor ({ app, port, host, staticPath }) {
+    constructor ({ app, port, host, staticPath, clientPath }) {
         this.app = app;
         this.host = host;
         this.port = port;
         this.staticPath = path.resolve(staticPath);
+        this.clientPath = path.resolve(clientPath);
 
-        this.app.use(express.static(this.staticPath));
+        this.app.use('/', express.static(this.staticPath));
+        this.app.use('/', express.static(this.clientPath));
+        console.log(this.clientPath);
 
         this.app.use('/', router);
     }

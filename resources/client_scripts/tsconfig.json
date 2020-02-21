@@ -1,9 +1,9 @@
 {
     "extends": "../../tsconfig",
     "compilerOptions": {
-        "outFile": "./dist/index.js",
+        "outFile": "../../lib/client/index.js",
         "allowJs": true,
         "module": "System"
     },
-    "exclude": ["./dist"]
+    "include": ["index.js"]
 }
