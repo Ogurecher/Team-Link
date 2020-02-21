@@ -1,4 +1,4 @@
-import { once } from 'events';
+import events, { once } from 'events';
 import path from 'path';
 import express from 'express';
 import debug from 'debug';
@@ -7,13 +7,17 @@ import { router } from './routes/router';
 const info = debug('team-link:info');
 const error = debug('team-link:error');
 
+interface ExpressServer extends events.EventEmitter {
+    close(): void;
+}
+
 export default class Server {
     public host: string;
     public port: string;
 
     private app: express.Express;
     private staticPath: string;
-    private server: any;
+    private server: ExpressServer | undefined;
 
     constructor ({ app, port, host, staticPath }: { app: express.Express; port: string; host: string; staticPath: string }) {
         this.app = app;
@@ -41,7 +45,7 @@ export default class Server {
 
     async close (): Promise<void> {
         try {
-            await this.server.close();
+            await this.server?.close();
         }
         catch (err) {
             error(err);
