@@ -13,6 +13,9 @@
       "eslint:recommended",
       "plugin:@typescript-eslint/recommended"
     ],
+    "plugins": [
+      "@typescript-eslint"
+    ],
     "rules": {
       "@typescript-eslint/explicit-function-return-type": [2, { "allowExpressions": true }],
       "@typescript-eslint/no-extra-parens": 2,
