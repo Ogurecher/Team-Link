@@ -22,6 +22,7 @@
       "@typescript-eslint/no-use-before-define": [2, "nofunc"],
       "@typescript-eslint/no-var-requires": [0],
       "@typescript-eslint/no-unused-vars": 2,
+      "@typescript-eslint/explicit-member-accessibility": 2,
       "arrow-parens": [2, "as-needed"],
       "arrow-spacing": [2, { "before": true, "after": true }],
       "prefer-arrow-callback": 2,

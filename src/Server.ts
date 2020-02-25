@@ -20,7 +20,7 @@ export default class Server {
     private clientPath: string;
     private server: ExpressServer | undefined;
 
-    constructor ({ app, port, host, staticPath, clientPath }: { app: express.Express; port: string; host: string; staticPath: string; clientPath: string }) {
+    public constructor ({ app, port, host, staticPath, clientPath }: { app: express.Express; port: string; host: string; staticPath: string; clientPath: string }) {
         this.app = app;
         this.host = host;
         this.port = port;
@@ -33,7 +33,7 @@ export default class Server {
         this.app.use('/', router);
     }
 
-    async listen (): Promise<void> {
+    public async listen (): Promise<void> {
         try {
             this.server = await this.app.listen(parseInt(this.port, 10), this.host);
 
@@ -46,7 +46,7 @@ export default class Server {
         }
     }
 
-    async close (): Promise<void> {
+    public async close (): Promise<void> {
         try {
             await this.server?.close();
         }

@@ -6,7 +6,7 @@ import got from 'got';
 import { App, Config } from '../';
 
 describe('API', () => {
-    let app = new App();
+    let app: App;
 
     const configInstance = new Config();
     const config = configInstance.config();

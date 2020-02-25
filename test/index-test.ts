@@ -5,7 +5,7 @@ import got from 'got';
 import { App, Config } from '../';
 
 describe('Server', () => {
-    let app = new App();
+    let app: App;
 
     const configInstance = new Config();
     const defaults = configInstance.defaults;

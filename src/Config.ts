@@ -21,7 +21,7 @@ interface Configuration extends DefaultConfiguration{
 export default class Config {
     public defaults: DefaultConfiguration;
 
-    constructor () {
+    public constructor () {
         dotenv.config();
 
         this.defaults = {
@@ -35,7 +35,7 @@ export default class Config {
         };
     }
 
-    config (): Configuration { // TODO remove default 'not provided' values and set them directly in tests
+    public config (): Configuration { // TODO remove default 'not provided' values and set them directly in tests
         return {
             port:                 process.env.PORT || this.defaults.port,
             host:                 process.env.HOST || this.defaults.host,
