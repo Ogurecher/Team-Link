@@ -20,9 +20,9 @@ export default class App {
     private server: Server;
     private options: Options;
 
-    private constructor ({ port = config.port, host = config.host, staticPath = config.staticPath, clientPath = config.clientPath } = {}) {
+    private constructor (options: Options = { port: config.port, host: config.host, staticPath: config.staticPath, clientPath: config.clientPath }) {
         this.app = express();
-        this.options = { port, host, staticPath, clientPath };
+        this.options = options;
         this.server = new Server({ app: this.app, ...this.options });
     }
 
