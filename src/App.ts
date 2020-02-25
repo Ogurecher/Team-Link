@@ -1,21 +1,24 @@
-const express = require('express');
-const debug = require('debug');
-const Server = require('./Server');
-const Config = require('./Config');
+import express from 'express';
+import debug from 'debug';
+import Server from './Server';
+import Config from './Config';
 
 const configInstance = new Config();
 const config = configInstance.config();
 const info = debug('team-link:info');
 const error = debug('team-link:error');
 
-class App {
+export default class App {
+    app;
+    server;
+
     constructor () {
         this.app = express();
     }
 
-    async createServer ({ port = config.port, host = config.host, staticPath = config.staticPath } = {}) {
+    async createServer ({ port = config.port, host = config.host, staticPath = config.staticPath, clientPath = config.clientPath } = {}) {
         try {
-            this.server = new Server({ app: this.app, port, host, staticPath });
+            this.server = new Server({ app: this.app, port, host, staticPath, clientPath });
             await this.server.listen();
             info(`Server created, port: ${port}, host: ${host}, static path: ${staticPath}`);
         }
@@ -38,5 +41,3 @@ class App {
         }
     }
 }
-
-module.exports = App;

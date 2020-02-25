@@ -1,7 +1,8 @@
-const path = require('path');
-const { App, Config } = require('../');
-const { expect } = require('chai');
-const got = require('got');
+import 'mocha';
+import path from 'path';
+import { expect } from 'chai';
+import got from 'got';
+import { App, Config } from '../';
 
 describe('Server', () => {
     const app = new App();

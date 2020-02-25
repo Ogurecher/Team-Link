@@ -1,11 +1,11 @@
-const path = require('path');
-const got = require('got');
-const Config = require('../Config');
+import path from 'path';
+import got from 'got';
+import Config from '../Config';
 
 const configInstance = new Config();
 const config = configInstance.config();
 
-async function refreshAccessToken () {
+export async function refreshAccessToken () {
     const refreshURL = path.join(config.authorizationBaseURL, config.tenantId, config.oauthVersion, '/token');
 
     const response = await got.post(refreshURL, {
@@ -20,7 +20,3 @@ async function refreshAccessToken () {
 
     return JSON.parse(response.body).access_token;
 }
-
-module.exports = {
-    refreshAccessToken
-};
