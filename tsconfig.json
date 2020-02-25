@@ -1,11 +1,8 @@
 {
+    "extends": "./tsconfig.base",
     "compilerOptions": {
         "outDir": "lib/src",
-        "target": "es2018",
-        "moduleResolution": "node",
-        "esModuleInterop": true,
         "module": "commonjs",
-        "strict": true,
         "declaration": true,
         "declarationDir": "types"
     },
