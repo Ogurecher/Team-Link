@@ -8,21 +8,22 @@ const config = configInstance.config();
 const info = debug('team-link:info');
 const error = debug('team-link:error');
 
+interface Options {
+    port: string;
+    host: string;
+    staticPath: string;
+    clientPath: string;
+}
+
 export default class App {
     private app: express.Express;
-    private port: string;
-    private host: string;
-    private staticPath: string;
-    private clientPath: string;
     private server: Server;
+    private options: Options;
 
     constructor ({ port = config.port, host = config.host, staticPath = config.staticPath, clientPath = config.clientPath } = {}) {
         this.app = express();
-        this.port = port;
-        this.host = host;
-        this.staticPath = staticPath;
-        this.clientPath = clientPath;
-        this.server = new Server({ app: this.app, port, host, staticPath, clientPath });
+        this.options = { port, host, staticPath, clientPath };
+        this.server = new Server({ app: this.app, ...this.options });
     }
 
     static async create ({ port = config.port, host = config.host, staticPath = config.staticPath, clientPath = config.clientPath } = {}): Promise<App> {
@@ -36,7 +37,7 @@ export default class App {
     async listen (): Promise<Server> {
         try {
             await this.server.listen();
-            info(`Server created, port: ${this.port}, host: ${this.host}, static path: ${this.staticPath}, client path: ${this.clientPath}`);
+            info(`Server created, port: ${this.options.port}, host: ${this.options.host}, static path: ${this.options.staticPath}, client path: ${this.options.clientPath}`);
         }
         catch (err) {
             error(err);
@@ -58,10 +59,10 @@ export default class App {
     }
 
     getHost (): string {
-        return this.host;
+        return this.options.host;
     }
 
     getPort (): string {
-        return this.port;
+        return this.options.port;
     }
 }
