@@ -1,7 +1,7 @@
 import App from './App';
 
 if (process.mainModule === module)
-    App.createServer();
+    App.create();
 
 
 export { default as App } from './App';

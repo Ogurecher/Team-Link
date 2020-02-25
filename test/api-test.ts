@@ -75,7 +75,7 @@ describe('API', () => {
         });
 
     before(async () => {
-        app = await App.createServer();
+        app = await App.create();
     });
 
     after(async () => {

@@ -25,7 +25,7 @@ export default class App {
         this.server = new Server({ app: this.app, port, host, staticPath, clientPath });
     }
 
-    static async createServer ({ port = config.port, host = config.host, staticPath = config.staticPath, clientPath = config.clientPath } = {}): Promise<App> {
+    static async create ({ port = config.port, host = config.host, staticPath = config.staticPath, clientPath = config.clientPath } = {}): Promise<App> {
         const app = new App({ port, host, staticPath, clientPath });
 
         await app.listen();

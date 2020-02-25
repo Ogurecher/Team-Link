@@ -12,7 +12,7 @@ describe('Server', () => {
     const rootPath = path.join(`http://${configInstance.config().host}:${configInstance.config().port}`);
 
     before(async () => {
-        app = await App.createServer();
+        app = await App.create();
     });
 
     after(async () => {
@@ -76,7 +76,7 @@ describe('Server', () => {
 
         await app.closeServer();
 
-        app = await App.createServer({ port: constructorPort, host: constructorHost });
+        app = await App.create({ port: constructorPort, host: constructorHost });
         const address = { port: app.getPort(), host: app.getHost() };
 
         expect(address).eql({ port: constructorPort, host: constructorHost });
