@@ -1,10 +1,8 @@
 import App from './App';
 
-if (process.mainModule === module) {
-    const app = new App();
+if (process.mainModule === module)
+    App.createServer();
 
-    app.createServer();
-}
 
 export { default as App } from './App';
 export { default as Server } from './Server';

@@ -5,14 +5,14 @@ import got from 'got';
 import { App, Config } from '../';
 
 describe('Server', () => {
-    const app = new App();
+    let app = new App();
 
     const configInstance = new Config();
     const defaults = configInstance.defaults;
     const rootPath = path.join(`http://${configInstance.config().host}:${configInstance.config().port}`);
 
     before(async () => {
-        await app.createServer();
+        app = await App.createServer();
     });
 
     after(async () => {
@@ -76,8 +76,8 @@ describe('Server', () => {
 
         await app.closeServer();
 
-        const constructedServer = await app.createServer({ port: constructorPort, host: constructorHost });
-        const address = { port: constructedServer.port, host: constructedServer.host };
+        app = await App.createServer({ port: constructorPort, host: constructorHost });
+        const address = { port: app.getPort(), host: app.getHost() };
 
         expect(address).eql({ port: constructorPort, host: constructorHost });
     });
