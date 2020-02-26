@@ -13,12 +13,16 @@
       "eslint:recommended",
       "plugin:@typescript-eslint/recommended"
     ],
+    "plugins": [
+      "@typescript-eslint"
+    ],
     "rules": {
-      // TODO: add this rule: "@typescript-eslint/explicit-function-return-type": [2, { "allowExpressions": true }],
+      "@typescript-eslint/explicit-function-return-type": [2, { "allowExpressions": true }],
       "@typescript-eslint/no-extra-parens": 2,
       "@typescript-eslint/no-use-before-define": [2, "nofunc"],
       "@typescript-eslint/no-var-requires": [0],
       "@typescript-eslint/no-unused-vars": 2,
+      "@typescript-eslint/explicit-member-accessibility": 2,
       "arrow-parens": [2, "as-needed"],
       "arrow-spacing": [2, { "before": true, "after": true }],
       "prefer-arrow-callback": 2,

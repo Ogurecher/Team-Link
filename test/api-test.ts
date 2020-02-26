@@ -6,7 +6,7 @@ import got from 'got';
 import { App, Config } from '../';
 
 describe('API', () => {
-    const app = new App();
+    let app: App;
 
     const configInstance = new Config();
     const config = configInstance.config();
@@ -75,7 +75,7 @@ describe('API', () => {
         });
 
     before(async () => {
-        await app.createServer();
+        app = await App.create();
     });
 
     after(async () => {

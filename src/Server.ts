@@ -1,4 +1,4 @@
-import { once } from 'events';
+import events, { once } from 'events';
 import path from 'path';
 import express from 'express';
 import debug from 'debug';
@@ -7,15 +7,20 @@ import { router } from './routes/router';
 const info = debug('team-link:info');
 const error = debug('team-link:error');
 
-export default class Server {
-    app
-    host
-    port
-    staticPath
-    clientPath
-    server
+interface ExpressServer extends events.EventEmitter {
+    close(): void;
+}
 
-    constructor ({ app, port, host, staticPath, clientPath }) {
+export default class Server {
+    public host: string;
+    public port: string;
+
+    private app: express.Express;
+    private staticPath: string;
+    private clientPath: string;
+    private server: ExpressServer | undefined;
+
+    public constructor ({ app, port, host, staticPath, clientPath }: { app: express.Express; port: string; host: string; staticPath: string; clientPath: string }) {
         this.app = app;
         this.host = host;
         this.port = port;
@@ -24,14 +29,13 @@ export default class Server {
 
         this.app.use('/', express.static(this.staticPath));
         this.app.use('/', express.static(this.clientPath));
-        console.log(this.clientPath);
 
         this.app.use('/', router);
     }
 
-    async listen () {
+    public async listen (): Promise<void> {
         try {
-            this.server = await this.app.listen(this.port, this.host);
+            this.server = await this.app.listen(parseInt(this.port, 10), this.host);
 
             await once(this.server, 'listening');
             info(`Server listening on port ${this.port}, host: ${this.host}`);
@@ -42,9 +46,9 @@ export default class Server {
         }
     }
 
-    async close () {
+    public async close (): Promise<void> {
         try {
-            await this.server.close();
+            await this.server?.close();
         }
         catch (err) {
             error(err);

@@ -8,19 +8,36 @@ const config = configInstance.config();
 const info = debug('team-link:info');
 const error = debug('team-link:error');
 
-export default class App {
-    app;
-    server;
+interface Options {
+    port: string;
+    host: string;
+    staticPath: string;
+    clientPath: string;
+}
 
-    constructor () {
+export default class App {
+    private app: express.Express;
+    private server: Server;
+    private options: Options;
+
+    private constructor (options: Options) {
         this.app = express();
+        this.options = options;
+        this.server = new Server({ app: this.app, ...this.options });
     }
 
-    async createServer ({ port = config.port, host = config.host, staticPath = config.staticPath, clientPath = config.clientPath } = {}) {
+    public static async create ({ port = config.port, host = config.host, staticPath = config.staticPath, clientPath = config.clientPath } = {}): Promise<App> {
+        const app = new App({ port, host, staticPath, clientPath });
+
+        await app.listen();
+
+        return app;
+    }
+
+    public async listen (): Promise<Server> {
         try {
-            this.server = new Server({ app: this.app, port, host, staticPath, clientPath });
             await this.server.listen();
-            info(`Server created, port: ${port}, host: ${host}, static path: ${staticPath}`);
+            info(`Server created, port: ${this.options.port}, host: ${this.options.host}, static path: ${this.options.staticPath}, client path: ${this.options.clientPath}`);
         }
         catch (err) {
             error(err);
@@ -30,7 +47,7 @@ export default class App {
         return this.server;
     }
 
-    async closeServer () {
+    public async closeServer (): Promise<void> {
         try {
             await this.server.close();
             info('Server closed');
@@ -39,5 +56,13 @@ export default class App {
             error(err);
             throw err;
         }
+    }
+
+    public getHost (): string {
+        return this.options.host;
+    }
+
+    public getPort (): string {
+        return this.options.port;
     }
 }

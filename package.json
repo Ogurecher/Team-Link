@@ -2,7 +2,8 @@
   "name": "team-link",
   "version": "1.0.0",
   "description": "Provides a convenient interface to call all online team members via MS Teams",
-  "main": "lib/src/index.js",
+  "main": "lib/src/index",
+  "types": "types",
   "scripts": {
     "start": "npm run build && node lib/src/index.js",
     "lint": "eslint --ext '.ts' src test",
@@ -22,6 +23,7 @@
   },
   "homepage": "https://github.com/Ogurecher/Team-Link#readme",
   "devDependencies": {
+    "@types/chai": "^4.2.9",
     "@types/debug": "^4.1.5",
     "@types/express": "^4.17.2",
     "@types/mocha": "^7.0.1",

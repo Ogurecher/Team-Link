@@ -5,14 +5,14 @@ import got from 'got';
 import { App, Config } from '../';
 
 describe('Server', () => {
-    const app = new App();
+    let app: App;
 
     const configInstance = new Config();
     const defaults = configInstance.defaults;
     const rootPath = path.join(`http://${configInstance.config().host}:${configInstance.config().port}`);
 
     before(async () => {
-        await app.createServer();
+        app = await App.create();
     });
 
     after(async () => {
@@ -35,7 +35,8 @@ describe('Server', () => {
 
 
         const response = await got(rootPath);
-        const actualTitle = TitleRegex.exec(response.body)[1].trim();
+        const regexResult: RegExpExecArray | null = TitleRegex.exec(response.body);
+        const actualTitle = regexResult ? regexResult[1].trim() : '';
 
 
         expect(actualTitle).equal(expectedTitle);
@@ -75,8 +76,8 @@ describe('Server', () => {
 
         await app.closeServer();
 
-        const constructedServer = await app.createServer({ port: constructorPort, host: constructorHost });
-        const address = { port: constructedServer.port, host: constructedServer.host };
+        app = await App.create({ port: constructorPort, host: constructorHost });
+        const address = { port: app.getPort(), host: app.getHost() };
 
         expect(address).eql({ port: constructorPort, host: constructorHost });
     });
