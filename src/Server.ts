@@ -27,6 +27,8 @@ export default class Server {
         this.staticPath = path.resolve(staticPath);
         this.clientPath = path.resolve(clientPath);
 
+        this.app.use(express.json());
+
         this.app.use('/', express.static(this.staticPath));
         this.app.use('/', express.static(this.clientPath));
 

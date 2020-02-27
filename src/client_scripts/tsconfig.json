@@ -4,6 +4,5 @@
         "outFile": "../../lib/client/index.js",
         "allowJs": true,
         "module": "System"
-    },
-    "include": ["index.js"]
+    }
 }
