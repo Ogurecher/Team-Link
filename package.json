@@ -8,7 +8,7 @@
     "start": "npm run build && node lib/src/index.js",
     "lint": "eslint --ext '.ts' src test",
     "test": "npm run lint && mocha -r ts-node/register test/**/*-test.ts",
-    "debug": "node --inspect-brk src/index.js",
+    "debug": "node --inspect-brk lib/src/index.js",
     "watch": "npm test -- -w",
     "build": "tsc && tsc -p ./resources/client_scripts"
   },
