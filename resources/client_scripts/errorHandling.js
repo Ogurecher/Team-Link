@@ -1,5 +1,4 @@
 const debug = window.debug;
-localStorage.debug = 'team-link:*';
 
 const info = debug('team-link:info');
 const error = debug('team-link:error');
