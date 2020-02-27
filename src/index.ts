@@ -3,14 +3,12 @@ import debug from 'debug';
 
 const error = debug('team-link:error');
 
-process.on('unhandledRejection', () => {
-    error('Unhandled promise rejection');
-    throw new Error('Unhandled promise rejection');
+process.on('unhandledRejection', err => {
+    error(err);
 });
 
-process.on('uncaughtException', () => {
-    error('Uncaught exception');
-    throw new Error('Uncaught exception');
+process.on('uncaughtException', err => {
+    error(err);
 });
 
 if (process.mainModule === module)
