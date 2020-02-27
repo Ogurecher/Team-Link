@@ -18,3 +18,4 @@ if (process.mainModule === module)
 export { default as App } from './App';
 export { default as Server } from './Server';
 export { default as Config } from './Config';
+export { default as interfaces } from './interfaces';

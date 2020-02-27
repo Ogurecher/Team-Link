@@ -1,22 +1,5 @@
 import dotenv from 'dotenv';
-
-interface DefaultConfiguration {
-    port: string;
-    host: string;
-    staticPath: string;
-    clientPath: string;
-    apiBaseURL: string;
-    authorizationBaseURL: string;
-    oauthVersion: string;
-}
-
-interface Configuration extends DefaultConfiguration{
-    accessToken: string;
-    tenantId: string;
-    clientId: string;
-    clientSecret: string;
-    refreshToken: string;
-}
+import { DefaultConfiguration, Configuration } from './interfaces';
 
 export default class Config {
     public defaults: DefaultConfiguration;

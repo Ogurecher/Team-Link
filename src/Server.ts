@@ -1,15 +1,12 @@
-import events, { once } from 'events';
+import { once } from 'events';
 import path from 'path';
 import express from 'express';
 import debug from 'debug';
 import { router } from './routes/router';
+import { ExpressServer } from './interfaces';
 
 const info = debug('team-link:info');
 const error = debug('team-link:error');
-
-interface ExpressServer extends events.EventEmitter {
-    close(): void;
-}
 
 export default class Server {
     public host: string;

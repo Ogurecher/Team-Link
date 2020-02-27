@@ -2,18 +2,12 @@ import express from 'express';
 import debug from 'debug';
 import Server from './Server';
 import Config from './Config';
+import { Options } from './interfaces';
 
 const configInstance = new Config();
 const config = configInstance.config();
 const info = debug('team-link:info');
 const error = debug('team-link:error');
-
-interface Options {
-    port: string;
-    host: string;
-    staticPath: string;
-    clientPath: string;
-}
 
 export default class App {
     private app: express.Express;
