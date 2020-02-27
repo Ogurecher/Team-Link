@@ -10,7 +10,7 @@
     "test": "npm run lint && mocha -r ts-node/register test/**/*-test.ts",
     "debug": "node --inspect-brk lib/src/index.js",
     "watch": "npm test -- -w",
-    "build": "tsc && tsc -p ./resources/client_scripts"
+    "build": "tsc && tsc -p ./src/client_scripts"
   },
   "repository": {
     "type": "git",
