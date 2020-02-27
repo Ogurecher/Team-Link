@@ -11,10 +11,12 @@
     },
     "extends": [
       "eslint:recommended",
-      "plugin:@typescript-eslint/recommended"
+      "plugin:@typescript-eslint/recommended",
+      "plugin:testcafe/recommended"
     ],
     "plugins": [
-      "@typescript-eslint"
+      "@typescript-eslint",
+      "testcafe"
     ],
     "rules": {
       "@typescript-eslint/explicit-function-return-type": [2, { "allowExpressions": true }],
