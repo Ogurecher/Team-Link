@@ -25,6 +25,6 @@ async function getOnlineUsers () {
     document.getElementById('root').innerHTML = table;
 }
 
-function subscribe(func) {
-    setInterval(func, 5000); // TODO import config and use POLLING_INTERVAL from there
+function subscribe({ func = getOnlineUsers, pollingInterval = 10000 } = {}) {
+    setInterval(func, pollingInterval);
 }

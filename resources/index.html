@@ -7,7 +7,7 @@
     </head>
     <body>
         <script type="text/javascript">
-            subscribe(getOnlineUsers);
+            subscribe({ func: getOnlineUsers, pollingInterval: config.POLLING_INTERVAL });
         </script>
         <div id="root"></div>
     </body>
