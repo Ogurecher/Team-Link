@@ -111,6 +111,10 @@
       "no-use-before-define": [2, "nofunc"],
       "no-var-requires": [0],
       "no-unused-vars": 2
+    },
+    "globals": {
+      "fetch": false,
+      "document": false
     }
 }
   
