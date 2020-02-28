@@ -22,7 +22,7 @@ fixture `Client`
     });
 
 test('Polls repeatedly', async t => {
-    await userPresences.persist(false);
+    userPresences.persist(false);
 
     const usersTable = await Selector('#available_users').textContent;
 
