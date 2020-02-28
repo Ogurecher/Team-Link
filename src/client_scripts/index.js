@@ -20,7 +20,7 @@ async function getOnlineUsers () {
         rows.push(userRow);
     };
 
-    const table = `<table>${rows.join('')}</table>`;
+    const table = `<table id="available_users">${rows.join('')}</table>`;
 
     document.getElementById('root').innerHTML = table;
 }

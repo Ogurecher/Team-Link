@@ -1,7 +1,7 @@
 import nock from 'nock';
 import { interfaces } from '../../';
 
-export function nockRequests (config: interfaces.DefaultConfiguration): void {
+export function nockRequests (config: interfaces.DefaultConfiguration): nock.Scope {
     nock(config.authorizationBaseURL)
         .persist()
         .post(/\/.*\/.*\/.*\/token/)
@@ -47,7 +47,7 @@ export function nockRequests (config: interfaces.DefaultConfiguration): void {
             ]
         });
 
-    nock(config.apiBaseURL)
+    const userPresences = nock(config.apiBaseURL)
         .persist()
         .post(/\/communications\/getPresencesByUserId/)
         .reply(200, {
@@ -62,4 +62,6 @@ export function nockRequests (config: interfaces.DefaultConfiguration): void {
                 }
             ]
         });
+
+    return userPresences;
 }
