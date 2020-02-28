@@ -11,7 +11,7 @@ const getErrorInfo = (err) => {
 }
 
 const sendError = (err) => {
-    fetch('http://localhost:3000/clientError', {
+    fetch('clientError', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
