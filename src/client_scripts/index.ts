@@ -1,4 +1,7 @@
-async function getOnlineUsers (): Promise<void> {
+import config from './clientConfig';
+
+
+export async function getOnlineUsers (): Promise<void> {
     const response = await fetch('users');
 
     const onlineUsers = response.json();
@@ -28,14 +31,7 @@ async function getOnlineUsers (): Promise<void> {
 
 }
 
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable no-unused-vars */
-/* eslint-disable no-undef */
 
-function subscribe ({ func = getOnlineUsers } = {}): void {
+export function subscribe ({ func = getOnlineUsers } = {}): void {
     setInterval(func, config.pollingInterval);
 }
-
-/* eslint-enable @typescript-eslint/no-unused-vars */
-/* eslint-enable no-unused-vars */
-/* eslint-disable no-undef */

@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable no-unused-vars */
 
-const config = {
+export default {
     pollingInterval: 5000
 };
 

@@ -24,7 +24,7 @@ fixture `Client`
 test('Polls repeatedly', async t => {
     userPresences.persist(false);
 
-    const usersTable = await Selector('#available_users').textContent;
+    const expectedInitialUsersTable = 'Display Name ID Status \n username1 userId1 Available'.replace(/\s/g, '');
 
     nock(config.apiBaseURL)
         .post(/\/communications\/getPresencesByUserId/)
@@ -41,6 +41,11 @@ test('Polls repeatedly', async t => {
             ]
         });
 
+
+    const initialUsersTable = await Selector('#available_users').textContent;
+
+
     await t
-        .expect(Selector('#available_users').textContent).notEql(usersTable, { timeout: 10000 });
+        .expect(initialUsersTable.replace(/\s/g, '')).eql(expectedInitialUsersTable)
+        .expect(Selector('#available_users').textContent).notEql(initialUsersTable, { timeout: 10000 });
 });
