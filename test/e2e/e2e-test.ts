@@ -1,7 +1,6 @@
 import { Selector } from 'testcafe';
-import nock from 'nock';
 import { App, Config } from '../../';
-import { nockRequests } from '../util/nocks';
+import { nockRequests, nockUserPresencesOnce } from '../util/nocks';
 
 const configInstance = new Config();
 const config = configInstance.config();
@@ -23,23 +22,9 @@ fixture `Client`
 
 test('Polls repeatedly', async t => {
     userPresences.persist(false);
+    nockUserPresencesOnce(config);
 
     const expectedInitialUsersTable = 'Display Name ID Status \n username1 userId1 Available'.replace(/\s/g, '');
-
-    nock(config.apiBaseURL)
-        .post(/\/communications\/getPresencesByUserId/)
-        .reply(200, {
-            value: [
-                {
-                    id:           'userId1',
-                    availability: 'Available'
-                },
-                {
-                    id:           'userId2',
-                    availability: 'Available'
-                }
-            ]
-        });
 
 
     const initialUsersTable = await Selector('#available_users').textContent;

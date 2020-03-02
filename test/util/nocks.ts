@@ -65,3 +65,20 @@ export function nockRequests (config: interfaces.DefaultConfiguration): nock.Sco
 
     return userPresences;
 }
+
+export function nockUserPresencesOnce (config: interfaces.DefaultConfiguration): void {
+    nock(config.apiBaseURL)
+        .post(/\/communications\/getPresencesByUserId/)
+        .reply(200, {
+            value: [
+                {
+                    id:           'userId1',
+                    availability: 'Available'
+                },
+                {
+                    id:           'userId2',
+                    availability: 'Available'
+                }
+            ]
+        });
+}
