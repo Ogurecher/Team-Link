@@ -3,16 +3,15 @@ interface Window {
     debug: Function;
 }
 
-
-const debug = window.debug;
-
-const error = debug('team-link:error');
-
 interface ErrorInfo {
     name: string | undefined;
     message: string | undefined;
     stack: string | undefined;
 }
+
+const debug = window.debug;
+
+const error = debug('team-link:error');
 
 const sendError = (err: ErrorInfo): void => {
     fetch('clientError', {
