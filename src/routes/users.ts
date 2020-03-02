@@ -63,7 +63,7 @@ async function getPresences ({ idList = [], accessToken = config.accessToken }: 
     });
 }
 
-export async function getOnlineUsers (req: object, res: HTTPResponse): Promise<void> {
+export async function getOnlineUsers (req: unknown, res: HTTPResponse): Promise<void> {
     res = attachCORSHeaders({ res });
 
     const accessToken = await refreshAccessToken();

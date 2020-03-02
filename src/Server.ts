@@ -15,7 +15,7 @@ export default class Server {
     private app: express.Express;
     private staticPath: string;
     private clientPath: string;
-    private server: ExpressServer | undefined;
+    private server?: ExpressServer;
 
     public constructor ({ app, port, host, staticPath, clientPath }: { app: express.Express; port: string; host: string; staticPath: string; clientPath: string }) {
         this.app = app;

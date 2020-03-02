@@ -4,9 +4,9 @@ interface Window {
 }
 
 interface ErrorInfo {
-    name: string | undefined;
-    message: string | undefined;
-    stack: string | undefined;
+    name?: string;
+    message?: string;
+    stack?: string;
 }
 
 const debug = window.debug;
@@ -23,7 +23,7 @@ const sendError = (err: ErrorInfo): void => {
     });
 };
 
-window.onerror = (message: string | Event, source: string | undefined, lineno: number | undefined, colno: number | undefined, err: Error | undefined) => {
+window.onerror = (message: unknown, source: unknown, lineno: unknown, colno: unknown, err: Error | undefined) => {
     error(`An error occured. More info: ${err}`);
     sendError({ name: err?.name, message: err?.message, stack: err?.stack });
 };
