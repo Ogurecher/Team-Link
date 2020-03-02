@@ -1,9 +1,10 @@
 {
-    "extends": "../../../tsconfig.base",
+    "extends": "../../../tsconfig",
     "compilerOptions": {
         "outDir": "../../../lib/client/"
     },
     "include": [
         "errorHandling.ts"
-    ]
+    ],
+    "exclude": []
 }
