@@ -2,7 +2,7 @@ import config from './clientConfig';
 
 
 export async function getOnlineUsers (): Promise<void> {
-    const response = await fetch('users');
+    const response = await fetch(config.usersEndpoint);
 
     const onlineUsers = response.json();
 
@@ -22,9 +22,9 @@ export async function getOnlineUsers (): Promise<void> {
         rows.push(userRow);
     }
 
-    const table = `<table id="available_users">${rows.join('')}</table>`;
+    const table = `<table id="${config.tableDOMElementId}">${rows.join('')}</table>`;
 
-    const root = document.getElementById('root');
+    const root = document.getElementById(config.rootDOMElementId);
 
     if (root)
         root.innerHTML = table;
