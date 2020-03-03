@@ -1,5 +1,11 @@
 import events from 'events';
 
+export interface CreateCallRequest {
+    body: {
+        userId: string[];
+    }
+}
+
 export interface Group {
     id: string;
 }
@@ -26,7 +32,7 @@ export interface OnlineUser extends User{
 
 export interface HTTPResponse {
     header(title: string, options: string | string[]): void;
-    send(body: OnlineUser[] | string): void;
+    send(body: unknown): void;
 }
 
 export interface Options {
@@ -44,6 +50,7 @@ export interface DefaultConfiguration {
     apiBaseURL: string;
     authorizationBaseURL: string;
     oauthVersion: string;
+    callbackURI: string;
 }
 
 export interface Configuration extends DefaultConfiguration {

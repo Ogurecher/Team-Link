@@ -108,3 +108,7 @@ lib
 
 # Typescript types
 types
+
+# Ngrok
+ngrok.exe
+ngrok.yml
