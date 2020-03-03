@@ -2,8 +2,8 @@ import events from 'events';
 
 export interface CreateCallRequest {
     body: {
-        userId: string[];
-    }
+        userIds: string[];
+    };
 }
 
 export interface Group {

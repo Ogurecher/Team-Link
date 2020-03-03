@@ -23,26 +23,29 @@ export async function createCall (req: CreateCallRequest, res: HTTPResponse): Pr
             Authorization: `Bearer ${accessToken}`
         },
         json: {
-            '@odata.type': '#microsoft.graph.call',
-            'callbackUri': `${config.callbackURI}`,
-            'targets':     [
-                {
-                    '@odata.type': '#microsoft.graph.invitationParticipantInfo',
-                    'identity':    {
-                        '@odata.type': '#microsoft.graph.identitySet',
-                        'user':        {
-                            '@odata.type': '#microsoft.graph.identity',
-                            'id':          `${req.body.userId[0]}`
-                        }
+            '@odata.type':             '#microsoft.graph.call',
+            'direction':               'outgoing',
+            'ringingTimeoutInSeconds': '10',
+            'callbackUri':             `${config.callbackURI}`,
+            'targets':                 populateUsers(req.body.userIds),
+            'source':                  {
+                '@odata.type': '#microsoft.graph.participantInfo',
+                'identity':    {
+                    '@odata.type': '#microsoft.graph.identitySet',
+                    'application': {
+                        '@odata.type': '#microsoft.graph.identity',
+                        'displayName': 'Team-Link Bot',
+                        'id':          '37b604eb-dbb8-495c-9638-884b3b9c5d72'
                     }
                 }
-            ],
-            'requestedModalities': [
-                'video'
+            },
+            "requestedModalities": [
+                "video"
             ],
             'tenantId':    `${config.tenantId}`,
             'mediaConfig': {
-                '@odata.type': '#microsoft.graph.serviceHostedMediaConfig'
+                '@odata.type':                 '#microsoft.graph.serviceHostedMediaConfig',
+                'removeFromDefaultAudioGroup': false
             }
         }
     });
@@ -52,4 +55,21 @@ export async function createCall (req: CreateCallRequest, res: HTTPResponse): Pr
     debug(callParameters);
 
     res.send(callParameters);
+}
+
+function populateUsers (userIds: string[]): {}[] {
+    const template = (userId: string): {} => {
+        return {
+            '@odata.type': '#microsoft.graph.invitationParticipantInfo',
+            'identity':    {
+                '@odata.type': '#microsoft.graph.identitySet',
+                'user':        {
+                    '@odata.type': '#microsoft.graph.identity',
+                    'id':          `${userId}`
+                }
+            }
+        };
+    };
+
+    return userIds.map((userId: string) => template(userId));
 }

@@ -9,13 +9,17 @@
         <script type="text/javascript" src="index.js"></script>
     </head>
     <body>
+        <div id="root"></div>
+        <input id="call_button" type="submit" value="Call", onclick="fireCreateCallRequest()"/>
         <script type="text/javascript">
             (async () => {
                 const { subscribe, getOnlineUsers } = await System.import('index');
+                const { fireCreateCallRequest } =  await System.import('fireCreateCallRequest');
+
+                window.fireCreateCallRequest = fireCreateCallRequest;
 
                 subscribe({ func: getOnlineUsers });
             })();
         </script>
-        <div id="root"></div>
     </body>
 </html>
