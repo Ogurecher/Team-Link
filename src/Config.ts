@@ -14,7 +14,8 @@ export default class Config {
             clientPath:           'lib/client',
             apiBaseURL:           'https://graph.microsoft.com/beta',
             authorizationBaseURL: 'https://login.microsoftonline.com',
-            oauthVersion:         '/oauth2/v2.0'
+            oauthVersion:         '/oauth2/v2.0',
+            callbackURI:          'https://174e52c4.ngrok.io'
         };
     }
 
@@ -27,6 +28,7 @@ export default class Config {
             apiBaseURL:           process.env.API_BASE_URL || this.defaults.apiBaseURL,
             authorizationBaseURL: process.env.OAUTH_BASE_URL || this.defaults.authorizationBaseURL,
             oauthVersion:         process.env.OAUTH_VERSION || this.defaults.oauthVersion,
+            callbackURI:          process.env.CALLBACK_URI || this.defaults.callbackURI,
             accessToken:          process.env.OAUTH_ACCESS_TOKEN_USER || 'not provided',
             tenantId:             process.env.OAUTH_TENANT_ID || 'not provided',
             clientId:             process.env.OAUTH_CLIENT_ID || 'not provided',

@@ -4,13 +4,13 @@ import debugModule from 'debug';
 import Config from '../Config';
 import { attachCORSHeaders } from './headers';
 import { getAppAccessToken } from './token';
-import { HTTPResponse } from '../interfaces';
+import { HTTPResponse, CreateCallRequest } from '../interfaces';
 
 const configInstance = new Config();
 const config = configInstance.config();
 const debug = debugModule('team-link:debug');
 
-export async function createCall (req: unknown, res: HTTPResponse): Promise<void> {
+export async function createCall (req: CreateCallRequest, res: HTTPResponse): Promise<void> {
     res = attachCORSHeaders({ res });
 
     const accessToken = await getAppAccessToken();
@@ -23,23 +23,33 @@ export async function createCall (req: unknown, res: HTTPResponse): Promise<void
             Authorization: `Bearer ${accessToken}`
         },
         json: {
-            callbackUri: 'http://localhost:3000/callback',
-            targets:     [
+            '@odata.type': '#microsoft.graph.call',
+            'callbackUri': `${config.callbackURI}`,
+            'targets':     [
                 {
-                    identity: {
-                        user: {
-                            id: 'bccff64b-77fc-404a-a5b8-f208c7a0f1b6'
+                    '@odata.type': '#microsoft.graph.invitationParticipantInfo',
+                    'identity':    {
+                        '@odata.type': '#microsoft.graph.identitySet',
+                        'user':        {
+                            '@odata.type': '#microsoft.graph.identity',
+                            'id':          `${req.body.userId[0]}`
                         }
                     }
                 }
             ],
-            requestedModalities: [
-                'audio'
-            ]
+            'requestedModalities': [
+                'video'
+            ],
+            'tenantId':    `${config.tenantId}`,
+            'mediaConfig': {
+                '@odata.type': '#microsoft.graph.serviceHostedMediaConfig'
+            }
         }
     });
 
-    debug(createCallRes);
+    const callParameters = JSON.parse(createCallRes.body);
 
-    res.send('Ok');
+    debug(callParameters);
+
+    res.send(callParameters);
 }
