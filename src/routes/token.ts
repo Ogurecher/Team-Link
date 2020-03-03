@@ -20,3 +20,18 @@ export async function refreshAccessToken (): Promise<string> {
 
     return JSON.parse(response.body).access_token;
 }
+
+export async function getAppAccessToken (): Promise<string> {
+    const accessTokenURL = path.join(config.authorizationBaseURL, config.tenantId, config.oauthVersion, '/token');
+
+    const response = await got.post(accessTokenURL, {
+        body: `
+        client_id=${config.clientId}
+        &grant_type=client_credentials
+        &scope=https://graph.microsoft.com/.default
+        &client_secret=${config.clientSecret}
+        `
+    });
+
+    return JSON.parse(response.body).access_token;
+}
