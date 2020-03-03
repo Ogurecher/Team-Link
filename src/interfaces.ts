@@ -26,7 +26,7 @@ export interface OnlineUser extends User{
 
 export interface HTTPResponse {
     header(title: string, options: string | string[]): void;
-    send(body: OnlineUser[]): void;
+    send(body: OnlineUser[] | string): void;
 }
 
 export interface Options {
