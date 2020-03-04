@@ -1,15 +1,12 @@
-import events, { once } from 'events';
+import { once } from 'events';
 import path from 'path';
 import express from 'express';
 import debug from 'debug';
 import { router } from './routes/router';
+import { ExpressServer } from './interfaces';
 
 const info = debug('team-link:info');
 const error = debug('team-link:error');
-
-interface ExpressServer extends events.EventEmitter {
-    close(): void;
-}
 
 export default class Server {
     public host: string;
@@ -18,7 +15,7 @@ export default class Server {
     private app: express.Express;
     private staticPath: string;
     private clientPath: string;
-    private server: ExpressServer | undefined;
+    private server?: ExpressServer;
 
     public constructor ({ app, port, host, staticPath, clientPath }: { app: express.Express; port: string; host: string; staticPath: string; clientPath: string }) {
         this.app = app;

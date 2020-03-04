@@ -1,4 +1,4 @@
-import { HTTPResponse } from './users';
+import { HTTPResponse } from '../interfaces';
 
 export function attachCORSHeaders ({ res }: { res: HTTPResponse }): HTTPResponse {
     res.header('Access-Control-Allow-Origin', ['*']);

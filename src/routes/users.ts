@@ -4,39 +4,11 @@ import debugModule from 'debug';
 import Config from '../Config';
 import { attachCORSHeaders } from './headers';
 import { refreshAccessToken } from './token';
+import { Group, Channel, User, Presence, HTTPResponse } from '../interfaces';
 
 const configInstance = new Config();
 const config = configInstance.config();
 const debug = debugModule('team-link:debug');
-
-interface Group {
-    id: string;
-}
-
-interface Channel {
-    id: string;
-}
-
-export interface User {
-    id: string;
-    userId?: string;
-    displayName: string;
-}
-
-interface Presence {
-    id: string;
-    status: string;
-    availability: string;
-}
-
-export interface OnlineUser extends User{
-    status: string;
-}
-
-export interface HTTPResponse {
-    header(title: string, options: string | string[]): void;
-    send(body: OnlineUser[]): void;
-}
 
 async function getGroup ({ displayName = '', accessToken = config.accessToken }: { displayName: string; accessToken: string }): Promise<Group> {
     const groupQuery = `/groups?$filter=startswith(displayName,'${displayName}')&$select=displayName,id`;
@@ -91,7 +63,7 @@ async function getPresences ({ idList = [], accessToken = config.accessToken }: 
     });
 }
 
-export async function getOnlineUsers (req: object, res: HTTPResponse): Promise<void> {
+export async function getOnlineUsers (req: unknown, res: HTTPResponse): Promise<void> {
     res = attachCORSHeaders({ res });
 
     const accessToken = await refreshAccessToken();
