@@ -1,9 +1,30 @@
 import events from 'events';
 
-export interface CreateCallRequest {
+export interface HTTPPostRequest {
+    body: {};
+}
+
+export interface CallbackRequest {
+    body: {
+        value: [
+            {
+                resourceData: {
+                    state: string;
+                };
+            }
+        ];
+    };
+}
+
+export interface CreateCallRequest extends HTTPPostRequest {
     body: {
         userIds: string[];
     };
+}
+
+export interface MeetingInfo {
+    organizerId: string;
+    chatInfo: {};
 }
 
 export interface Group {
@@ -33,6 +54,8 @@ export interface OnlineUser extends User{
 export interface HTTPResponse {
     header(title: string, options: string | string[]): void;
     send(body: unknown): void;
+    status(code: number): void;
+    end(): void;
 }
 
 export interface Options {

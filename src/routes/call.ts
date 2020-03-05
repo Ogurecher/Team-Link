@@ -3,8 +3,8 @@ import path from 'path';
 import debugModule from 'debug';
 import Config from '../Config';
 import { attachCORSHeaders } from './headers';
-import { getAppAccessToken } from './token';
-import { HTTPResponse, CreateCallRequest } from '../interfaces';
+import { getAppAccessToken, refreshAccessToken } from './token';
+import { HTTPResponse, CreateCallRequest, MeetingInfo } from '../interfaces';
 
 const configInstance = new Config();
 const config = configInstance.config();
@@ -24,28 +24,15 @@ export async function createCall (req: CreateCallRequest, res: HTTPResponse): Pr
         },
         json: {
             '@odata.type':             '#microsoft.graph.call',
-            'direction':               'outgoing',
-            'ringingTimeoutInSeconds': '10',
+            'ringingTimeoutInSeconds': '60',
             'callbackUri':             `${config.callbackURI}`,
             'targets':                 populateUsers(req.body.userIds),
-            'source':                  {
-                '@odata.type': '#microsoft.graph.participantInfo',
-                'identity':    {
-                    '@odata.type': '#microsoft.graph.identitySet',
-                    'application': {
-                        '@odata.type': '#microsoft.graph.identity',
-                        'displayName': 'Team-Link Bot',
-                        'id':          '37b604eb-dbb8-495c-9638-884b3b9c5d72'
-                    }
-                }
-            },
-            "requestedModalities": [
-                "video"
+            'requestedModalities':     [
+                'video'
             ],
             'tenantId':    `${config.tenantId}`,
             'mediaConfig': {
-                '@odata.type':                 '#microsoft.graph.serviceHostedMediaConfig',
-                'removeFromDefaultAudioGroup': false
+                '@odata.type': '#microsoft.graph.serviceHostedMediaConfig'
             }
         }
     });
@@ -55,6 +42,12 @@ export async function createCall (req: CreateCallRequest, res: HTTPResponse): Pr
     debug(callParameters);
 
     res.send(callParameters);
+
+    /*
+    const meetingInfo = await createOnlineMeeting();
+    const callId = await callMeeting(meetingInfo);
+    await addParticipants({ callId, userIds: req.body.userIds, accessToken });
+    */
 }
 
 function populateUsers (userIds: string[]): {}[] {
@@ -72,4 +65,76 @@ function populateUsers (userIds: string[]): {}[] {
     };
 
     return userIds.map((userId: string) => template(userId));
+}
+
+async function createOnlineMeeting (): Promise<MeetingInfo> {
+    const accessToken = await refreshAccessToken();
+
+    const createMeetingQuery = `/me/onlineMeetings`;
+    const createMeetingURL = path.join(config.apiBaseURL, createMeetingQuery);
+
+    const createMeetingRes = await got.post(createMeetingURL, {
+        headers: {
+            Authorization: `Bearer ${accessToken}`
+        },
+        json: {}
+    });
+
+    const onlineMeeting = JSON.parse(createMeetingRes.body);
+
+    const organizerId = onlineMeeting.participants.organizer.identity.user.id;
+    const chatInfo = onlineMeeting.chatInfo;
+
+    return {
+        organizerId,
+        chatInfo
+    };
+}
+
+async function callMeeting ({ organizerId, chatInfo }: MeetingInfo): Promise<string> {
+    const organizerMeetingInfo = {
+        organizer: populateUsers([organizerId])[0]
+    };
+
+    const accessToken = await getAppAccessToken();
+
+    const callMeetingQuery = `/communications/calls`;
+    const callMeetingURL = path.join(config.apiBaseURL, callMeetingQuery);
+
+    const callMeetingRes = await got.post(callMeetingURL, {
+        headers: {
+            Authorization: `Bearer ${accessToken}`
+        },
+        json: {
+            '@odata.type': '#microsoft.graph.call',
+            'callbackUri': `${config.callbackURI}`,
+            'chatInfo':    chatInfo,
+            'meetingInfo': organizerMeetingInfo,
+            'tenantId':    `${config.tenantId}`,
+            'mediaConfig': {
+                '@odata.type': '#microsoft.graph.serviceHostedMediaConfig'
+            }
+        }
+    });
+
+    const callParameters = JSON.parse(callMeetingRes.body);
+
+    debug(callParameters);
+
+    return callParameters.id;
+}
+
+async function addParticipants ({ callId, userIds, accessToken }: { callId: string; userIds: string[]; accessToken: string}): Promise<void> {
+    const callMeetingQuery = `/communications/calls/${callId}/participants/invite`;
+    const callMeetingURL = path.join(config.apiBaseURL, callMeetingQuery);
+
+    const callMeetingRes = await got.post(callMeetingURL, {
+        headers: {
+            Authorization: `Bearer ${accessToken}`
+        },
+        json: {
+            'participants':  populateUsers(userIds),
+            'clientContext': config.clientId
+        }
+    });
 }

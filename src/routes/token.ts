@@ -12,7 +12,7 @@ export async function refreshAccessToken (): Promise<string> {
         body: `
         client_id=${config.clientId}
         &grant_type=refresh_token
-        &scope=offline_access+user.read.all+mail.read+chat.readwrite+presence.read.all+group.read.all
+        &scope=https://graph.microsoft.com/.default
         &client_secret=${config.clientSecret}
         &refresh_token=${config.refreshToken}
         `
