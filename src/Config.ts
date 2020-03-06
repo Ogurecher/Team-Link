@@ -15,7 +15,7 @@ export default class Config {
             apiBaseURL:           'https://graph.microsoft.com/beta',
             authorizationBaseURL: 'https://login.microsoftonline.com',
             oauthVersion:         '/oauth2/v2.0',
-            callbackURI:          'https://174e52c4.ngrok.io'
+            callbackURI:          'https://174e52c4.ngrok.io/callback'
         };
     }
 
