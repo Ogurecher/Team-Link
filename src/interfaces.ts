@@ -27,6 +27,20 @@ export interface MeetingInfo {
     chatInfo: {};
 }
 
+export interface UserInfo {
+    '@odata.type': string;
+    identity?: {};
+    organizer?: {};
+}
+
+export interface OrganizerMeetingInfo extends UserInfo {
+    allowConversationWithoutHost?: boolean;
+}
+
+export interface Call {
+    id: string;
+}
+
 export interface Group {
     id: string;
 }
