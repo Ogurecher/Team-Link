@@ -5,6 +5,7 @@ import Config from '../Config';
 import { attachCORSHeaders } from './headers';
 import { getAppAccessToken, refreshAccessToken } from './token';
 import { HTTPResponse, CreateCallRequest, MeetingInfo, Call, UserInfo, OrganizerMeetingInfo } from '../interfaces';
+import { notifier } from './callback';
 
 const configInstance = new Config();
 const config = configInstance.config();
@@ -19,9 +20,9 @@ export async function createCall (req: CreateCallRequest, res: HTTPResponse): Pr
     const callParameters = await callMeeting(meetingInfo);
     const callId = callParameters.id;
 
-    setTimeout(() => {
+    notifier.once('Call established', () => {
         addParticipants({ callId, userIds: req.body.userIds, accessToken });
-    }, 2000);
+    });
 
     debug(callParameters);
 

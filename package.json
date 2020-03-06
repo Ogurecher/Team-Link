@@ -8,7 +8,7 @@
     "start": "npm run build && node lib/src/index.js",
     "lint": "eslint --ext '.ts' src test",
     "e2e-test": "testcafe chrome:headless ./test/e2e/* --ts-config-path ./tsconfig.base.json",
-    "test": "npm run lint && mocha -r ts-node/register test/*-test.ts --timeout 5000",
+    "test": "npm run lint && mocha -r ts-node/register test/*-test.ts",
     "debug": "node --inspect-brk src/index.js",
     "watch": "npm test -- -w",
     "build": "tsc && tsc -p ./src/client_scripts && tsc -p ./src/client_scripts/error"
