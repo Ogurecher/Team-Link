@@ -22,10 +22,10 @@ export async function fireCreateCallRequest (): Promise<void> {
 
     const callInfo = document.createElement('p');
 
-    callInfo.id = 'call_info';
+    callInfo.id = config.callInfoDOMElementId;
     callInfo.innerText = `callId: ${callParameters.id}`;
 
-    const call = document.getElementById('call');
+    const call = document.getElementById(config.callDOMElementId);
 
     if (call)
         call.appendChild(callInfo);
