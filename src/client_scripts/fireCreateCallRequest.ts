@@ -20,13 +20,20 @@ export async function fireCreateCallRequest (): Promise<void> {
 
     const callParameters = await callResponse.json();
 
-    const callInfo = document.createElement('p');
-
-    callInfo.id = config.callInfoDOMElementId;
-    callInfo.innerText = `callId: ${callParameters.id}`;
-
     const call = document.getElementById(config.callDOMElementId);
+    const oldCallInfo = document.getElementById(config.callInfoDOMElementId);
 
-    if (call)
+    const callInfoText = `callId: ${callParameters.id}`;
+
+    if (call && !oldCallInfo) {
+        const callInfo = document.createElement('p');
+
+        callInfo.id = config.callInfoDOMElementId;
+        callInfo.innerText = callInfoText;
+
         call.appendChild(callInfo);
+    }
+    else if (oldCallInfo)
+        oldCallInfo.innerText = callInfoText;
+
 }
