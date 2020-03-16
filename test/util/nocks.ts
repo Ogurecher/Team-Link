@@ -63,6 +63,34 @@ export function nockRequests (config: interfaces.DefaultConfiguration): nock.Sco
             ]
         });
 
+    nock(config.apiBaseURL)
+        .persist()
+        .post(/\/me\/onlineMeetings/)
+        .reply(200, {
+            participants: {
+                organizer: {
+                    identity: {
+                        user: {
+                            id: 'organizerId1'
+                        }
+                    }
+                }
+            },
+            chatInfo: 'chatInfo1'
+        });
+
+    nock(config.apiBaseURL)
+        .persist()
+        .post(/\/communications\/calls/)
+        .reply(200, {
+            id: 'callId1'
+        });
+
+    nock(config.apiBaseURL)
+        .persist()
+        .post(/\/communications\/calls\/.*\/participants\/invite/)
+        .reply(200);
+
     return userPresences;
 }
 

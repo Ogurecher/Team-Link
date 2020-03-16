@@ -88,10 +88,10 @@ async function callMeeting ({ organizerId, chatInfo }: MeetingInfo): Promise<Cal
 }
 
 async function addParticipants ({ callId, userIds, accessToken }: { callId: string; userIds: string[]; accessToken: string}): Promise<void> {
-    const callMeetingQuery = `/communications/calls/${callId}/participants/invite`;
-    const callMeetingURL = path.join(config.apiBaseURL, callMeetingQuery);
+    const addParticipantsQuery = `/communications/calls/${callId}/participants/invite`;
+    const addParticipantsURL = path.join(config.apiBaseURL, addParticipantsQuery);
 
-    await got.post(callMeetingURL, {
+    await got.post(addParticipantsURL, {
         headers: {
             Authorization: `Bearer ${accessToken}`
         },

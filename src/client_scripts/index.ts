@@ -28,7 +28,6 @@ export async function getOnlineUsers (): Promise<void> {
 
     if (root)
         root.innerHTML = table;
-
 }
 
 

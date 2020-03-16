@@ -34,3 +34,13 @@ test('Polls repeatedly', async t => {
         .expect(initialUsersTable.replace(/\s/g, '')).eql(expectedInitialUsersTable)
         .expect(Selector('#available_users').textContent).notEql(initialUsersTable, { timeout: 10000 });
 });
+
+test('Calls when the "call" button is clicked', async t => {
+    nockUserPresencesOnce(config);
+    const expectedCallInfo = 'callId: callId1';
+
+    await t
+        .expect(Selector('#available_users').textContent).ok()
+        .click('#call_button')
+        .expect(Selector('#call_info').textContent).eql(expectedCallInfo);
+});
