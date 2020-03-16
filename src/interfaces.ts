@@ -96,6 +96,8 @@ export interface Configuration extends DefaultConfiguration {
     clientId: string;
     clientSecret: string;
     refreshToken: string;
+    groupId: string;
+    channelId: string;
 }
 
 export interface ExpressServer extends events.EventEmitter {

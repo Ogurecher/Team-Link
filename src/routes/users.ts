@@ -68,8 +68,8 @@ export async function getOnlineUsers (req: unknown, res: HTTPResponse): Promise<
 
     const accessToken = await refreshAccessToken();
 
-    const group = await getGroup({ displayName: 'dxdeveloper', accessToken });
-    const channel = await getChannel({ group, displayName: 'General', accessToken });
+    const group = config.groupId ? { id: config.groupId } : await getGroup({ displayName: 'dxdeveloper', accessToken });
+    const channel = config.channelId ? { id: config.channelId } : await getChannel({ group, displayName: 'General', accessToken });
     const users = await getAllUsers({ group, channel, accessToken });
 
     const userStatuses = await getPresences({ idList: users.map((data: User) => data.id), accessToken });

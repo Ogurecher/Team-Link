@@ -33,7 +33,9 @@ export default class Config {
             tenantId:             process.env.OAUTH_TENANT_ID || 'not provided',
             clientId:             process.env.OAUTH_CLIENT_ID || 'not provided',
             clientSecret:         process.env.OAUTH_CLIENT_SECRET || 'not provided',
-            refreshToken:         process.env.OAUTH_REFRESH_TOKEN_USER || 'not provided'
+            refreshToken:         process.env.OAUTH_REFRESH_TOKEN_USER || 'not provided',
+            groupId:              process.env.TEAMS_GROUP_ID || '',
+            channelId:            process.env.TEAMS_CHANNEL_ID || ''
         };
     }
 }
