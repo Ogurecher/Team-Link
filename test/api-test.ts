@@ -12,6 +12,7 @@ describe('API', () => {
     const config = configInstance.config();
     const rootPath = path.join(`http://${config.host}:${config.port}`);
     const usersURL = path.join(rootPath, '/users');
+    const callURL = path.join(rootPath, '/call');
 
     nockRequests(config);
 
@@ -40,6 +41,26 @@ describe('API', () => {
 
 
         const response = await got(usersURL);
+
+        expect(JSON.parse(response.body)).eql(expectedResponse);
+    });
+
+    it(`Sends a response from the '/call' endpoint`, async () => {
+        const expectedStatus = 200;
+
+
+        const response = await got.post(callURL);
+
+
+        expect(response.statusCode).equal(expectedStatus);
+    });
+
+    it(`Provides a correct response from the '/call' endpoint`, async () => {
+        const expectedResponse = { id: 'callId1' };
+
+
+        const response = await got.post(callURL);
+
 
         expect(JSON.parse(response.body)).eql(expectedResponse);
     });

@@ -1,5 +1,46 @@
 import events from 'events';
 
+export interface HTTPPostRequest {
+    body: {};
+}
+
+export interface CallbackRequest {
+    body: {
+        value: [
+            {
+                resourceData: {
+                    state: string;
+                };
+            }
+        ];
+    };
+}
+
+export interface CreateCallRequest extends HTTPPostRequest {
+    body: {
+        userIds: string[];
+    };
+}
+
+export interface MeetingInfo {
+    organizerId: string;
+    chatInfo: {};
+}
+
+export interface UserInfo {
+    '@odata.type': string;
+    identity?: {};
+    organizer?: {};
+}
+
+export interface OrganizerMeetingInfo extends UserInfo {
+    allowConversationWithoutHost?: boolean;
+}
+
+export interface Call {
+    id: string;
+}
+
 export interface Group {
     id: string;
 }
@@ -26,7 +67,9 @@ export interface OnlineUser extends User{
 
 export interface HTTPResponse {
     header(title: string, options: string | string[]): void;
-    send(body: OnlineUser[]): void;
+    send(body: unknown): void;
+    status(code: number): void;
+    end(): void;
 }
 
 export interface Options {
@@ -44,6 +87,7 @@ export interface DefaultConfiguration {
     apiBaseURL: string;
     authorizationBaseURL: string;
     oauthVersion: string;
+    callbackURI: string;
 }
 
 export interface Configuration extends DefaultConfiguration {
@@ -52,6 +96,8 @@ export interface Configuration extends DefaultConfiguration {
     clientId: string;
     clientSecret: string;
     refreshToken: string;
+    groupId: string;
+    channelId: string;
 }
 
 export interface ExpressServer extends events.EventEmitter {
