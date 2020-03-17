@@ -1,4 +1,3 @@
-
 interface Window {
     debug: Function;
 }

@@ -3,9 +3,11 @@
     "compilerOptions": {
         "outFile": "../../lib/client/index.js",
         "allowJs": true,
-        "module": "System"
+        "module": "System",
+        "jsx": "react"
     },
     "include": [
-        "*"
+        "*",
+        "./components/*"
     ]
 }
