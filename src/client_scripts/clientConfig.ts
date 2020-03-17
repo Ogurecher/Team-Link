@@ -4,6 +4,6 @@ export default {
     callEndpoint:         'call',
     rootDOMElementId:     'root',
     tableDOMElementId:    'available_users',
-    callDOMElementId:     'call',
+    callDOMElementId:     'call_button',
     callInfoDOMElementId: 'call_info'
 };

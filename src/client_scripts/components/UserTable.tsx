@@ -1,8 +1,6 @@
-import React from 'react';
+import React, { ReactNode } from 'react';
 import UserTableRow from './UserTableRow';
 import { User } from '../interfaces';
-
-//const React = window.React;
 
 interface UserTableProps {
     tableDOMElementId: string;
@@ -10,23 +8,21 @@ interface UserTableProps {
 }
 
 export default class UserTable extends React.Component<UserTableProps> {
-    constructor (props: UserTableProps) {
-        super(props);
-    }
-
-    populateTable () {
-        return this.props.users.map((user: User) => {
+    private populateTable (): JSX.Element[] {
+        return this.props.users.map((user: User, index) => {
             return (
-                <UserTableRow cellType='td' displayName={user.displayName} id={user.id} status={user.status}></UserTableRow>
+                <UserTableRow key={index} cellType='td' displayName={user.displayName} id={user.id} status={user.status}></UserTableRow>
             );
-        })
+        });
     }
 
-    render () {
-        return(
+    public render (): ReactNode {
+        return (
             <table id={this.props.tableDOMElementId}>
-                <UserTableRow cellType='th' displayName='Display Name' id='ID' status='Status'></UserTableRow>
-                {this.populateTable()}
+                <tbody>
+                    <UserTableRow key='-1' cellType='th' displayName='Display Name' id='ID' status='Status'></UserTableRow>
+                    {this.populateTable()}
+                </tbody>
             </table>
         );
     }

@@ -6,29 +6,23 @@ import UserTable from './components/UserTable';
 import CallButton from './components/CallButton';
 import CallInfo from './components/CallInfo';
 
-/*interface Window {
-    React: any;
-}
-
-const React = window.React;*/
-
-export function renderTable (onlineUsers: User[]) {
+export function renderTable (onlineUsers: User[]): void {
     ReactDOM.render(
         <UserTable tableDOMElementId={config.tableDOMElementId} users={onlineUsers}></UserTable>,
         document.getElementById(config.rootDOMElementId)
-    )
+    );
 }
 
-export function renderButton () {
+export function renderButton (): void {
     ReactDOM.render(
         <CallButton></CallButton>,
-        document.getElementById(config.rootDOMElementId)
-    )
+        document.getElementById(config.callDOMElementId)
+    );
 }
 
-export function renderCallInfo (callId: string) {
+export function renderCallInfo (callId: string): void {
     ReactDOM.render(
         <CallInfo callId={callId}></CallInfo>,
-        document.getElementById(config.rootDOMElementId)
-    )
+        document.getElementById(config.callInfoDOMElementId)
+    );
 }

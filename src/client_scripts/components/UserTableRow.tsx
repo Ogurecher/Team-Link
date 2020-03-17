@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { ReactNode } from 'react';
 
 interface UserTableRowProps {
     cellType: string;
@@ -8,27 +8,23 @@ interface UserTableRowProps {
 }
 
 export default class UserTableRow extends React.Component<UserTableRowProps> {
-    constructor (props: UserTableRowProps) {
-        super(props);
-    }
-
-    render () {
+    public render (): ReactNode {
         if (this.props.cellType === 'th') {
-            return(
+            return (
                 <tr>
                     <th>{this.props.displayName}</th>
                     <th>{this.props.id}</th>
                     <th>{this.props.status}</th>
                 </tr>
             );
-        } else {
-            return(
-                <tr>
-                    <td>{this.props.displayName}</td>
-                    <td>{this.props.id}</td>
-                    <td>{this.props.status}</td>
-                </tr>
-            );
         }
+        return (
+            <tr>
+                <td>{this.props.displayName}</td>
+                <td>{this.props.id}</td>
+                <td>{this.props.status}</td>
+            </tr>
+        );
+
     }
 }

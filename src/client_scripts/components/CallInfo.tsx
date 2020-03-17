@@ -1,11 +1,11 @@
-import React from 'react';
+import React, { ReactNode } from 'react';
 
 interface CallInfoProps {
     callId: string;
 }
 
 export default class CallInfo extends React.Component<CallInfoProps> {
-    render () {
+    public render (): ReactNode {
         return (
             <p>
                 callId: {this.props.callId}
