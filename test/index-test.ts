@@ -3,8 +3,10 @@ import path from 'path';
 import { expect } from 'chai';
 import got from 'got';
 import { App, Config } from '../';
+import { setEnvVariables } from './util/setEnv';
 
 describe('Server', () => {
+    setEnvVariables();
     let app: App;
 
     const configInstance = new Config();
