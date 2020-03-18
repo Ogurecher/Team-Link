@@ -29,8 +29,6 @@ export default class Server {
         this.app.use('/', express.static(this.staticPath));
         this.app.use('/', express.static(this.clientPath));
 
-        this.app.use('/', express.static(path.resolve('node_modules')));
-
         this.app.use('/', router);
     }
 
