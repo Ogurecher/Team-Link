@@ -1,9 +1,10 @@
 import { Selector } from 'testcafe';
-import { App, Config } from '../../';
 import { nockRequests, nockUserPresencesOnce, nockUserPresencesPersist } from '../util/nocks';
 import { setEnvVariables } from '../util/setEnv';
 
 setEnvVariables();
+
+import { App, Config } from '../../';
 
 const configInstance = new Config();
 const config = configInstance.config();

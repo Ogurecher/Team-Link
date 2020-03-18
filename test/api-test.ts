@@ -2,12 +2,14 @@ import 'mocha';
 import path from 'path';
 import { expect } from 'chai';
 import got from 'got';
-import { App, Config } from '../';
 import { nockRequests } from './util/nocks';
 import { setEnvVariables } from './util/setEnv';
 
+setEnvVariables();
+
+import { App, Config } from '../';
+
 describe('API', () => {
-    setEnvVariables();
     let app: App;
 
     const configInstance = new Config();
