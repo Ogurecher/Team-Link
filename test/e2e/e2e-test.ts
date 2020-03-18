@@ -1,6 +1,6 @@
 import { Selector } from 'testcafe';
 import { App, Config } from '../../';
-import { nockRequests, nockUserPresencesOnce } from '../util/nocks';
+import { nockRequests, nockUserPresencesOnce, nockUserPresencesPersist } from '../util/nocks';
 
 const configInstance = new Config();
 const config = configInstance.config();
@@ -36,7 +36,7 @@ test('Polls repeatedly', async t => {
 });
 
 test('Calls when the "call" button is clicked', async t => {
-    nockUserPresencesOnce(config);
+    nockUserPresencesPersist(config);
     const expectedCallInfo = 'callId: callId1';
 
     await t

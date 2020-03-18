@@ -15,14 +15,14 @@ export function renderTable (onlineUsers: User[]): void {
 
 export function renderButton (): void {
     ReactDOM.render(
-        <CallButton></CallButton>,
-        document.getElementById(config.callDOMElementId)
+        <CallButton callDOMElementId={config.callDOMElementId}></CallButton>,
+        document.getElementById(config.callRootDOMElementId)
     );
 }
 
 export function renderCallInfo (callId: string): void {
     ReactDOM.render(
-        <CallInfo callId={callId}></CallInfo>,
-        document.getElementById(config.callInfoDOMElementId)
+        <CallInfo callId={callId} callInfoDOMElementId={config.callInfoDOMElementId}></CallInfo>,
+        document.getElementById(config.callInfoRootDOMElementId)
     );
 }

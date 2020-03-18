@@ -1,9 +1,14 @@
 import React, { ReactNode } from 'react';
+import { fireCreateCallRequest } from '../fireCreateCallRequest';
 
-export default class CallButton extends React.Component {
+interface CallButtonProps {
+    callDOMElementId: string;
+}
+
+export default class CallButton extends React.Component<CallButtonProps> {
     public render (): ReactNode {
         return (
-            <input id="call_button" type="submit" value="Call" onclick="fireCreateCallRequest()"/>
+            <input id={this.props.callDOMElementId} type="submit" value="Call" onClick={fireCreateCallRequest}/>
         );
     }
 }
