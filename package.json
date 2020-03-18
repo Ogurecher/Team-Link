@@ -6,7 +6,7 @@
   "types": "types",
   "scripts": {
     "start": "npm run build && node lib/src/index.js",
-    "lint": "eslint --ext '.ts' src test",
+    "lint": "eslint --ext '.ts' --ext '.tsx' src test",
     "e2e-test": "testcafe chrome:headless ./test/e2e/* --ts-config-path ./tsconfig.base.json",
     "test": "npm run lint && mocha -r ts-node/register test/*-test.ts",
     "debug": "node --inspect-brk src/index.js",
@@ -34,6 +34,7 @@
     "@typescript-eslint/parser": "^2.20.0",
     "chai": "^4.2.0",
     "eslint": "^6.8.0",
+    "eslint-plugin-react": "^7.19.0",
     "eslint-plugin-testcafe": "^0.2.1",
     "mocha": "^7.0.1",
     "nock": "^11.9.1",
