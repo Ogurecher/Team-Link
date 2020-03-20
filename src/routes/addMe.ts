@@ -17,6 +17,7 @@ export async function addMe (req: AddMeRequest, res: HTTPResponse): Promise<void
     res.send(202);
 
     if (req.body.value[0].changeType === 'created') {
+        debug('entered if');
         debug(JSON.stringify(req.body, null, 4));
         callIdEmitter.emit('CallId requested');
 

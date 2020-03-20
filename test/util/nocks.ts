@@ -110,3 +110,11 @@ export function nockUserPresencesOnce (config: interfaces.DefaultConfiguration):
             ]
         });
 }
+
+export function nockCallRejectionOnce (config: interfaces.DefaultConfiguration): nock.Scope {
+    const callRejectionScope = nock(config.apiBaseURL)
+        .post(/\/communications\/calls\/.*\/reject/)
+        .reply(202);
+
+    return callRejectionScope;
+}
