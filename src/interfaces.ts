@@ -22,6 +22,26 @@ export interface CreateCallRequest extends HTTPPostRequest {
     };
 }
 
+export interface AddMeRequest extends HTTPPostRequest {
+    body: {
+        value: [
+            {
+                changeType: string;
+                resourceUrl: string;
+                resourceData: {
+                    source: {
+                        identity: {
+                            user: {
+                                id: string;
+                            };
+                        };
+                    };
+                };
+            }
+        ];
+    };
+}
+
 export interface MeetingInfo {
     organizerId: string;
     chatInfo: {};

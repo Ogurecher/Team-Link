@@ -1,5 +1,6 @@
 import got from 'got';
 import path from 'path';
+import events from 'events';
 import debugModule from 'debug';
 import Config from '../Config';
 import { attachCORSHeaders } from './headers';
@@ -10,6 +11,8 @@ import { notifier } from './callback';
 const configInstance = new Config();
 const config = configInstance.config();
 const debug = debugModule('team-link:debug');
+
+export const callIdEmitter = new events.EventEmitter();
 
 export async function createCall (req: CreateCallRequest, res: HTTPResponse): Promise<void> {
     res = attachCORSHeaders({ res });
@@ -24,7 +27,11 @@ export async function createCall (req: CreateCallRequest, res: HTTPResponse): Pr
         addParticipants({ callId, userIds: req.body.userIds, accessToken });
     });
 
-    debug(callParameters);
+    callIdEmitter.on('CallId requested', () => {
+        callIdEmitter.emit('CallId provided', callId, accessToken);
+    });
+
+    debug(JSON.stringify(callParameters, null, 4));
 
     res.send(callParameters);
 }
