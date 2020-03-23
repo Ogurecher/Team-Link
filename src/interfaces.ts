@@ -89,6 +89,7 @@ export interface HTTPResponse {
     header(title: string, options: string | string[]): void;
     send(body: unknown): void;
     status(code: number): void;
+    sendStatus(code: number): void;
     end(): void;
 }
 

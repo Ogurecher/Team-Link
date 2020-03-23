@@ -14,17 +14,27 @@ const debug = debugModule('team-link:debug');
 export async function addMe (req: AddMeRequest, res: HTTPResponse): Promise<void> {
     res = attachCORSHeaders({ res });
 
-    res.send(202);
-
     if (req.body.value[0].changeType === 'created') {
-        debug('entered if');
-        debug(JSON.stringify(req.body, null, 4));
         callIdEmitter.emit('CallId requested');
 
         const userId = req.body.value[0].resourceData.source.identity.user.id;
         const accessToken = await getAppAccessToken();
 
+        const rejectCallQuery = `${req.body.value[0].resourceUrl}/reject`;
+        const rejectCallURL = path.join(config.apiBaseURL, rejectCallQuery);
+
+        await got.post(rejectCallURL, {
+            headers: {
+                Authorization: `Bearer ${accessToken}`
+            },
+            json: {
+                'reason': 'None'
+            }
+        });
+
         callIdEmitter.once('CallId provided', async callId => {
+            debug(`Adding ${userId} to ${callId}`);
+
             const addParticipantsQuery = `/communications/calls/${callId}/participants/invite`;
             const addParticipantsURL = path.join(config.apiBaseURL, addParticipantsQuery);
 
@@ -50,17 +60,7 @@ export async function addMe (req: AddMeRequest, res: HTTPResponse): Promise<void
                 }
             });
         });
-
-        const rejectCallQuery = `${req.body.value[0].resourceUrl}/reject`;
-        const rejectCallURL = path.join(config.apiBaseURL, rejectCallQuery);
-
-        await got.post(rejectCallURL, {
-            headers: {
-                Authorization: `Bearer ${accessToken}`
-            },
-            json: {
-                'reason': 'None'
-            }
-        });
     }
+
+    res.sendStatus(202);
 }

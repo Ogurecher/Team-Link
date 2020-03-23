@@ -81,7 +81,7 @@ export function nockRequests (config: interfaces.DefaultConfiguration): nock.Sco
 
     nock(config.apiBaseURL)
         .persist()
-        .post(/\/communications\/calls/)
+        .post(/\/communications\/calls$/)
         .reply(200, {
             id: 'callId1'
         });

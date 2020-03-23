@@ -43,6 +43,7 @@ describe('API', () => {
 
         const response = await got(usersURL);
 
+
         expect(JSON.parse(response.body)).eql(expectedResponse);
     });
 
@@ -101,11 +102,11 @@ describe('API', () => {
     it(`Hangs up a call when calling the bot on the '/addMe' endpoint`, async () => {
         const callRejectionScope = nockCallRejectionOnce(config);
 
+
         await got.post(addMeURL, {
             json: addMeBody
         });
 
-        callRejectionScope.done();
 
         expect(callRejectionScope.isDone()).eql(true);
     });
