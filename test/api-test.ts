@@ -3,7 +3,7 @@ import path from 'path';
 import { expect } from 'chai';
 import got from 'got';
 import { App, Config } from '../';
-import { nockRequests, nockCallRejectionOnce } from './util/nocks';
+import { nockRequests, nockCallRejectionOnce, nockInviteParticipantsOnce, cleanNocks } from './util/nocks';
 
 describe('API', () => {
     let app: App;
@@ -15,14 +15,20 @@ describe('API', () => {
     const callURL = path.join(rootPath, '/call');
     const addMeURL = path.join(rootPath, '/addMe');
 
-    nockRequests(config);
-
     before(async () => {
         app = await App.create();
     });
 
     after(async () => {
         await app.closeServer();
+    });
+
+    beforeEach(async () => {
+        nockRequests(config);
+    });
+
+    afterEach(async () => {
+        cleanNocks();
     });
 
     it(`Sends a response from the '/users' endpoint`, async () => {
@@ -48,6 +54,7 @@ describe('API', () => {
     });
 
     it(`Sends a response from the '/call' endpoint`, async () => {
+        nockInviteParticipantsOnce(config);
         const expectedStatus = 200;
 
 
@@ -58,6 +65,7 @@ describe('API', () => {
     });
 
     it(`Provides a correct response from the '/call' endpoint`, async () => {
+        nockInviteParticipantsOnce(config);
         const expectedResponse = { id: 'callId1' };
 
 
@@ -86,9 +94,10 @@ describe('API', () => {
     };
 
     it(`Sends a response from the '/addMe' endpoint`, async () => {
-        const expectedStatus = 202;
-
+        nockInviteParticipantsOnce(config);
         nockCallRejectionOnce(config);
+
+        const expectedStatus = 202;
 
 
         const response = await got.post(addMeURL, {
@@ -100,6 +109,7 @@ describe('API', () => {
     });
 
     it(`Hangs up a call when calling the bot on the '/addMe' endpoint`, async () => {
+        nockInviteParticipantsOnce(config);
         const callRejectionScope = nockCallRejectionOnce(config);
 
 
@@ -109,5 +119,21 @@ describe('API', () => {
 
 
         expect(callRejectionScope.isDone()).eql(true);
+    });
+
+    it(`/addMe adds user to the previously created call`, async () => {
+        nockCallRejectionOnce(config);
+
+
+        await got.post(callURL);
+
+        const addParticipantsScope = nockInviteParticipantsOnce(config);
+
+        await got.post(addMeURL, {
+            json: addMeBody
+        });
+
+
+        expect(addParticipantsScope.isDone()).eql(true);
     });
 });
