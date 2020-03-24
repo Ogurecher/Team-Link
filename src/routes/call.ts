@@ -20,7 +20,7 @@ export async function createCall (req: CreateCallRequest, res: HTTPResponse): Pr
     const accessToken = await getAppAccessToken();
 
     const meetingInfo = await createOnlineMeeting();
-    const callParameters = await callMeeting(meetingInfo);
+    const callParameters = await callMeeting(meetingInfo, accessToken);
     const callId = callParameters.id;
 
     notifier.once('Call established', () => {
@@ -63,12 +63,10 @@ async function createOnlineMeeting (): Promise<MeetingInfo> {
     };
 }
 
-async function callMeeting ({ organizerId, chatInfo }: MeetingInfo): Promise<Call> {
+async function callMeeting ({ organizerId, chatInfo }: MeetingInfo, accessToken: string): Promise<Call> {
     const organizerMeetingInfo: OrganizerMeetingInfo = populateUsers({ userIds: [organizerId], organizer: true })[0];
 
     organizerMeetingInfo.allowConversationWithoutHost = true;
-
-    const accessToken = await getAppAccessToken();
 
     const callMeetingQuery = `/communications/calls`;
     const callMeetingURL = path.join(config.apiBaseURL, callMeetingQuery);

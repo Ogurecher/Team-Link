@@ -2,18 +2,21 @@ import 'mocha';
 import path from 'path';
 import { expect } from 'chai';
 import got from 'got';
-import { nockRequests, nockCallRejectionOnce, nockInviteParticipantsOnce, cleanNocks } from './util/nocks';
 import { setEnvVariables } from './util/setEnv';
 
 setEnvVariables();
 
 import { App, Config } from '../';
+import { NockManager } from './util/NockManager';
 
 describe('API', () => {
     let app: App;
 
     const configInstance = new Config();
     const config = configInstance.config();
+
+    const nockManager = new NockManager(config);
+
     const rootPath = path.join(`http://${config.host}:${config.port}`);
     const usersURL = path.join(rootPath, '/users');
     const callURL = path.join(rootPath, '/call');
@@ -27,15 +30,13 @@ describe('API', () => {
         await app.closeServer();
     });
 
-    beforeEach(async () => {
-        nockRequests(config);
-    });
-
     afterEach(async () => {
-        cleanNocks();
+        nockManager.cleanNocks();
     });
 
     it(`Sends a response from the '/users' endpoint`, async () => {
+        nockManager.setupAllNocks();
+
         const expectedStatus = 200;
 
 
@@ -46,6 +47,8 @@ describe('API', () => {
     });
 
     it(`Provides a correct response from the '/users' endpoint`, async () => {
+        nockManager.setupAllNocks();
+
         const expectedResponse = [
             { displayName: 'username1', id: 'userId1', status: 'Available' }
         ];
@@ -58,7 +61,13 @@ describe('API', () => {
     });
 
     it(`Sends a response from the '/call' endpoint`, async () => {
-        nockInviteParticipantsOnce(config);
+        nockManager.setupNock({
+            method: 'post',
+            name:   'inviteParticipantsNocks'
+        });
+
+        nockManager.setupAllNocks();
+
         const expectedStatus = 200;
 
 
@@ -69,7 +78,13 @@ describe('API', () => {
     });
 
     it(`Provides a correct response from the '/call' endpoint`, async () => {
-        nockInviteParticipantsOnce(config);
+        nockManager.setupNock({
+            method: 'post',
+            name:   'inviteParticipantsNocks'
+        });
+
+        nockManager.setupAllNocks();
+
         const expectedResponse = { id: 'callId1' };
 
 
@@ -98,8 +113,20 @@ describe('API', () => {
     };
 
     it(`Sends a response from the '/addMe' endpoint`, async () => {
-        nockInviteParticipantsOnce(config);
-        nockCallRejectionOnce(config);
+        nockManager.setupNock({
+            method: 'post',
+            name:   'inviteParticipantsNocks'
+        });
+
+        nockManager.setupNock({
+            method:   'post',
+            name:     'rejectCallNocks',
+            response: {
+                status: 202
+            }
+        });
+
+        nockManager.setupAllNocks();
 
         const expectedStatus = 202;
 
@@ -113,8 +140,20 @@ describe('API', () => {
     });
 
     it(`Hangs up a call when calling the bot on the '/addMe' endpoint`, async () => {
-        nockInviteParticipantsOnce(config);
-        const callRejectionScope = nockCallRejectionOnce(config);
+        nockManager.setupNock({
+            method: 'post',
+            name:   'inviteParticipantsNocks'
+        });
+
+        const callRejectionScope = nockManager.setupNock({
+            method:   'post',
+            name:     'rejectCallNocks',
+            response: {
+                status: 202
+            }
+        })[0];
+
+        nockManager.setupAllNocks();
 
 
         await got.post(addMeURL, {
@@ -126,12 +165,15 @@ describe('API', () => {
     });
 
     it(`/addMe adds user to the previously created call`, async () => {
-        nockCallRejectionOnce(config);
+        const addParticipantsScope = nockManager.setupNock({
+            method: 'post',
+            name:   'inviteParticipantsNocks'
+        })[0];
+
+        nockManager.setupAllNocks();
 
 
         await got.post(callURL);
-
-        const addParticipantsScope = nockInviteParticipantsOnce(config);
 
         await got.post(addMeURL, {
             json: addMeBody

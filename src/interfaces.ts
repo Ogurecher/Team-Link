@@ -127,13 +127,10 @@ export interface ExpressServer extends events.EventEmitter {
 }
 
 export interface Nocks {
-    getTokenNock: nock.Scope;
-    getGroupNock: nock.Scope;
-    getChannelNock: nock.Scope;
-    getUsersNock: nock.Scope;
-    getPresencesNock: nock.Scope;
-    createMeetingNock: nock.Scope;
-    createCallNock: nock.Scope;
-    inviteParticipantsNock: nock.Scope;
-    rejectCallNock: nock.Scope;
+    [name: string]: nock.Scope[];
+}
+
+export interface NockResponse {
+    status: number;
+    body?: {};
 }
