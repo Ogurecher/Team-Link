@@ -1,10 +1,10 @@
 import { Selector } from 'testcafe';
-import { nockRequests, nockUserPresencesOnce, nockUserPresencesPersist } from '../util/nocks';
 import { setEnvVariables } from '../util/setEnv';
 
 setEnvVariables();
 
 import { App, Config } from '../../';
+import { NockManager } from '../util/NockManager';
 
 const configInstance = new Config();
 const config = configInstance.config();
@@ -13,7 +13,7 @@ const rootPath = `http://${config.host}:${config.port}`;
 
 let app: App;
 
-const userPresences = nockRequests(config);
+const nockManager = new NockManager(config);
 
 fixture `Client`
     .page `${rootPath}`
@@ -24,9 +24,32 @@ fixture `Client`
         await app.closeServer();
     });
 
+afterEach(() => {
+    nockManager.cleanNocks();
+});
+
 test('Polls repeatedly', async t => {
-    userPresences.persist(false);
-    nockUserPresencesOnce(config);
+    nockManager.setupAllNocks();
+
+    nockManager.setupNock({
+        method:   'post',
+        name:     'getPresencesNocks',
+        response: {
+            status: 200,
+            body:   {
+                value: [
+                    {
+                        id:           'userId1',
+                        availability: 'Available'
+                    },
+                    {
+                        id:           'userId2',
+                        availability: 'Available'
+                    }
+                ]
+            }
+        }
+    });
 
     const expectedInitialUsersTable = 'Display Name ID Status \n username1 userId1 Available'.replace(/\s/g, '');
 
@@ -40,7 +63,28 @@ test('Polls repeatedly', async t => {
 });
 
 test('Calls when the "call" button is clicked', async t => {
-    nockUserPresencesPersist(config);
+    nockManager.setupAllNocks();
+
+    nockManager.setupNock({
+        method:   'post',
+        name:     'getPresencesNocks',
+        response: {
+            status: 200,
+            body:   {
+                value: [
+                    {
+                        id:           'userId1',
+                        availability: 'Available'
+                    },
+                    {
+                        id:           'userId2',
+                        availability: 'Available'
+                    }
+                ]
+            }
+        }
+    });
+
     const expectedCallInfo = 'callId: callId1';
 
     await t
