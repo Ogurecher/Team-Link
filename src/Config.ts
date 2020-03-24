@@ -19,7 +19,7 @@ export default class Config {
         };
     }
 
-    public config (): Configuration { // TODO remove default 'not provided' values and set them directly in tests
+    public config (): Configuration {
         return {
             port:                 process.env.PORT || this.defaults.port,
             host:                 process.env.HOST || this.defaults.host,
@@ -29,11 +29,11 @@ export default class Config {
             authorizationBaseURL: process.env.OAUTH_BASE_URL || this.defaults.authorizationBaseURL,
             oauthVersion:         process.env.OAUTH_VERSION || this.defaults.oauthVersion,
             callbackURI:          process.env.CALLBACK_URI || this.defaults.callbackURI,
-            accessToken:          process.env.OAUTH_ACCESS_TOKEN_USER || 'not provided',
-            tenantId:             process.env.OAUTH_TENANT_ID || 'not provided',
-            clientId:             process.env.OAUTH_CLIENT_ID || 'not provided',
-            clientSecret:         process.env.OAUTH_CLIENT_SECRET || 'not provided',
-            refreshToken:         process.env.OAUTH_REFRESH_TOKEN_USER || 'not provided',
+            accessToken:          process.env.OAUTH_ACCESS_TOKEN_USER || '',
+            tenantId:             process.env.OAUTH_TENANT_ID || '',
+            clientId:             process.env.OAUTH_CLIENT_ID || '',
+            clientSecret:         process.env.OAUTH_CLIENT_SECRET || '',
+            refreshToken:         process.env.OAUTH_REFRESH_TOKEN_USER || '',
             groupId:              process.env.TEAMS_GROUP_ID || '',
             channelId:            process.env.TEAMS_CHANNEL_ID || ''
         };

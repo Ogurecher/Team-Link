@@ -1,15 +1,10 @@
-
-interface Window {
-    debug: Function;
-}
+import debug from 'debug';
 
 interface ErrorInfo {
     name?: string;
     message?: string;
     stack?: string;
 }
-
-const debug = window.debug;
 
 const error = debug('team-link:error');
 

@@ -1,4 +1,5 @@
 import config from './clientConfig';
+import { renderCallInfo } from './reactRenderer';
 
 export async function fireCreateCallRequest (): Promise<void> {
     const userTableRows = document.getElementById(config.tableDOMElementId)?.getElementsByTagName('tr');
@@ -20,20 +21,5 @@ export async function fireCreateCallRequest (): Promise<void> {
 
     const callParameters = await callResponse.json();
 
-    const call = document.getElementById(config.callDOMElementId);
-    const oldCallInfo = document.getElementById(config.callInfoDOMElementId);
-
-    const callInfoText = `callId: ${callParameters.id}`;
-
-    if (call && !oldCallInfo) {
-        const callInfo = document.createElement('p');
-
-        callInfo.id = config.callInfoDOMElementId;
-        callInfo.innerText = callInfoText;
-
-        call.appendChild(callInfo);
-    }
-    else if (oldCallInfo)
-        oldCallInfo.innerText = callInfoText;
-
+    renderCallInfo(callParameters.id);
 }

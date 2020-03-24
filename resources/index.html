@@ -2,21 +2,33 @@
 <html>
     <head>
         <title>Available users</title>
+        <script type="systemjs-importmap">
+            {
+                "imports": {
+                    "debug": "https://unpkg.com/debug@4.1.1/dist/debug.js",
+                    "react": "https://unpkg.com/react@16/umd/react.development.js",
+                    "react-dom": "https://unpkg.com/react-dom@16/umd/react-dom.development.js"
+                }
+            }
+        </script>
         <script src="https://unpkg.com/systemjs@6.2.5/dist/system.js"></script>
         <script src="https://unpkg.com/systemjs@6.2.5/dist/extras/named-register.js"></script>
-        <script src="https://unpkg.com/debug@4.1.1/dist/debug.js"></script>
         <script type="text/javascript" src="errorHandling.js"></script>
         <script type="text/javascript" src="index.js"></script>
     </head>
     <body>
         <div id="root"></div>
-        <div id="call">
-            <input id="call_button" type="submit" value="Call", onclick="fireCreateCallRequest()"/>
-        </div>
+        <div id="call_button_root"></div>
+        <div id="call_info_root"></div>
         <script type="text/javascript">
             (async () => {
+                await System.import('./errorHandling.js');
+                await System.import('./index.js');
                 const { subscribe, getOnlineUsers } = await System.import('index');
                 const { fireCreateCallRequest } =  await System.import('fireCreateCallRequest');
+                const { renderButton } = await System.import('reactRenderer');
+
+                renderButton();
 
                 window.fireCreateCallRequest = fireCreateCallRequest;
 
