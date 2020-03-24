@@ -1,4 +1,5 @@
 import events from 'events';
+import nock from 'nock';
 
 export interface HTTPPostRequest {
     body: {};
@@ -123,4 +124,16 @@ export interface Configuration extends DefaultConfiguration {
 
 export interface ExpressServer extends events.EventEmitter {
     close(): void;
+}
+
+export interface Nocks {
+    getTokenNock: nock.Scope;
+    getGroupNock: nock.Scope;
+    getChannelNock: nock.Scope;
+    getUsersNock: nock.Scope;
+    getPresencesNock: nock.Scope;
+    createMeetingNock: nock.Scope;
+    createCallNock: nock.Scope;
+    inviteParticipantsNock: nock.Scope;
+    rejectCallNock: nock.Scope;
 }

@@ -1,145 +1,191 @@
 import nock from 'nock';
 import { interfaces } from '../../';
 
-export function nockRequests (config: interfaces.DefaultConfiguration): nock.Scope {
-    nock(config.authorizationBaseURL)
-        .persist()
-        .post(/\/.*\/.*\/.*\/token/)
-        .reply(200, {
-            'access_token': 'token'
-        });
 
-    nock(config.apiBaseURL)
-        .persist()
-        .get(/\/groups/)
-        .reply(200, {
-            value: [
-                {
-                    id: 'groupId'
+
+export class NockManager {
+    private config: interfaces.DefaultConfiguration;
+    private regExpMap: {[name: string]: RegExp}
+
+    private initializeRegExpMap (): {[name: string]: RegExp} {
+        return {
+            'getTokenNock': /\/.*\/.*\/.*\/token/,
+            'getGroupNock': /\/groups/,
+            'getChannelNock': /\/teams\/.*\/channels\?/,
+            'getUsersNock': /\/teams\/.*\/channels\/.*\/members/,
+            'getPresencesNock': /\/communications\/getPresencesByUserId/,
+            'createMeetingNock': /\/me\/onlineMeetings/,
+            'createCallNock': /\/communications\/calls$/,
+            'inviteParticipantsNock': /\/communications\/calls\/.*\/participants\/invite/,
+            'rejectCallNock': /\/communications\/calls\/.*\/reject/
+        }
+    }
+
+    public nocks: interfaces.Nocks;
+
+    constructor (config: interfaces.DefaultConfiguration) {
+        this.config = config;
+        this.regExpMap = this.initializeRegExpMap();
+    }
+
+    public setupNock ({ url = this.config.apiBaseURL, method, name, response = { status: 200 }, quantity = 1 } : 
+        {url?: string, method: string, name: string, response?: interfaces.NockResponse, quantity?: number}): nock.Scope[] {
+            
+        const nocksList = []
+
+        for (let i = 0; i < quantity; i++) {
+            let interceptor;
+            if (method === 'post') {
+                interceptor = nock(url).post(this.regExpMap[name]);
+            } else if (method === 'get') {
+                interceptor = nock(url).get(this.regExpMap[name]);
+            }
+
+            const resultNock = interceptor.reply(response.status, response.body || {});
+
+            nocksList.push(resultNock)
+            this.nocks[name].push(resultNock)
+        }
+        
+        return nocksList;
+    }
+
+    public cleanNocks () {
+        nock.cleanAll();
+        this.nocks = {
+            getTokenNocks: [],
+            getGroupNocks: [],
+            getChannelNocks: [],
+            getUsersNocks: [],
+            getPresencesNocks: [],
+            createMeetingNocks: [],
+            createCallNocks: [],
+            inviteParticipantsNocks: [],
+            rejectCallNocks: []
+        }
+    }
+
+    public setupAllNocks () {
+        this.nocks.getTokenNocks = this.setupNock({
+                url: this.config.authorizationBaseURL,
+                method: 'post',
+                name: 'getTokenNock',
+                response: {
+                    status: 200,
+                    body: {'access_token': 'token'}
                 }
-            ]
         });
-
-    nock(config.apiBaseURL)
-        .persist()
-        .get(/\/teams\/.*\/channels\?/)
-        .reply(200, {
-            value: [
-                {
-                    id: 'channelId'
-                }
-            ]
-        });
-
-    nock(config.apiBaseURL)
-        .persist()
-        .get(/\/teams\/.*\/channels\/.*\/members/)
-        .reply(200, {
-            value: [
-                {
-                    userId:      'userId1',
-                    displayName: 'username1'
-                },
-                {
-                    userId:      'userId2',
-                    displayName: 'username2'
-                }
-            ]
-        });
-
-    const userPresences = nock(config.apiBaseURL)
-        .persist()
-        .post(/\/communications\/getPresencesByUserId/)
-        .reply(200, {
-            value: [
-                {
-                    id:           'userId1',
-                    availability: 'Available'
-                },
-                {
-                    id:           'userId2',
-                    availability: 'Offline'
-                }
-            ]
-        });
-
-    nock(config.apiBaseURL)
-        .persist()
-        .post(/\/me\/onlineMeetings/)
-        .reply(200, {
-            participants: {
-                organizer: {
-                    identity: {
-                        user: {
-                            id: 'organizerId1'
-                        }
+        
+        this.nocks.getGroupNocks = this.setupNock({
+                method: 'get',
+                name: 'getGroupNocks',
+                response: {
+                    status: 200,
+                    body: {
+                        value: [
+                            {
+                                id: 'groupId'
+                            }
+                        ]
                     }
                 }
-            },
-            chatInfo: 'chatInfo1'
         });
 
-    nock(config.apiBaseURL)
-        .persist()
-        .post(/\/communications\/calls$/)
-        .reply(200, {
-            id: 'callId1'
-        });
-
-    return userPresences;
-}
-
-export function nockUserPresencesOnce (config: interfaces.DefaultConfiguration): void {
-    nock(config.apiBaseURL)
-        .post(/\/communications\/getPresencesByUserId/)
-        .reply(200, {
-            value: [
-                {
-                    id:           'userId1',
-                    availability: 'Available'
-                },
-                {
-                    id:           'userId2',
-                    availability: 'Available'
+        this.nocks.getChannelNocks = this.setupNock({
+                method: 'get',
+                name: 'getChannelNocks',
+                response: {
+                    status: 200,
+                    body: {
+                        value: [
+                            {
+                                id: 'channelId'
+                            }
+                        ]
+                    }
                 }
-            ]
         });
-}
 
-export function nockUserPresencesPersist (config: interfaces.DefaultConfiguration): void {
-    nock(config.apiBaseURL)
-        .persist()
-        .post(/\/communications\/getPresencesByUserId/)
-        .reply(200, {
-            value: [
-                {
-                    id:           'userId1',
-                    availability: 'Available'
-                },
-                {
-                    id:           'userId2',
-                    availability: 'Available'
+        this.nocks.getUsersNocks = this.setupNock({
+            method: 'get',
+            name: 'getUsersNocks',
+            response: {
+                status: 200,
+                body: {
+                    value: [
+                        {
+                            userId:      'userId1',
+                            displayName: 'username1'
+                        },
+                        {
+                            userId:      'userId2',
+                            displayName: 'username2'
+                        }
+                    ]
                 }
-            ]
+            }
         });
-}
 
-export function nockCallRejectionOnce (config: interfaces.DefaultConfiguration): nock.Scope {
-    const callRejectionScope = nock(config.apiBaseURL)
-        .post(/\/communications\/calls\/.*\/reject/)
-        .reply(202);
+        this.nocks.getPresencesNocks = this.setupNock({
+            method: 'post',
+            name: 'getPresencesNocks',
+            response: {
+                status: 200,
+                body: {
+                    value: [
+                        {
+                            id:           'userId1',
+                            availability: 'Available'
+                        },
+                        {
+                            id:           'userId2',
+                            availability: 'Offline'
+                        }
+                    ]
+                }
+            }
+        });
 
-    return callRejectionScope;
-}
+        this.nocks.createMeetingNocks = this.setupNock({
+            method: 'post',
+            name: 'createMeetingNocks',
+            response: {
+                status: 200,
+                body: {
+                    participants: {
+                        organizer: {
+                            identity: {
+                                user: {
+                                    id: 'organizerId1'
+                                }
+                            }
+                        }
+                    },
+                    chatInfo: 'chatInfo1'
+                }
+            }
+        });
 
-export function nockInviteParticipantsOnce (config: interfaces.DefaultConfiguration): nock.Scope {
-    const addParticipantsNock = nock(config.apiBaseURL)
-        .post(/\/communications\/calls\/.*\/participants\/invite/)
-        .reply(200);
+        this.nocks.createCallNocks = this.setupNock({
+            method: 'post',
+            name: 'createCallNocks',
+            response: {
+                status: 200,
+                body: {  id: 'callId1' }
+            }
+        });
 
-    return addParticipantsNock;
-}
+        this.nocks.inviteParticipantsNocks = this.setupNock({
+            method: 'post',
+            name: 'inviteParticipantsNocks'
+        });
 
-export function cleanNocks (): void {
-    nock.cleanAll();
+        this.nocks.rejectCallNocks = this.setupNock({
+            method: 'post',
+            name: 'rejectCallNocks',
+            response: {
+                status: 202
+            }
+        });
+    }
 }
