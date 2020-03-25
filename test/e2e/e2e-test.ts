@@ -22,11 +22,10 @@ fixture `Client`
     })
     .after(async () => {
         await app.closeServer();
+    })
+    .afterEach(async () => {
+        nockManager.cleanNocks();
     });
-
-afterEach(() => {
-    nockManager.cleanNocks();
-});
 
 test('Polls repeatedly', async t => {
     nockManager.setupAllNocks();
@@ -50,6 +49,8 @@ test('Polls repeatedly', async t => {
             }
         }
     });
+
+    nockManager.setupAllNocks();
 
     const expectedInitialUsersTable = 'Display Name ID Status \n username1 userId1 Available'.replace(/\s/g, '');
 

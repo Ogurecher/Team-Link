@@ -45,7 +45,7 @@ export class NockManager {
     public setupNock ({ url = this.config.apiBaseURL, method, name, response = { status: 200 }, quantity = 1 }:
         {url?: string; method: string; name: string; response?: interfaces.NockResponse; quantity?: number}): nock.Scope[] {
 
-        const nocksList = [];
+        const nocksList: nock.Scope[] = [];
 
         for (let i = 0; i < quantity; i++) {
             let interceptor;
