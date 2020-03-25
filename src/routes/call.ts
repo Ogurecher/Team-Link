@@ -27,8 +27,14 @@ export async function createCall (req: CreateCallRequest, res: HTTPResponse): Pr
         addParticipants({ callId, userIds: req.body.userIds, accessToken });
     });
 
-    callIdEmitter.on('CallId requested', () => {
+    const callIdRequestedCallback = (): void => {
         callIdEmitter.emit('CallId provided', callId, accessToken);
+    };
+
+    callIdEmitter.on('CallId requested', callIdRequestedCallback);
+
+    notifier.once('Call terminated', () => {
+        callIdEmitter.removeListener('CallId requested', callIdRequestedCallback);
     });
 
     debug(JSON.stringify(callParameters, null, 4));

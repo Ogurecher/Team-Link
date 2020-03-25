@@ -20,7 +20,23 @@ describe('API', () => {
     const rootPath = path.join(`http://${config.host}:${config.port}`);
     const usersURL = path.join(rootPath, '/users');
     const callURL = path.join(rootPath, '/call');
+    const hangUpURL = path.join(rootPath, '/hangUp');
+    const callbackURL = path.join(rootPath, '/callback');
     const addMeURL = path.join(rootPath, '/addMe');
+
+    const terminateCall = async (): Promise<void> => {
+        await got.post(callbackURL, {
+            json: {
+                value: [
+                    {
+                        resourceData: {
+                            state: 'terminated'
+                        }
+                    }
+                ]
+            }
+        });
+    };
 
     before(async () => {
         app = await App.create();
@@ -55,6 +71,44 @@ describe('API', () => {
 
 
         const response = await got(usersURL);
+
+
+        expect(JSON.parse(response.body)).eql(expectedResponse);
+    });
+
+    it(`Sends a response from the '/call' endpoint`, async () => {
+        nockManager.setupNock({
+            method: 'post',
+            name:   'inviteParticipantsNocks'
+        });
+
+        nockManager.setupAllNocks();
+
+        const expectedStatus = 200;
+
+
+        const response = await got.post(callURL);
+
+        await terminateCall();
+
+
+        expect(response.statusCode).equal(expectedStatus);
+    });
+
+    it(`Provides a correct response from the '/call' endpoint`, async () => {
+        nockManager.setupNock({
+            method: 'post',
+            name:   'inviteParticipantsNocks'
+        });
+
+        nockManager.setupAllNocks();
+
+        const expectedResponse = { id: 'callId1' };
+
+
+        const response = await got.post(callURL);
+
+        await terminateCall();
 
 
         expect(JSON.parse(response.body)).eql(expectedResponse);
@@ -144,41 +198,39 @@ describe('API', () => {
             json: addMeBody
         });
 
+        await terminateCall();
+
 
         expect(addParticipantsScope.isDone()).eql(true);
     });
 
-    it(`Sends a response from the '/call' endpoint`, async () => {
-        nockManager.setupNock({
-            method: 'post',
-            name:   'inviteParticipantsNocks'
-        });
-
+    it(`Sends a response from the '/hangUp' endpoint`, async () => {
         nockManager.setupAllNocks();
 
-        const expectedStatus = 200;
+        const expectedStatus = 204;
 
 
-        const response = await got.post(callURL);
+        await got.post(callURL);
+
+        const response = await got.delete(hangUpURL);
+
+        await terminateCall();
 
 
-        expect(response.statusCode).equal(expectedStatus);
+        expect(response.statusCode).eql(expectedStatus);
     });
 
-    it(`Provides a correct response from the '/call' endpoint`, async () => {
-        nockManager.setupNock({
-            method: 'post',
-            name:   'inviteParticipantsNocks'
-        });
-
+    it(`Terminates the call on delete request on '/hangUp' endpoint`, async () => {
         nockManager.setupAllNocks();
 
-        const expectedResponse = { id: 'callId1' };
+
+        await got.post(callURL);
+
+        await got.delete(hangUpURL);
+
+        await terminateCall();
 
 
-        const response = await got.post(callURL);
-
-
-        expect(JSON.parse(response.body)).eql(expectedResponse);
+        expect(nockManager.nocks['hangUpNocks'][0].isDone()).eql(true);
     });
 });

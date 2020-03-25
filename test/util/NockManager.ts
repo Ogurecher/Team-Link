@@ -15,6 +15,7 @@ export class NockManager {
             'getPresencesNocks':       /\/communications\/getPresencesByUserId/,
             'createMeetingNocks':      /\/me\/onlineMeetings/,
             'createCallNocks':         /\/communications\/calls$/,
+            'hangUpNocks':             /\/communications\/calls\/.*/,
             'inviteParticipantsNocks': /\/communications\/calls\/.*\/participants\/invite/,
             'rejectCallNocks':         /\/communications\/calls\/.*\/reject/
         };
@@ -29,6 +30,7 @@ export class NockManager {
             'getPresencesNocks':       [],
             'createMeetingNocks':      [],
             'createCallNocks':         [],
+            'hangUpNocks':             [],
             'inviteParticipantsNocks': [],
             'rejectCallNocks':         []
         };
@@ -52,8 +54,10 @@ export class NockManager {
 
             if (method === 'post')
                 interceptor = nock(url).post(this.regExpMap[name]);
-            else
+            else if (method === 'get')
                 interceptor = nock(url).get(this.regExpMap[name]);
+            else
+                interceptor = nock(url).delete(this.regExpMap[name]);
 
 
             const resultNock = interceptor.reply(response.status, response.body);
@@ -191,6 +195,14 @@ export class NockManager {
             name:     'rejectCallNocks',
             response: {
                 status: 202
+            }
+        });
+
+        this.nocks['hangUpNocks'] = this.setupNock({
+            method:   'delete',
+            name:     'hangUpNocks',
+            response: {
+                status: 204
             }
         });
     }
