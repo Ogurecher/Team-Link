@@ -26,11 +26,13 @@
                 await System.import('./index.js');
                 const { subscribe, getOnlineUsers } = await System.import('index');
                 const { fireCreateCallRequest } =  await System.import('fireCreateCallRequest');
+                const { hangUpCall } =  await System.import('hangUpCall');
                 const { renderButton } = await System.import('reactRenderer');
 
                 renderButton();
 
                 window.fireCreateCallRequest = fireCreateCallRequest;
+                window.hangUpCall = hangUpCall;
 
                 subscribe({ func: getOnlineUsers });
             })();

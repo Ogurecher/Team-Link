@@ -4,6 +4,7 @@ import config from './clientConfig';
 import { User } from './interfaces';
 import UserTable from './components/UserTable';
 import CallButton from './components/CallButton';
+import HangUpButton from './components/HangUpButton';
 import CallInfo from './components/CallInfo';
 
 export function renderTable (onlineUsers: User[]): void {
@@ -15,7 +16,11 @@ export function renderTable (onlineUsers: User[]): void {
 
 export function renderButton (): void {
     ReactDOM.render(
-        <CallButton callDOMElementId={config.callDOMElementId}></CallButton>,
+        <div>
+            <CallButton callDOMElementId={config.callDOMElementId}></CallButton>
+            <HangUpButton></HangUpButton>
+        </div>
+        ,
         document.getElementById(config.callRootDOMElementId)
     );
 }
