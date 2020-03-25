@@ -60,40 +60,6 @@ describe('API', () => {
         expect(JSON.parse(response.body)).eql(expectedResponse);
     });
 
-    it(`Sends a response from the '/call' endpoint`, async () => {
-        nockManager.setupNock({
-            method: 'post',
-            name:   'inviteParticipantsNocks'
-        });
-
-        nockManager.setupAllNocks();
-
-        const expectedStatus = 200;
-
-
-        const response = await got.post(callURL);
-
-
-        expect(response.statusCode).equal(expectedStatus);
-    });
-
-    it(`Provides a correct response from the '/call' endpoint`, async () => {
-        nockManager.setupNock({
-            method: 'post',
-            name:   'inviteParticipantsNocks'
-        });
-
-        nockManager.setupAllNocks();
-
-        const expectedResponse = { id: 'callId1' };
-
-
-        const response = await got.post(callURL);
-
-
-        expect(JSON.parse(response.body)).eql(expectedResponse);
-    });
-
     const addMeBody = {
         value: [
             {
@@ -172,7 +138,6 @@ describe('API', () => {
 
         nockManager.setupAllNocks();
 
-
         await got.post(callURL);
 
         await got.post(addMeURL, {
@@ -181,5 +146,39 @@ describe('API', () => {
 
 
         expect(addParticipantsScope.isDone()).eql(true);
+    });
+
+    it(`Sends a response from the '/call' endpoint`, async () => {
+        nockManager.setupNock({
+            method: 'post',
+            name:   'inviteParticipantsNocks'
+        });
+
+        nockManager.setupAllNocks();
+
+        const expectedStatus = 200;
+
+
+        const response = await got.post(callURL);
+
+
+        expect(response.statusCode).equal(expectedStatus);
+    });
+
+    it(`Provides a correct response from the '/call' endpoint`, async () => {
+        nockManager.setupNock({
+            method: 'post',
+            name:   'inviteParticipantsNocks'
+        });
+
+        nockManager.setupAllNocks();
+
+        const expectedResponse = { id: 'callId1' };
+
+
+        const response = await got.post(callURL);
+
+
+        expect(JSON.parse(response.body)).eql(expectedResponse);
     });
 });
