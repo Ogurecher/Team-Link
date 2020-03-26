@@ -11,7 +11,8 @@
     "test": "npm run lint && mocha -r ts-node/register test/*-test.ts",
     "debug": "node --inspect-brk src/index.js",
     "watch": "npm test -- -w",
-    "build": "tsc && tsc -p ./src/client_scripts && tsc -p ./src/client_scripts/error"
+    "build": "tsc && tsc -p ./src/client_scripts && tsc -p ./src/client_scripts/error",
+    "start-cs": "dotnet run --project ./src/native/HTTPServer/"
   },
   "repository": {
     "type": "git",

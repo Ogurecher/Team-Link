@@ -24,22 +24,24 @@ namespace HTTPServer {
             listener.Start();
             Console.WriteLine("Listening on {0}", prefixes);
 
-            Console.WriteLine("Waiting for client...");
-            HttpListenerContext context = listener.GetContext();
+            while (true) {
+                Console.WriteLine("Waiting for client...");
+                HttpListenerContext context = listener.GetContext();
 
-            Console.WriteLine("Got client");
-            HttpListenerRequest req = context.Request;
-            HttpListenerResponse res = context.Response;
+                Console.WriteLine("Got client");
+                HttpListenerRequest req = context.Request;
+                HttpListenerResponse res = context.Response;
 
-            string responseSting = "Hello response";
-            byte[] buffer = System.Text.Encoding.UTF8.GetBytes(responseSting);
+                string responseSting = "Hello response";
+                byte[] buffer = System.Text.Encoding.UTF8.GetBytes(responseSting);
 
-            res.ContentLength64 = buffer.Length;
+                res.ContentLength64 = buffer.Length;
 
-            System.IO.Stream output = res.OutputStream;
-            output.Write(buffer, 0, buffer.Length);
+                System.IO.Stream output = res.OutputStream;
+                output.Write(buffer, 0, buffer.Length);
 
-            output.Close();
+                output.Close();
+            }
         }
         public Server (string host, string port) {
             this.baseURI = String.Format("http://{0}:{1}", host, port);
