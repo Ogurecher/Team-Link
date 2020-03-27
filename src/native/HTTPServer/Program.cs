@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 
 namespace HTTPServer
 {
@@ -7,11 +8,22 @@ namespace HTTPServer
         static void Main(string[] args)
         {
             Server server = new Server("localhost", "3001");
-            server.listen();
-            
-            server.close();
+            Task listeningTask1 = server.listen();
 
-            server.listen();
+            System.Threading.Thread.Sleep(3000);
+
+            server.close();
+            
+            
+            if (server.isListening()) {
+                listeningTask1.Wait();
+            };
+
+            Task listeningTask2 = server.listen();
+
+            if (server.isListening()) {
+                listeningTask2.Wait();
+            };
         }
     }
 }

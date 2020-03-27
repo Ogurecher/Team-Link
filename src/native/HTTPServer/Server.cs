@@ -7,15 +7,14 @@ namespace HTTPServer {
 
         private string baseURI;
         private HttpListener listener;
-        private void setUpListener (string[] prefixes) {
+        
+        private Task setUpListener (string[] prefixes) {
             if (this.listener.IsListening) {
-                Console.WriteLine("Another listener is already listening on {0}", this.listener.Prefixes);
-                return;
+                throw new Exception(String.Format("Another listener is already listening on {0}", this.listener.Prefixes));
             }
 
             if (!HttpListener.IsSupported) {
-                Console.WriteLine("Windows XP SP2 or Server 2003 is required to use the HttpListener class.");
-                return;
+                throw new Exception("Windows XP SP2 or Server 2003 is required to use the HttpListener class.");
             }
 
             if (prefixes == null || prefixes.Length == 0)
@@ -37,7 +36,7 @@ namespace HTTPServer {
 
             Console.WriteLine("Listening on {0}", prefixes);
 
-            listeningTask.Wait();
+            return listeningTask;
         }
 
         private async Task respond (HttpListener listener) {
@@ -69,13 +68,15 @@ namespace HTTPServer {
             this.listener = new HttpListener();
         }
 
-        public void listen () {
+        public Task listen () {
             string helloEndpoint = "/hello/";
             string helloPrefix = String.Concat(this.baseURI, helloEndpoint);
 
             string[] prefixes = {helloPrefix};
 
-            this.setUpListener(prefixes);
+            Task listeningTask = this.setUpListener(prefixes);
+
+            return listeningTask;
         }
 
         public void close () {
@@ -83,6 +84,10 @@ namespace HTTPServer {
                 Console.WriteLine("Stopping");
                 this.listener.Close();
             }
+        }
+
+        public bool isListening () {
+            return this.listener.IsListening;
         }
     }
 }
