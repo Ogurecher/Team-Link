@@ -16,6 +16,9 @@ namespace MediaServer.MediaBot
     using Microsoft.Graph.Communications.Resources;
     using Microsoft.Skype.Bots.Media;
     using MediaServer.Authentication;
+    using MediaServer.Controllers;
+    using MediaServer.Util.OnlineMeetings;
+    using MediaServer.Util.Meetings;
 
     //using Sample.Common;
     //using Sample.Common.Authentication;
@@ -30,6 +33,8 @@ namespace MediaServer.MediaBot
     public class Bot
     {
         private readonly IGraphLogger logger;
+
+        public OnlineMeetingHelper OnlineMeetings { get; }
 
         public Bot(BotOptions options, IGraphLogger graphLogger) {
             this.Options = options;
@@ -52,6 +57,7 @@ namespace MediaServer.MediaBot
             builder.SetNotificationUrl(options.BotBaseUrl);
             builder.SetMediaPlatformSettings(this.MediaInit(options));
             builder.SetServiceBaseUrl(options.PlaceCallEndpointUrl);
+            Console.Write("OK");
 
             this.Client = builder.Build();
         }
@@ -60,6 +66,51 @@ namespace MediaServer.MediaBot
 
         public ICommunicationsClient Client { get; }
 
+        public async Task<ICall> JoinCallAsync(JoinCallController.JoinCallBody joinCallBody)
+        {
+            var scenarioId = Guid.NewGuid();
+
+            MeetingInfo meetingInfo;
+            ChatInfo chatInfo;
+            if (!string.IsNullOrWhiteSpace(joinCallBody.MeetingId))
+            {
+                // Meeting id is a cloud-video-interop numeric meeting id.
+                var onlineMeeting = await this.OnlineMeetings
+                    .GetOnlineMeetingAsync(joinCallBody.TenantId, joinCallBody.MeetingId, scenarioId)
+                    .ConfigureAwait(false);
+
+                meetingInfo = new OrganizerMeetingInfo { Organizer = onlineMeeting.Participants.Organizer.Identity, };
+                chatInfo = onlineMeeting.ChatInfo;
+            }
+            else
+            {
+                (chatInfo, meetingInfo) = JoinInfo.ParseJoinURL(joinCallBody.JoinURL);
+            }
+
+            var tenantId =
+                joinCallBody.TenantId ??
+                (meetingInfo as OrganizerMeetingInfo)?.Organizer.GetPrimaryIdentity()?.GetTenantId();
+            ILocalMediaSession mediaSession = this.CreateLocalMediaSession();
+
+            var joinParams = new JoinMeetingParameters(chatInfo, meetingInfo, mediaSession)
+            {
+                TenantId = tenantId,
+            };
+
+            if (!string.IsNullOrWhiteSpace(joinCallBody.DisplayName))
+            {
+                joinParams.GuestIdentity = new Identity
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    DisplayName = joinCallBody.DisplayName,
+                };
+            }
+
+            var statefulCall = await this.Client.Calls().AddAsync(joinParams, scenarioId).ConfigureAwait(false);
+            this.logger.Info($"Call creation complete: {statefulCall.Id}");
+            return statefulCall;
+        }
+        
         private ILocalMediaSession CreateLocalMediaSession(Guid mediaSessionId = default(Guid)) {
             var mediaSession = this.Client.CreateMediaSession(
                 new AudioSocketSettings {

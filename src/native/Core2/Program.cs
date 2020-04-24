@@ -16,6 +16,7 @@ namespace MediaServer
     {
         public static void Main(string[] args)
         {
+            Console.Write("Start");
             CreateWebHostBuilder(args).Build().Run();
         }
 
@@ -30,16 +31,8 @@ namespace MediaServer
             
             return WebHost.CreateDefaultBuilder(args)
                 .UseConfiguration(configuration)
-                .UseStartup<Startup>()
-                .UseHttpSys(options =>
-                {
-                    options.Authentication.Schemes = AuthenticationSchemes.None;
-                    options.Authentication.AllowAnonymous = true;
-                    options.MaxConnections = 1000;
-                    options.MaxRequestBodySize = 30000000;
-                })
-                .UseUrls(urls);
+                //.UseUrls(urls)
+                .UseStartup<Startup>();
         }
-                
     }
 }
