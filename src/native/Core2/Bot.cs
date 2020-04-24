@@ -36,6 +36,8 @@ namespace MediaServer.MediaBot
 
         public OnlineMeetingHelper OnlineMeetings { get; }
 
+        public ConcurrentDictionary<string, CallHandler> CallHandlers { get; } = new ConcurrentDictionary<string, CallHandler>();
+
         public Bot(BotOptions options, IGraphLogger graphLogger) {
             this.Options = options;
             this.logger = graphLogger;
@@ -60,6 +62,10 @@ namespace MediaServer.MediaBot
             Console.Write("OK");
 
             this.Client = builder.Build();
+
+            this.Client.Calls().OnUpdated += this.CallsOnUpdated;
+
+            this.OnlineMeetings = new OnlineMeetingHelper(authProvider, options.PlaceCallEndpointUrl);
         }
 
         public BotOptions Options { get; }
@@ -109,6 +115,24 @@ namespace MediaServer.MediaBot
             var statefulCall = await this.Client.Calls().AddAsync(joinParams, scenarioId).ConfigureAwait(false);
             this.logger.Info($"Call creation complete: {statefulCall.Id}");
             return statefulCall;
+        }
+        
+        private void CallsOnUpdated(ICallCollection sender, CollectionEventArgs<ICall> args)
+        {
+            Console.WriteLine("BOT CALLSONUPDATED");
+            foreach (var call in args.AddedResources)
+            {
+                Console.WriteLine(call);
+                this.CallHandlers.GetOrAdd(call.Id, new CallHandler(call));
+            }
+
+            foreach (var call in args.RemovedResources)
+            {
+                if (this.CallHandlers.TryRemove(call.Id, out CallHandler handler))
+                {
+                    handler.Dispose();
+                }
+            }
         }
         
         private ILocalMediaSession CreateLocalMediaSession(Guid mediaSessionId = default(Guid)) {
