@@ -1,9 +1,13 @@
 namespace MediaServer.MediaBot
 {
+    using System.IO;
+    using System.Text;
     using System.Threading.Tasks;
+    using System.Net.Http;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.Graph.Communications.Client;
     using Microsoft.Graph.Communications.Common.Telemetry;
+    using Newtonsoft.Json;
     using MediaServer.Controllers;
     using MediaServer.Extensions;
 
@@ -12,6 +16,8 @@ namespace MediaServer.MediaBot
     /// </summary>
     public class PlatformCallContoller : Controller
     {
+        private static readonly HttpClient client = new HttpClient();
+
         private IGraphLogger logger;
         private Bot bot;
 
@@ -38,6 +44,19 @@ namespace MediaServer.MediaBot
         {
             this.logger.Info($"Received HTTP {this.Request.Method}, {this.Url}");
 
+            using (var reader = new StreamReader(this.Request.Body))
+            {
+                var body = reader.ReadToEnd();
+
+                HttpContent content = new StringContent(body, Encoding.UTF8, "application/json");
+                client.PostAsync("https://94717350.ngrok.io/callback", content);
+            }
+
+            //HttpContent content = new StringContent(JsonConvert.SerializeObject(bodyString), Encoding.UTF8, "application/json");
+            //HttpContent content = this.Request.CreateRequestMessage().Content;
+
+            //client.PostAsync("https://7477d595.ngrok.io/callback", content);
+
             // Pass the incoming message to the sdk. The sdk takes care of what to do with it.
             var response = await this.bot.Client.ProcessNotificationAsync(this.Request.CreateRequestMessage()).ConfigureAwait(false);
             await response.CreateHttpResponseAsync(this.Response).ConfigureAwait(false);
@@ -45,6 +64,11 @@ namespace MediaServer.MediaBot
             // Enforce the connection close to ensure that requests are evenly load balanced so
             // calls do no stick to one instance of the worker role.
             response.Headers.ConnectionClose = true;
+        }
+
+        public class Notification
+        {
+            public string[] Value { get; set; }
         }
     }
 }
