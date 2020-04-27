@@ -30,6 +30,7 @@ namespace MediaServer.Controllers
                 CallURL = serviceURL + HttpRouteConstants.CallRoute.Replace("{callId}", call.Id),
                 CallsURL = serviceURL + HttpRouteConstants.Calls,
                 ServiceLogsURL = serviceURL + HttpRouteConstants.Logs + call.Id,
+                id = call.Id
             });
         }
 
@@ -42,6 +43,10 @@ namespace MediaServer.Controllers
             public string TenantId { get; set; }
 
             public string DisplayName { get; set; }
+
+            public string ChatInfo { get; set; }
+
+            public string MeetingInfo { get; set; }
         }
 
         public class JoinCallResponseBody
@@ -60,6 +65,8 @@ namespace MediaServer.Controllers
             /// Gets or sets the URL for the service logs on this node.
             /// </summary>
             public string ServiceLogsURL { get; set; }
+
+            public string id { get; set; }
         }
     }
 }

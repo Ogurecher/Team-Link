@@ -15,6 +15,7 @@ namespace MediaServer.MediaBot
     using Microsoft.Graph.Communications.Common.Telemetry;
     using Microsoft.Graph.Communications.Resources;
     using Microsoft.Skype.Bots.Media;
+    using Newtonsoft.Json;
     using MediaServer.Authentication;
     using MediaServer.Controllers;
     using MediaServer.Util.OnlineMeetings;
@@ -78,15 +79,10 @@ namespace MediaServer.MediaBot
 
             MeetingInfo meetingInfo;
             ChatInfo chatInfo;
-            if (!string.IsNullOrWhiteSpace(joinCallBody.MeetingId))
+            if (!string.IsNullOrWhiteSpace(joinCallBody.MeetingInfo))
             {
-                // Meeting id is a cloud-video-interop numeric meeting id.
-                var onlineMeeting = await this.OnlineMeetings
-                    .GetOnlineMeetingAsync(joinCallBody.TenantId, joinCallBody.MeetingId, scenarioId)
-                    .ConfigureAwait(false);
-
-                meetingInfo = new OrganizerMeetingInfo { Organizer = onlineMeeting.Participants.Organizer.Identity, };
-                chatInfo = onlineMeeting.ChatInfo;
+                meetingInfo = JsonConvert.DeserializeObject<OrganizerMeetingInfo>(joinCallBody.MeetingInfo);
+                chatInfo = JsonConvert.DeserializeObject<ChatInfo>(joinCallBody.ChatInfo);
             }
             else
             {

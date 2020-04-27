@@ -20,7 +20,7 @@ export async function createCall (req: CreateCallRequest, res: HTTPResponse): Pr
     const accessToken = await getAppAccessToken();
 
     const meetingInfo = await createOnlineMeeting();
-    const callParameters = await callMeeting(meetingInfo, accessToken);
+    const callParameters = await callMeeting(meetingInfo);
     const callId = callParameters.id;
 
     notifier.once('Call established', () => {
@@ -69,40 +69,31 @@ async function createOnlineMeeting (): Promise<MeetingInfo> {
     };
 }
 
-async function callMeeting ({ organizerId, chatInfo }: MeetingInfo, accessToken: string): Promise<Call> {
+async function callMeeting ({ organizerId, chatInfo }: MeetingInfo): Promise<Call> {
     const organizerMeetingInfo: OrganizerMeetingInfo = populateUsers({ userIds: [organizerId], organizer: true })[0];
 
     organizerMeetingInfo.allowConversationWithoutHost = true;
 
-    const callMeetingQuery = `/communications/calls`;
-    const callMeetingURL = path.join(config.apiBaseURL, callMeetingQuery);
+    const callMeetingQuery = `/joinCall`;
+    const callMeetingURL = path.join('https://myhuebot.ngrok.io', callMeetingQuery);
 
     const callMeetingRes = await got.post(callMeetingURL, {
-        headers: {
-            Authorization: `Bearer ${accessToken}`
-        },
         json: {
-            '@odata.type': '#microsoft.graph.call',
-            'callbackUri': `${config.callbackURI}`,
-            'chatInfo':    chatInfo,
-            'meetingInfo': organizerMeetingInfo,
-            "mediaConfig": {
-                "@odata.type": "#microsoft.graph.appHostedMediaConfig",
-                "blob": "{\"mpUri\":\"net.tcp://1.huebot.cf:28437/MediaProcessor\",\"audioRenderContexts\":[\"a9d685c9-22ed-4dbe-bfd7-58cc9ebdf254\"],\"videoRenderContexts\":[\"def2dc35-e8e2-421f-bce1-f35290d2beb9\"],\"audioSourceContexts\":[null],\"videoSourceContexts\":[\"c651c3f0-8304-4b73-a506-ba00cd2c2cf6\"],\"dataRenderContexts\":null,\"dataSourceContexts\":null,\"supportedAudioFormat\":\"Pcm16K\",\"videoSinkEncodingFormats\":[\"Yuv\"],\"mpMediaSessionId\":\"fca33a2d-a8d5-447f-b459-99fb1ac4ea21\",\"regionAffinity\":null,\"skypeMediaBotsVersion\":\"1.14.1.0234\",\"mediaStackVersion\":\"2019.45.1.7\",\"mpVersion\":\"7.2.0.6941\",\"callId\":\"3e3683db-74dc-4f6a-91ec-a78970972a0a\"}"
-            },
-            'tenantId': `${config.tenantId}`
-
-            /*"mediaConfig": {
-                "@odata.type": "#microsoft.graph.appHostedMediaConfig",
-                "blob": "{\"mpUri\":\"net.tcp://1.huebot.cf:28437/MediaProcessor\",\"audioRenderContexts\":[\"a9d685c9-22ed-4dbe-bfd7-58cc9ebdf254\"],\"videoRenderContexts\":[\"def2dc35-e8e2-421f-bce1-f35290d2beb9\"],\"audioSourceContexts\":[null],\"videoSourceContexts\":[\"c651c3f0-8304-4b73-a506-ba00cd2c2cf6\"],\"dataRenderContexts\":null,\"dataSourceContexts\":null,\"supportedAudioFormat\":\"Pcm16K\",\"videoSinkEncodingFormats\":[\"Yuv\"],\"mpMediaSessionId\":\"fca33a2d-a8d5-447f-b459-99fb1ac4ea21\",\"regionAffinity\":null,\"skypeMediaBotsVersion\":\"1.14.1.0234\",\"mediaStackVersion\":\"2019.45.1.7\",\"mpVersion\":\"7.2.0.6941\",\"callId\":\"3e3683db-74dc-4f6a-91ec-a78970972a0a\"}"
-            }*/
-
-            /*"mediaConfig": {
-            "@odata.type": "#microsoft.graph.appHostedMediaConfig",
-            "blob": "{\"mpUri\":\"net.tcp://1.huebot.cf:28437/MediaProcessor\",\"audioRenderContexts\":[\"c84e3bce-9c93-4a3b-8b66-59d3c4927745\"],\"videoRenderContexts\":[\"81658fd7-6bba-4a2e-91d5-b652429b4fc2\"],\"audioSourceContexts\":[null],\"videoSourceContexts\":[\"a753d627-0d1f-49b8-b3c3-cb48617c7510\"],\"dataRenderContexts\":null,\"dataSourceContexts\":null,\"supportedAudioFormat\":\"Pcm16K\",\"videoSinkEncodingFormats\":[\"Yuv\"],\"mpMediaSessionId\":\"dfc68190-3aa0-4345-be72-0ecb9fb3b1a5\",\"regionAffinity\":null,\"skypeMediaBotsVersion\":\"1.14.1.0234\",\"mediaStackVersion\":\"2019.45.1.7\",\"mpVersion\":\"7.2.0.6941\",\"callId\":\"e3848d71-9564-44b8-9d50-d3c12ff982b3\"}"
-            }*/
+            'ChatInfo': JSON.stringify(chatInfo),
+            'MeetingInfo': JSON.stringify(organizerMeetingInfo),
+            'TenantId': config.tenantId
         }
     });
+    
+    /*"mediaConfig": {
+        "@odata.type": "#microsoft.graph.appHostedMediaConfig",
+        "blob": "{\"mpUri\":\"net.tcp://1.huebot.cf:28437/MediaProcessor\",\"audioRenderContexts\":[\"a9d685c9-22ed-4dbe-bfd7-58cc9ebdf254\"],\"videoRenderContexts\":[\"def2dc35-e8e2-421f-bce1-f35290d2beb9\"],\"audioSourceContexts\":[null],\"videoSourceContexts\":[\"c651c3f0-8304-4b73-a506-ba00cd2c2cf6\"],\"dataRenderContexts\":null,\"dataSourceContexts\":null,\"supportedAudioFormat\":\"Pcm16K\",\"videoSinkEncodingFormats\":[\"Yuv\"],\"mpMediaSessionId\":\"fca33a2d-a8d5-447f-b459-99fb1ac4ea21\",\"regionAffinity\":null,\"skypeMediaBotsVersion\":\"1.14.1.0234\",\"mediaStackVersion\":\"2019.45.1.7\",\"mpVersion\":\"7.2.0.6941\",\"callId\":\"3e3683db-74dc-4f6a-91ec-a78970972a0a\"}"
+    }*/
+
+    /*"mediaConfig": {
+    "@odata.type": "#microsoft.graph.appHostedMediaConfig",
+    "blob": "{\"mpUri\":\"net.tcp://1.huebot.cf:28437/MediaProcessor\",\"audioRenderContexts\":[\"c84e3bce-9c93-4a3b-8b66-59d3c4927745\"],\"videoRenderContexts\":[\"81658fd7-6bba-4a2e-91d5-b652429b4fc2\"],\"audioSourceContexts\":[null],\"videoSourceContexts\":[\"a753d627-0d1f-49b8-b3c3-cb48617c7510\"],\"dataRenderContexts\":null,\"dataSourceContexts\":null,\"supportedAudioFormat\":\"Pcm16K\",\"videoSinkEncodingFormats\":[\"Yuv\"],\"mpMediaSessionId\":\"dfc68190-3aa0-4345-be72-0ecb9fb3b1a5\",\"regionAffinity\":null,\"skypeMediaBotsVersion\":\"1.14.1.0234\",\"mediaStackVersion\":\"2019.45.1.7\",\"mpVersion\":\"7.2.0.6941\",\"callId\":\"e3848d71-9564-44b8-9d50-d3c12ff982b3\"}"
+    }*/
 
     const callParameters = JSON.parse(callMeetingRes.body);
 
