@@ -14,7 +14,7 @@ namespace MediaServer
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             Console.Write("Start");
             CreateWebHostBuilder(args).Build().Run();
@@ -26,12 +26,9 @@ namespace MediaServer
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
                 .Build();
-
-            String[] urls = {"https://+:9441", "https://+:9442", "https://+:9444"};
             
             return WebHost.CreateDefaultBuilder(args)
                 .UseConfiguration(configuration)
-                //.UseUrls(urls)
                 .UseStartup<Startup>();
         }
     }

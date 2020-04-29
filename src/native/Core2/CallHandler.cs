@@ -1,6 +1,7 @@
 namespace MediaServer.MediaBot
 {
     using System;
+    using System.Collections.Generic;
     using System.Drawing;
     using System.Linq;
     using System.Runtime.InteropServices;
@@ -13,10 +14,13 @@ namespace MediaServer.MediaBot
     using Microsoft.Graph.Communications.Common.Telemetry;
     using Microsoft.Graph.Communications.Resources;
     using Microsoft.Skype.Bots.Media;
+    using Microsoft.MixedReality.WebRTC;
     using Timer = System.Timers.Timer;
+    using MediaServer;
     using MediaServer.Util;
     using MediaServer.Util.HeartBeat;
     using MediaServer.Util.VideoFormat;
+    using NamedPipeSignaler;
 
     public class CallHandler : HeartbeatHandler
     {
@@ -82,6 +86,8 @@ namespace MediaServer.MediaBot
             this.endCallTimer.Enabled = false;
             this.endCallTimer.AutoReset = false;
             this.endCallTimer.Elapsed += this.OnTimerElapsed;
+
+            //this.InitializeWebRTC();
         }
 
         /// <summary>
@@ -112,6 +118,44 @@ namespace MediaServer.MediaBot
             this.endCallTimer.Elapsed -= this.OnTimerElapsed;
         }
 
+
+        /*private async Task InitializeWebRTC()
+        {
+            Console.WriteLine("Initializing WebRTC");
+
+            using (var peerConnection = new PeerConnection())
+            {
+                var config = new PeerConnectionConfiguration
+                {
+                    IceServers = new List<IceServer> {
+                            new IceServer{ Urls = { "stun:stun.l.google.com:19302" } }
+                        }
+                };
+
+                await peerConnection.InitializeAsync(config);
+                Console.WriteLine("Peer connection initialized.");
+
+                var signaler = new NamedPipeSignaler(peerConnection, "rename_me_later_pipe");
+
+                signaler.SdpMessageReceived += (string type, string sdp) => {
+                    peerConnection.SetRemoteDescription(type, sdp);
+                    if (type == "offer")
+                    {
+                        peerConnection.CreateAnswer();
+                    }
+                };
+
+                signaler.IceCandidateReceived += (string candidate, int sdpMlineindex, string sdpMid) => {
+                    peerConnection.AddIceCandidate(sdpMid, sdpMlineindex, candidate);
+                };
+
+                await signaler.StartAsync();
+                Console.WriteLine("Signaler started");
+
+
+            }
+        }*/
+        
         private void OnCallUpdated(ICall sender, ResourceEventArgs<Call> args)
         {
             // Call state might have changed to established.
