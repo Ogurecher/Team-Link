@@ -16,7 +16,7 @@ namespace MediaServer
     using Microsoft.Graph.Communications.Common.Telemetry;
     using Microsoft.MixedReality.WebRTC;
     using MediaServer.MediaBot;
-    using NamedPipeSignaler;
+    using WebSocketSignaler;
     public class Startup
     {
         private IGraphLogger logger = new GraphLogger(typeof(Program).Assembly.GetName().Name, redirectToTrace: true);
@@ -81,7 +81,7 @@ namespace MediaServer
                     if (context.WebSockets.IsWebSocketRequest)
                     {
                         WebSocket webSocket = await context.WebSockets.AcceptWebSocketAsync();
-                        await Echo(context, webSocket);
+                        await InitializeWebRTC(context, webSocket);
                     }
                     else
                     {
@@ -96,7 +96,7 @@ namespace MediaServer
             });
         }
 
-        private async Task Echo(HttpContext context, WebSocket webSocket) // MOVE TO CONTROLLERS LATER
+        private async Task InitializeWebRTC(HttpContext context, WebSocket webSocket) // MOVE TO CONTROLLERS LATER
         {
             Console.WriteLine("Initializing WebRTC");
 
@@ -112,7 +112,7 @@ namespace MediaServer
                 await peerConnection.InitializeAsync(config);
                 Console.WriteLine("Peer connection initialized.");
 
-                var signaler = new NamedPipeSignaler(peerConnection, webSocket);
+                var signaler = new WebSocketSignaler(peerConnection, webSocket);
 
                 signaler.SdpMessageReceived += (string type, string sdp) => {
                     peerConnection.SetRemoteDescription(type, sdp);
@@ -124,6 +124,14 @@ namespace MediaServer
 
                 signaler.IceCandidateReceived += (string candidate, int sdpMlineindex, string sdpMid) => {
                     peerConnection.AddIceCandidate(sdpMid, sdpMlineindex, candidate);
+                };
+
+                peerConnection.Connected += () => {
+                    Console.WriteLine("!!! --- PeerConnection: connected --- !!!");
+                };
+
+                peerConnection.IceStateChanged += (IceConnectionState newState) => {
+                    Console.WriteLine($"!!! --- ICE state: {newState} --- !!!");
                 };
 
                 await signaler.StartAsync();

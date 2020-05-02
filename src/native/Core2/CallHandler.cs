@@ -20,7 +20,6 @@ namespace MediaServer.MediaBot
     using MediaServer.Util;
     using MediaServer.Util.HeartBeat;
     using MediaServer.Util.VideoFormat;
-    using NamedPipeSignaler;
 
     public class CallHandler : HeartbeatHandler
     {

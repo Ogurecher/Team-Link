@@ -1,16 +1,20 @@
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.IO;
 using System.IO.Pipes;
+using System.Linq;
 using System.Net.WebSockets;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.MixedReality.WebRTC;
+using Newtonsoft.Json;
 
-namespace NamedPipeSignaler
+namespace WebSocketSignaler
 {
-    public class NamedPipeSignaler
+    public class WebSocketSignaler
     {
         public PeerConnection PeerConnection { get; }
 
@@ -52,9 +56,12 @@ namespace NamedPipeSignaler
         /// <summary>
         /// Thread-safe collection of outgoing message, with automatic blocking read.
         /// </summary>
+
+        private readonly BlockingCollection<string> _incomingMessages = new BlockingCollection<string>(new ConcurrentQueue<string>());
+
         private readonly BlockingCollection<string> _outgoingMessages = new BlockingCollection<string>(new ConcurrentQueue<string>());
 
-        public NamedPipeSignaler(PeerConnection peerConnection, WebSocket webSocket)
+        public WebSocketSignaler(PeerConnection peerConnection, WebSocket webSocket)
         {
             PeerConnection = peerConnection;
             WebSocket = webSocket;
@@ -94,59 +101,130 @@ namespace NamedPipeSignaler
         /// Entry point for the reading task which read incoming messages from the
         /// receiving pipe and dispatch them through events to the WebRTC peer.
         /// </summary>
+
         private async Task ProcessIncomingMessages()
         {
-            // ReadLine() will block while waiting for a new line
-            var buffer = new byte[1024 * 4];
+            string connectionStatus = await ProcessIncomingMessage();
 
-            WebSocketReceiveResult result = await WebSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
-            string bufferStr = Encoding.ASCII.GetString(buffer);
-
-            foreach (var line in bufferStr.Split(new string[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries))
+            while (connectionStatus == "continue")
             {
-                Console.WriteLine($"[<-] {line}");
-                if (line == "ice")
-                {
-                    string sdpMid = _recvStream.ReadLine();
-                    int sdpMlineindex = int.Parse(_recvStream.ReadLine());
-
-                    // The ICE candidate is a multi-line field, ends with an empty line
-                    string candidate = "";
-                    while ((line = _recvStream.ReadLine()) != null)
-                    {
-                        if (line.Length == 0)
-                        {
-                            break;
-                        }
-                        candidate += line;
-                        candidate += "\n";
-                    }
-
-                    Console.WriteLine($"[<-] ICE candidate: {sdpMid} {sdpMlineindex} {candidate}");
-                    IceCandidateReceived?.Invoke(sdpMid, sdpMlineindex, candidate);
-                }
-                else if (line == "sdp")
-                {
-                    string type = _recvStream.ReadLine();
-
-                    // The SDP message content is a multi-line field, ends with an empty line
-                    string sdp = "";
-                    while ((line = _recvStream.ReadLine()) != null)
-                    {
-                        if (line.Length == 0)
-                        {
-                            break;
-                        }
-                        sdp += line;
-                        sdp += "\n";
-                    }
-
-                    Console.WriteLine($"[<-] SDP message: {type} {sdp}");
-                    SdpMessageReceived?.Invoke(type, sdp);
-                }
+                connectionStatus = await ProcessIncomingMessage();
             }
 
-            Console.WriteLine("Finished processing messages");
+            await WebSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Normal closure", CancellationToken.None);
+        }
+
+        private async Task<string> ProcessIncomingMessage()
+        {
+            // ReadLine() will block while waiting for a new line
+            byte[] buffer = new byte[1024 * 8];
+
+            WebSocketReceiveResult result = await WebSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+
+            var messageBytes = new ArraySegment<byte>(buffer, 0, result.Count).ToArray();
+
+            
+
+            using(MemoryStream ms = new MemoryStream(messageBytes))
+            {
+                StreamReader streamReader = new StreamReader(ms);
+
+                string messageStr = streamReader.ReadLine();
+
+                if (messageStr == "null")
+                {
+                    return "continue";
+                }
+
+                if (messageStr == null)
+                {
+                    return "end";
+                }
+
+                Dictionary<string, string> messageJson = JsonConvert.DeserializeObject<Dictionary<string, string>>(messageStr);
+
+                if (messageJson.ContainsKey("sdp"))
+                {
+                    string type = messageJson["type"];
+                    string sdp = messageJson["sdp"];
+
+                    Console.WriteLine("[<-] sdp");
+                    Console.WriteLine(type);
+                    Console.WriteLine(sdp);
+
+                    SdpMessageReceived?.Invoke(type, sdp);
+                }
+                else if (messageJson.ContainsKey("candidate"))
+                {
+                    string sdpMid = messageJson["sdpMid"];
+                    string sdpMLineIndex = messageJson["sdpMLineIndex"];
+                    string candidate = messageJson["candidate"];
+
+                    Console.WriteLine("[<-] ice");
+                    Console.WriteLine(candidate);
+                    Console.WriteLine(sdpMLineIndex);
+                    Console.WriteLine(sdpMid);
+
+                    IceCandidateReceived?.Invoke(candidate, Int32.Parse(sdpMLineIndex), sdpMid);
+                }
+
+                /*string line;
+            
+                while ((line = streamReader.ReadLine()) != null)
+                {
+                    Console.WriteLine($"[<-] {line}");
+                    if (line == "ice")
+                    {
+                        string sdpMid = streamReader.ReadLine();
+                        int sdpMlineindex = int.Parse(streamReader.ReadLine());
+
+                        // The ICE candidate is a multi-line field, ends with an empty line
+                        string candidate = "";
+                        while ((line = streamReader.ReadLine()) != null)
+                        {
+                            if (line.Length == 0)
+                            {
+                                break;
+                            }
+                            candidate += line;
+                            candidate += "\n";
+                        }
+
+                        Console.WriteLine($"[<-] ICE candidate: {sdpMid} {sdpMlineindex} {candidate}");
+                        IceCandidateReceived?.Invoke(sdpMid, sdpMlineindex, candidate);
+                    }
+                    else if (line == "sdp")
+                    {
+                        string type = streamReader.ReadLine();
+
+                        // The SDP message content is a multi-line field, ends with an empty line
+                        string sdp = "";
+                        while ((line = streamReader.ReadLine()) != null)
+                        {
+                            if (line.Length == 0)
+                            {
+                                break;
+                            }
+                            sdp += line;
+                            sdp += "\n";
+                        }
+
+                        Console.WriteLine($"[<-] SDP message: {type} {sdp}");
+                        SdpMessageReceived?.Invoke(type, sdp);
+                    }
+                }*/
+            }
+
+            Console.WriteLine("Finished processing message");
+
+            if (result.CloseStatus.HasValue)
+            {
+                return "end";
+            }
+            else
+            {
+                return "continue";
+            }
         }
 
         /// <summary>
@@ -164,7 +242,7 @@ namespace NamedPipeSignaler
                 //_sendStream.Write(msg);
 
                 byte[] buffer = Encoding.ASCII.GetBytes(msg);
-                await WebSocket.SendAsync(new ArraySegment<byte>(buffer), 0, false, CancellationToken.None);
+                await WebSocket.SendAsync(new ArraySegment<byte>(buffer), WebSocketMessageType.Text, false, CancellationToken.None);
             }
         }
 
@@ -172,7 +250,7 @@ namespace NamedPipeSignaler
         /// Send a message to the remote signaler.
         /// </summary>
         /// <param name="msg">The message to send.</param>
-        private void SendMessage(string msg)
+        private async Task SendMessage(string msg)
         {
             try
             {
@@ -180,7 +258,8 @@ namespace NamedPipeSignaler
                 // WebRTC signaler thread which is typically invoking this method through
                 // the PeerConnection signaling callbacks.
                 Console.WriteLine($"[->] {msg}");
-                _outgoingMessages.Add(msg);
+                byte[] buffer = Encoding.ASCII.GetBytes(msg);
+                await WebSocket.SendAsync(new ArraySegment<byte>(buffer), WebSocketMessageType.Text, true, CancellationToken.None);
             }
             catch (Exception e)
             {
@@ -192,13 +271,27 @@ namespace NamedPipeSignaler
         private void PeerConnection_IceCandidateReadytoSend(string candidate, int sdpMlineindex, string sdpMid)
         {
             // See ProcessIncomingMessages() for the message format
-            SendMessage($"ice\n{sdpMid}\n{sdpMlineindex}\n{candidate}\n\n");
+            Dictionary<string, string> message = new Dictionary<string, string>
+            {
+                {"candidate", candidate},
+                {"sdpMlineindex", sdpMlineindex.ToString()},
+                {"sdpMid", sdpMid}
+            };
+
+            string serializedMessage = JsonConvert.SerializeObject(message);
+            SendMessage(serializedMessage);
         }
 
         private void PeerConnection_LocalSdpReadytoSend(string type, string sdp)
         {
-            // See ProcessIncomingMessages() for the message format
-            SendMessage($"sdp\n{type}\n{sdp}\n\n");
+            Dictionary<string, string> message = new Dictionary<string, string>
+            {
+                {"type", type},
+                {"sdp", sdp}
+            };
+
+            string serializedMessage = JsonConvert.SerializeObject(message);
+            SendMessage(serializedMessage);
         }
     }
 }
