@@ -20,6 +20,7 @@
         <div id="root"></div>
         <div id="call_button_root"></div>
         <div id="call_info_root"></div>
+
         <script type="text/javascript">
             (async () => {
                 await System.import('./errorHandling.js');
@@ -36,6 +37,96 @@
 
                 subscribe({ func: getOnlineUsers });
             })();
+        </script>
+
+        <video id="selfView" autoplay></video>
+        <video id="remoteView" autoplay></video>
+
+        <script>
+            // handles JSON.stringify/parse
+            const selfView = document.getElementById("selfView");
+            const remoteView = document.getElementById("remoteView");
+            
+            const constraints = {/*audio: true,*/ 
+                video: {
+                    mandatory: {
+                        minWidth: 640,
+                        maxWidth: 640,
+                        minHeight: 360,
+                        maxHeight: 360
+                    }
+                }
+            };
+            const signaling = new WebSocket('wss://myhuebot.ngrok.io/websocket');
+            const configuration = {iceServers: [{urls: 'stun:stun.l.google.com:19302'}]};
+            const pc = new RTCPeerConnection(configuration);
+    
+            // send any ice candidates to the other peer
+            pc.onicecandidate = ({candidate}) => signaling.send(JSON.stringify(candidate));
+    
+            // let the "negotiationneeded" event trigger offer generation
+            pc.onnegotiationneeded = async () => {
+                try {
+                    await pc.setLocalDescription(await pc.createOffer());
+                    
+                    // send the offer to the other peer
+                    signaling.send(JSON.stringify(pc.localDescription));
+                } catch (err) {
+                    console.error(err);
+                }
+            };
+    
+            // once remote track media arrives, show it in remote video element
+            pc.ontrack = (event) => {
+                // don't set srcObject again if it is already set.
+                if (remoteView.srcObject) return;
+                remoteView.srcObject = event.streams[0];
+            };
+    
+            // call start() to initiate
+            async function start() {
+                try {
+                    // get local stream, show it in self-view and add it to be sent
+                    const stream = await navigator.mediaDevices.getUserMedia(constraints);
+                    stream.getTracks().forEach((track) => pc.addTrack(track, stream));
+                    selfView.srcObject = stream;
+                } catch (err) {
+                    console.error(err);
+                }
+            }
+    
+            /*signaling.onmessage = function(event) {
+                data = JSON.parse(event.data);
+                console.debug("WebSocket message received:", event);
+            };*/
+    
+            signaling.onmessage = async (event) => {
+                try {
+                    data = JSON.parse(event.data);
+    
+                    if (data.type) {
+                        // if we get an offer, we need to reply with an answer
+                        if (data.type === 'offer') {
+                            await pc.setRemoteDescription(data);
+                            const stream = await navigator.mediaDevices.getUserMedia(constraints);
+                            stream.getTracks().forEach((track) => pc.addTrack(track, stream));
+                            await pc.setLocalDescription(await pc.createAnswer());
+    
+                            signaling.send(JSON.stringify(pc.localDescription));
+                        } else if (data.type === 'answer') {
+                            await pc.setRemoteDescription(data);
+                        } else {
+                            console.log('Unsupported SDP type.');
+                        }
+                    } else if (data.candidate) {
+                        await pc.addIceCandidate(data);
+                    }
+                } catch (err) {
+                    console.error(err);
+                }
+            };
+    
+            start();
         </script>
     </body>
 </html>
