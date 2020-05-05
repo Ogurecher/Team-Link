@@ -161,6 +161,17 @@ namespace MediaServer
                 }
                 byte[] convertedFrame = new byte[frame.width * frame.height * 12 / 8];
                 frame.CopyTo(convertedFrame);
+
+                byte[] nv12Frame = new byte[frame.width * frame.height * 12 / 8];
+                int pixelCount = convertedFrame.Length * 8 / 12;
+                
+                Array.Copy(convertedFrame, 0, nv12Frame, 0, pixelCount);
+
+                for (int i = 0; i < pixelCount / 4; i++)
+                {
+                    nv12Frame[pixelCount + i * 2] = convertedFrame[pixelCount + i];
+                    nv12Frame[pixelCount + i * 2 + 1] = convertedFrame[pixelCount + pixelCount / 4 + i];
+                }
             };
 
             await signaler.StartAsync();

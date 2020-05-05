@@ -128,12 +128,23 @@ namespace MediaServer.MediaBot
                 this.lastVideoSentTimeUtc = DateTime.Now;
 
                 // Step 1: Send Video with added hue
-                byte[] buffer = new byte[frame.width * frame.height * 12 / 8];
-                frame.CopyTo(buffer);
+                byte[] i420Frame = new byte[frame.width * frame.height * 12 / 8];
+                frame.CopyTo(i420Frame);
+
+                byte[] nv12Frame = new byte[frame.width * frame.height * 12 / 8];
+                int pixelCount = i420Frame.Length * 8 / 12;
+                
+                Array.Copy(i420Frame, 0, nv12Frame, 0, pixelCount);
+
+                for (int i = 0; i < pixelCount / 4; i++)
+                {
+                    nv12Frame[pixelCount + i * 2] = i420Frame[pixelCount + i];
+                    nv12Frame[pixelCount + i * 2 + 1] = i420Frame[pixelCount + pixelCount / 4 + i];
+                }
 
                 // Use the real length of the data (Media may send us a larger buffer)
                 VideoFormat sendVideoFormat = VideoFormatUtil.GetSendVideoFormat((int)frame.height, (int)frame.width);
-                var videoSendBuffer = new VideoSendBuffer(buffer, (uint)buffer.Length, sendVideoFormat);
+                var videoSendBuffer = new VideoSendBuffer(nv12Frame, (uint)nv12Frame.Length, sendVideoFormat);
                 this.Call.GetLocalMediaSession().VideoSocket.Send(videoSendBuffer);
             }
         }
