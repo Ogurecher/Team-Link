@@ -8,10 +8,10 @@ namespace MediaServer.Util.VideoFormat
     /// </summary>
     internal static class VideoFormatUtil
     {
-        public static VideoFormat GetSendVideoFormat(this VideoFormat videoFormat)
+        public static VideoFormat GetSendVideoFormat(int height, int width)
         {
             VideoFormat sendVideoFormat;
-            switch (videoFormat.Width)
+            switch (width)
             {
                 case 270:
                     sendVideoFormat = VideoFormat.NV12_270x480_15Fps;
@@ -30,7 +30,7 @@ namespace MediaServer.Util.VideoFormat
                     break;
 
                 case 480:
-                    if (videoFormat.Height == 270)
+                    if (height == 270)
                     {
                         sendVideoFormat = VideoFormat.NV12_480x270_15Fps;
                         break;
@@ -70,5 +70,11 @@ namespace MediaServer.Util.VideoFormat
 
             return sendVideoFormat;
         }
+
+        public static VideoFormat GetSendVideoFormat(this VideoFormat videoFormat)
+        {
+            return GetSendVideoFormat(videoFormat.Height, videoFormat.Width);
+        }
+            
     }
 }

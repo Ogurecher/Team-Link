@@ -14,6 +14,7 @@ namespace MediaServer.MediaBot
     using Microsoft.Graph.Communications.Common;
     using Microsoft.Graph.Communications.Common.Telemetry;
     using Microsoft.Graph.Communications.Resources;
+    using Microsoft.MixedReality.WebRTC;
     using Microsoft.Skype.Bots.Media;
     using Newtonsoft.Json;
     using MediaServer.Authentication;
@@ -39,7 +40,9 @@ namespace MediaServer.MediaBot
 
         public ConcurrentDictionary<string, CallHandler> CallHandlers { get; } = new ConcurrentDictionary<string, CallHandler>();
 
-        public Bot(BotOptions options, IGraphLogger graphLogger) {
+        private PeerConnection peerConnection;
+
+        public Bot(BotOptions options, IGraphLogger graphLogger, PeerConnection peerConnection) {
             this.Options = options;
             this.logger = graphLogger;
 
@@ -67,6 +70,8 @@ namespace MediaServer.MediaBot
             this.Client.Calls().OnUpdated += this.CallsOnUpdated;
 
             this.OnlineMeetings = new OnlineMeetingHelper(authProvider, options.PlaceCallEndpointUrl);
+
+            this.peerConnection = peerConnection;
         }
 
         public BotOptions Options { get; }
@@ -119,7 +124,7 @@ namespace MediaServer.MediaBot
             foreach (var call in args.AddedResources)
             {
                 Console.WriteLine(call);
-                this.CallHandlers.GetOrAdd(call.Id, new CallHandler(call));
+                this.CallHandlers.GetOrAdd(call.Id, new CallHandler(call, this.peerConnection));
             }
 
             foreach (var call in args.RemovedResources)

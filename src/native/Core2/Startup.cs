@@ -24,6 +24,8 @@ namespace MediaServer
         private BotOptions botOptions;
         private Bot bot;
 
+        private PeerConnection peerConnection;
+
         public WebSocket webSocket { get; }
 
         public Startup()
@@ -34,8 +36,9 @@ namespace MediaServer
                 .Build();
 
             this.botOptions = this.configuration.GetSection("Bot").Get<BotOptions>();
+            this.peerConnection = new PeerConnection();
 
-            this.bot = new Bot(this.botOptions, this.logger);
+            this.bot = new Bot(this.botOptions, this.logger, this.peerConnection);
         }
 
         // This method gets called by the runtime. Use this method to add services to the container.
@@ -51,6 +54,7 @@ namespace MediaServer
             services.AddSingleton(this.logger);
             services.AddSingleton(this.botOptions);
             services.AddSingleton(this.bot);
+            services.AddSingleton(this.peerConnection);
             services.AddMvc();
         }
 
@@ -100,48 +104,74 @@ namespace MediaServer
         {
             Console.WriteLine("Initializing WebRTC");
 
-            using (var peerConnection = new PeerConnection())
+            var config = new PeerConnectionConfiguration
             {
-                var config = new PeerConnectionConfiguration
+                IceServers = new List<IceServer> {
+                        new IceServer{ Urls = { "stun:stun.l.google.com:19302" } }
+                    }
+            };
+
+            await this.peerConnection.InitializeAsync(config);
+            Console.WriteLine("Peer connection initialized.");
+
+            var signaler = new WebSocketSignaler(this.peerConnection, webSocket);
+
+            signaler.SdpMessageReceived += (string type, string sdp) => {
+                this.peerConnection.SetRemoteDescription(type, sdp);
+                if (type == "offer")
                 {
-                    IceServers = new List<IceServer> {
-                            new IceServer{ Urls = { "stun:stun.l.google.com:19302" } }
-                        }
-                };
+                    this.peerConnection.CreateAnswer();
+                }
+            };
 
-                await peerConnection.InitializeAsync(config);
-                Console.WriteLine("Peer connection initialized.");
+            signaler.IceCandidateReceived += (string candidate, int sdpMlineindex, string sdpMid) => {
+                this.peerConnection.AddIceCandidate(sdpMid, sdpMlineindex, candidate);
+            };
 
-                var signaler = new WebSocketSignaler(peerConnection, webSocket);
+            this.peerConnection.Connected += () => {
+                Console.WriteLine("!!! --- PeerConnection: connected --- !!!");
+            };
 
-                signaler.SdpMessageReceived += (string type, string sdp) => {
-                    peerConnection.SetRemoteDescription(type, sdp);
-                    if (type == "offer")
+            this.peerConnection.IceStateChanged += (IceConnectionState newState) => {
+                Console.WriteLine($"!!! --- ICE state: {newState} --- !!!");
+            };
+
+            /*peerConnection.TransceiverAdded += (Transceiver transceiver) => {
+                var redirectTransceiver = peerConnection.AddTransceiver(MediaKind.Video);
+                redirectTransceiver.LocalVideoTrack = transceiver.RemoteVideoTrack;
+            };*/
+
+            /*int numFrames = 0;
+            peerConnection.VideoTrackAdded += (RemoteVideoTrack track) => {
+                track.I420AVideoFrameReady += (I420AVideoFrame frame) => {
+                    ++numFrames;
+                    if (numFrames % 60 == 0)
                     {
-                        peerConnection.CreateAnswer();
+                        Console.WriteLine($"Received video frames: {numFrames}");
                     }
                 };
+            };*/
 
-                signaler.IceCandidateReceived += (string candidate, int sdpMlineindex, string sdpMid) => {
-                    peerConnection.AddIceCandidate(sdpMid, sdpMlineindex, candidate);
-                };
+            int numFrames = 0;
+            this.peerConnection.I420RemoteVideoFrameReady += (I420AVideoFrame frame) => {
+                ++numFrames;
+                if (numFrames % 60 == 0)
+                {
+                    Console.WriteLine($"Received video frames: {numFrames}");
+                }
+                byte[] convertedFrame = new byte[frame.width * frame.height * 12 / 8];
+                frame.CopyTo(convertedFrame);
+            };
 
-                peerConnection.Connected += () => {
-                    Console.WriteLine("!!! --- PeerConnection: connected --- !!!");
-                };
+            await signaler.StartAsync();
 
-                peerConnection.IceStateChanged += (IceConnectionState newState) => {
-                    Console.WriteLine($"!!! --- ICE state: {newState} --- !!!");
-                };
+            Console.WriteLine("Signaler started");
 
-                await signaler.StartAsync();
-                Console.WriteLine("Signaler started");
-
-                Console.WriteLine("Press a key to terminate the application...");
-                Console.Read();
-                signaler.Stop();
-                Console.WriteLine("Program termined.");
-            }
+            Console.WriteLine("Press a key to terminate the application...");
+            Console.Read();
+            signaler.Stop();
+            this.peerConnection.Close();
+            Console.WriteLine("Program termined.");
         }
     }
 }

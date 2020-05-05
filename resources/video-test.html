@@ -11,7 +11,16 @@
         const selfView = document.getElementById("selfView");
         const remoteView = document.getElementById("remoteView");
         
-        const constraints = {/*audio: true,*/ video: true};
+        const constraints = {/*audio: true,*/ 
+            video: {
+                mandatory: {
+                    minWidth: 640,
+                    maxWidth: 640,
+                    minHeight: 360,
+                    maxHeight: 360
+                }
+            }
+        };
         const signaling = new WebSocket('wss://myhuebot.ngrok.io/websocket');
         const configuration = {iceServers: [{urls: 'stun:stun.l.google.com:19302'}]};
         const pc = new RTCPeerConnection(configuration);

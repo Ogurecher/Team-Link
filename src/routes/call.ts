@@ -101,6 +101,8 @@ async function callMeeting ({ organizerId, chatInfo }: MeetingInfo): Promise<Cal
 }
 
 async function addParticipants ({ callId, userIds, accessToken }: { callId: string; userIds: string[]; accessToken: string}): Promise<void> {
+    debug(`Adding ${userIds} to call ${callId}`);
+
     const addParticipantsQuery = `/communications/calls/${callId}/participants/invite`;
     const addParticipantsURL = path.join(config.apiBaseURL, addParticipantsQuery);
 

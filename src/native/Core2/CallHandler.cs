@@ -65,11 +65,13 @@ namespace MediaServer.MediaBot
         /// </summary>
         private Timer endCallTimer;
 
+        private PeerConnection peerConnection;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="CallHandler"/> class.
         /// </summary>
         /// <param name="statefulCall">Stateful call instance.</param>
-        public CallHandler(ICall statefulCall)
+        public CallHandler(ICall statefulCall, PeerConnection peerConnection)
             : base(TimeSpan.FromMinutes(10), statefulCall?.GraphLogger)
         {
             this.Call = statefulCall;
@@ -86,7 +88,8 @@ namespace MediaServer.MediaBot
             this.endCallTimer.AutoReset = false;
             this.endCallTimer.Elapsed += this.OnTimerElapsed;
 
-            //this.InitializeWebRTC();
+            this.peerConnection = peerConnection;
+            this.peerConnection.I420RemoteVideoFrameReady += this.OnLocalMediaReceived;
         }
 
         /// <summary>
@@ -118,42 +121,22 @@ namespace MediaServer.MediaBot
         }
 
 
-        /*private async Task InitializeWebRTC()
+        private void OnLocalMediaReceived(I420AVideoFrame frame)
         {
-            Console.WriteLine("Initializing WebRTC");
-
-            using (var peerConnection = new PeerConnection())
+            if (DateTime.Now > this.lastVideoSentTimeUtc + TimeSpan.FromMilliseconds(33))
             {
-                var config = new PeerConnectionConfiguration
-                {
-                    IceServers = new List<IceServer> {
-                            new IceServer{ Urls = { "stun:stun.l.google.com:19302" } }
-                        }
-                };
+                this.lastVideoSentTimeUtc = DateTime.Now;
 
-                await peerConnection.InitializeAsync(config);
-                Console.WriteLine("Peer connection initialized.");
+                // Step 1: Send Video with added hue
+                byte[] buffer = new byte[frame.width * frame.height * 12 / 8];
+                frame.CopyTo(buffer);
 
-                var signaler = new NamedPipeSignaler(peerConnection, "rename_me_later_pipe");
-
-                signaler.SdpMessageReceived += (string type, string sdp) => {
-                    peerConnection.SetRemoteDescription(type, sdp);
-                    if (type == "offer")
-                    {
-                        peerConnection.CreateAnswer();
-                    }
-                };
-
-                signaler.IceCandidateReceived += (string candidate, int sdpMlineindex, string sdpMid) => {
-                    peerConnection.AddIceCandidate(sdpMid, sdpMlineindex, candidate);
-                };
-
-                await signaler.StartAsync();
-                Console.WriteLine("Signaler started");
-
-
+                // Use the real length of the data (Media may send us a larger buffer)
+                VideoFormat sendVideoFormat = VideoFormatUtil.GetSendVideoFormat((int)frame.height, (int)frame.width);
+                var videoSendBuffer = new VideoSendBuffer(buffer, (uint)buffer.Length, sendVideoFormat);
+                this.Call.GetLocalMediaSession().VideoSocket.Send(videoSendBuffer);
             }
-        }*/
+        }
         
         private void OnCallUpdated(ICall sender, ResourceEventArgs<Call> args)
         {
@@ -219,7 +202,7 @@ namespace MediaServer.MediaBot
         private void OnVideoMediaReceived(object sender, VideoMediaReceivedEventArgs e)
         {
             Console.WriteLine("MEDIA RECEIVED");
-            try
+            /*try
             {
                 if (Interlocked.Decrement(ref this.maxIngestFrameCount) > 0)
                 {
@@ -247,7 +230,7 @@ namespace MediaServer.MediaBot
             catch (Exception ex)
             {
                 this.GraphLogger.Error(ex, $"[{this.Call.Id}] Exception in VideoMediaReceived");
-            }
+            }*/
 
             e.Buffer.Dispose();
         }
