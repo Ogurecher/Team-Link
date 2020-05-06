@@ -11,7 +11,11 @@
         const selfView = document.getElementById("selfView");
         const remoteView = document.getElementById("remoteView");
         
-        const constraints = {/*audio: true,*/ 
+        const constraints = {
+            audio: {
+                sampleSize: 16,
+                maxSampleRate: 16000
+            },
             video: {
                 mandatory: {
                     minWidth: 640,

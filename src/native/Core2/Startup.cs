@@ -174,6 +174,15 @@ namespace MediaServer
                 }
             };
 
+            int numAudioFrames = 0;
+            this.peerConnection.RemoteAudioFrameReady += (AudioFrame frame) => {
+                ++numAudioFrames;
+                if (numAudioFrames % 100 == 0)
+                {
+                    Console.WriteLine($"Received audio frames: {numAudioFrames}");
+                }
+            };
+
             await signaler.StartAsync();
 
             Console.WriteLine("Signaler started");

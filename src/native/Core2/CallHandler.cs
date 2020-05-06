@@ -90,6 +90,7 @@ namespace MediaServer.MediaBot
 
             this.peerConnection = peerConnection;
             this.peerConnection.I420RemoteVideoFrameReady += this.OnLocalMediaReceived;
+            this.peerConnection.RemoteAudioFrameReady += this.OnLocalAudioReceived;
         }
 
         /// <summary>
@@ -111,6 +112,8 @@ namespace MediaServer.MediaBot
             this.Call.OnUpdated -= this.OnCallUpdated;
             this.Call.GetLocalMediaSession().AudioSocket.DominantSpeakerChanged -= this.OnDominantSpeakerChanged;
             this.Call.GetLocalMediaSession().VideoSocket.VideoMediaReceived -= this.OnVideoMediaReceived;
+            this.peerConnection.I420RemoteVideoFrameReady -= this.OnLocalMediaReceived;
+            this.peerConnection.RemoteAudioFrameReady -= this.OnLocalAudioReceived;
             this.Call.Participants.OnUpdated -= this.OnParticipantsUpdated;
             foreach (var participant in this.Call.Participants)
             {
@@ -147,6 +150,12 @@ namespace MediaServer.MediaBot
                 var videoSendBuffer = new VideoSendBuffer(nv12Frame, (uint)nv12Frame.Length, sendVideoFormat);
                 this.Call.GetLocalMediaSession().VideoSocket.Send(videoSendBuffer);
             }
+        }
+
+        private void OnLocalAudioReceived(AudioFrame frame)
+        {
+            var audioSendBuffer = new AudioSendBuffer(frame.audioData, (long)(/*frame.frameCount*/ 160 * frame.bitsPerSample / 8 * frame.channelCount), AudioFormat.Pcm16K);
+            this.Call.GetLocalMediaSession().AudioSocket.Send(audioSendBuffer);
         }
         
         private void OnCallUpdated(ICall sender, ResourceEventArgs<Call> args)

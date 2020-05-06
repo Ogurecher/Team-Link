@@ -139,7 +139,7 @@ namespace MediaServer.MediaBot
         private ILocalMediaSession CreateLocalMediaSession(Guid mediaSessionId = default(Guid)) {
             var mediaSession = this.Client.CreateMediaSession(
                 new AudioSocketSettings {
-                    StreamDirections = StreamDirection.Recvonly,
+                    StreamDirections = StreamDirection.Sendrecv,
                     SupportedAudioFormat = AudioFormat.Pcm16K,
                 },
                 new VideoSocketSettings {
