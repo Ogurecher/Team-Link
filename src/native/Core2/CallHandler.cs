@@ -69,6 +69,10 @@ namespace MediaServer.MediaBot
 
         private PeerConnection peerConnection;
 
+        private RemoteVideoTrack clientVideoTrack;
+
+        private RemoteAudioTrack clientAudioTrack;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="CallHandler"/> class.
         /// </summary>
@@ -91,8 +95,12 @@ namespace MediaServer.MediaBot
             this.endCallTimer.Elapsed += this.OnTimerElapsed;
 
             this.peerConnection = peerConnection;
-            this.peerConnection.I420RemoteVideoFrameReady += this.OnLocalMediaReceived;
-            this.peerConnection.RemoteAudioFrameReady += this.OnLocalAudioReceived;
+
+            this.peerConnection.VideoTrackAdded += this.OnClientVideoTrackAdded;
+            this.peerConnection.VideoTrackRemoved += this.OnClientVideoTrackRemoved;
+
+            this.peerConnection.AudioTrackAdded += this.OnClientAudioTrackAdded;
+            this.peerConnection.AudioTrackRemoved += this.OnClientAudioTrackRemoved;
         }
 
         /// <summary>
@@ -114,8 +122,6 @@ namespace MediaServer.MediaBot
             this.Call.OnUpdated -= this.OnCallUpdated;
             this.Call.GetLocalMediaSession().AudioSocket.DominantSpeakerChanged -= this.OnDominantSpeakerChanged;
             this.Call.GetLocalMediaSession().VideoSocket.VideoMediaReceived -= this.OnVideoMediaReceived;
-            this.peerConnection.I420RemoteVideoFrameReady -= this.OnLocalMediaReceived;
-            this.peerConnection.RemoteAudioFrameReady -= this.OnLocalAudioReceived;
             this.Call.Participants.OnUpdated -= this.OnParticipantsUpdated;
             foreach (var participant in this.Call.Participants)
             {
@@ -123,10 +129,40 @@ namespace MediaServer.MediaBot
             }
 
             this.endCallTimer.Elapsed -= this.OnTimerElapsed;
+
+            this.peerConnection.VideoTrackAdded -= this.OnClientVideoTrackAdded;
+            this.peerConnection.VideoTrackRemoved -= this.OnClientVideoTrackRemoved;
+
+            this.peerConnection.AudioTrackAdded -= this.OnClientAudioTrackAdded;
+            this.peerConnection.AudioTrackRemoved -= this.OnClientAudioTrackRemoved;
+        }
+
+        private void OnClientVideoTrackAdded(RemoteVideoTrack track)
+        {
+            this.clientVideoTrack = track;
+            this.clientVideoTrack.I420AVideoFrameReady += this.OnClientVideoReceived;
+        }
+
+        private void OnClientAudioTrackAdded(RemoteAudioTrack track)
+        {
+            this.clientAudioTrack = track;
+            this.clientAudioTrack.AudioFrameReady += this.OnClientAudioReceived;
+        }
+
+        private void OnClientVideoTrackRemoved(Transceiver transceiver, RemoteVideoTrack track)
+        {
+            this.clientVideoTrack.I420AVideoFrameReady -= this.OnClientVideoReceived;
+            this.clientVideoTrack = null;
+        }
+
+        private void OnClientAudioTrackRemoved(Transceiver transceiver, RemoteAudioTrack track)
+        {
+            this.clientAudioTrack.AudioFrameReady -= this.OnClientAudioReceived;
+            this.clientAudioTrack = null;
         }
 
 
-        private void OnLocalMediaReceived(I420AVideoFrame frame)
+        private void OnClientVideoReceived(I420AVideoFrame frame)
         {
             if (DateTime.Now > this.lastVideoSentTimeUtc + TimeSpan.FromMilliseconds(33))
             {
@@ -161,12 +197,12 @@ namespace MediaServer.MediaBot
 
         private int audioFrameCounter = 0;
 
-        private void OnLocalAudioReceived(AudioFrame frame)
+        private void OnClientAudioReceived(AudioFrame frame)
         {
             this.audioFrameCounter += 1;
             int outRate = 16000;
 
-            int inputBufferLength = (int)(frame.frameCount * frame.bitsPerSample / 8 * frame.channelCount);
+            int inputBufferLength = (int)(frame.sampleRate / 100 * frame.bitsPerSample / 8 * frame.channelCount);
             byte[] inputBuffer = new byte[inputBufferLength];
             Marshal.Copy(frame.audioData, inputBuffer, 0, inputBufferLength);
 

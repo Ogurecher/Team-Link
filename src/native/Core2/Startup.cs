@@ -119,8 +119,8 @@ namespace MediaServer
 
             var signaler = new WebSocketSignaler(this.peerConnection, webSocket);
 
-            signaler.SdpMessageReceived += (string type, string sdp) => {
-                this.peerConnection.SetRemoteDescription(type, sdp);
+            signaler.SdpMessageReceived += async (string type, string sdp) => {
+                await this.peerConnection.SetRemoteDescriptionAsync(type, sdp);
                 if (type == "offer")
                 {
                     this.peerConnection.CreateAnswer();
@@ -144,8 +144,9 @@ namespace MediaServer
                 redirectTransceiver.LocalVideoTrack = transceiver.RemoteVideoTrack;
             };*/
 
-            /*int numFrames = 0;
+            int numFrames = 0;
             peerConnection.VideoTrackAdded += (RemoteVideoTrack track) => {
+                Console.WriteLine("VIDEO TRACK ADDED");
                 track.I420AVideoFrameReady += (I420AVideoFrame frame) => {
                     ++numFrames;
                     if (numFrames % 60 == 0)
@@ -153,9 +154,9 @@ namespace MediaServer
                         Console.WriteLine($"Received video frames: {numFrames}");
                     }
                 };
-            };*/
+            };
 
-            int numFrames = 0;
+            /*int numFrames = 0;
             this.peerConnection.I420RemoteVideoFrameReady += (I420AVideoFrame frame) => {
                 ++numFrames;
                 if (numFrames % 60 == 0)
@@ -175,15 +176,18 @@ namespace MediaServer
                     nv12Frame[pixelCount + i * 2] = convertedFrame[pixelCount + i];
                     nv12Frame[pixelCount + i * 2 + 1] = convertedFrame[pixelCount + pixelCount / 4 + i];
                 }
-            };
+            };*/
 
             int numAudioFrames = 0;
-            this.peerConnection.RemoteAudioFrameReady += (AudioFrame frame) => {
-                ++numAudioFrames;
-                if (numAudioFrames % 100 == 0)
-                {
-                    Console.WriteLine($"Received audio frames: {numAudioFrames}");
-                }
+            this.peerConnection.AudioTrackAdded += (RemoteAudioTrack track) => {
+                Console.WriteLine("AUDIO TRACK ADDED");
+                track.AudioFrameReady += (AudioFrame frame) => {
+                    ++numAudioFrames;
+                    if (numAudioFrames % 100 == 0)
+                    {
+                        Console.WriteLine($"Received audio frames: {numAudioFrames}");
+                    }
+                };
             };
 
             await signaler.StartAsync();
