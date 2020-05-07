@@ -3,6 +3,7 @@ namespace MediaServer.MediaBot
     using System;
     using System.Collections.Generic;
     using System.Drawing;
+    using System.IO;
     using System.Linq;
     using System.Runtime.InteropServices;
     using System.Threading;
@@ -15,6 +16,7 @@ namespace MediaServer.MediaBot
     using Microsoft.Graph.Communications.Resources;
     using Microsoft.Skype.Bots.Media;
     using Microsoft.MixedReality.WebRTC;
+    using NAudio.Wave;
     using Timer = System.Timers.Timer;
     using MediaServer;
     using MediaServer.Util;
@@ -152,10 +154,67 @@ namespace MediaServer.MediaBot
             }
         }
 
+
+        private byte[] savedFrame;
+
+        private int maxAudioFramesToSend = 2;
+
+        private int audioFrameCounter = 0;
+
         private void OnLocalAudioReceived(AudioFrame frame)
         {
-            var audioSendBuffer = new AudioSendBuffer(frame.audioData, (long)(/*frame.frameCount*/ 160 * frame.bitsPerSample / 8 * frame.channelCount), AudioFormat.Pcm16K);
-            this.Call.GetLocalMediaSession().AudioSocket.Send(audioSendBuffer);
+            this.audioFrameCounter += 1;
+            int outRate = 16000;
+
+            int inputBufferLength = (int)(frame.frameCount * frame.bitsPerSample / 8 * frame.channelCount);
+            byte[] inputBuffer = new byte[inputBufferLength];
+            Marshal.Copy(frame.audioData, inputBuffer, 0, inputBufferLength);
+
+            byte[] pcm16Bytes;
+
+            if (frame.sampleRate != outRate)
+            {
+                IWaveProvider provider = new RawSourceWaveStream(new MemoryStream(inputBuffer),
+                    new WaveFormat((int)frame.sampleRate, (int)frame.bitsPerSample, (int)frame.channelCount));
+
+                var outFormat = new WaveFormat(outRate, provider.WaveFormat.Channels);
+
+                using (var resampler = new MediaFoundationResampler(provider, outFormat))
+                {
+                    resampler.ResamplerQuality = 1;
+
+                    int wavHeaderSize = 44;
+                    int outBufferLength = outFormat.AverageBytesPerSecond / 100;
+                    int wavBufferLength = outBufferLength + wavHeaderSize;
+                    MemoryStream outStream = new MemoryStream(wavBufferLength);
+                    WaveFileWriter.WriteWavFileToStream(outStream, resampler);
+
+                    byte[] wavBytes = outStream.ToArray();
+                    ArraySegment<byte> pcm16ArraySegment = new ArraySegment<byte>(wavBytes, wavHeaderSize, outBufferLength);
+                    pcm16Bytes = pcm16ArraySegment.ToArray();
+                }
+            }
+            else
+            {
+                pcm16Bytes = inputBuffer;
+            }
+
+            if (this.audioFrameCounter % this.maxAudioFramesToSend == 0)
+            {
+                byte[] stackedFrames = new byte[savedFrame.Length + pcm16Bytes.Length];
+                savedFrame.CopyTo(stackedFrames, 0);
+                pcm16Bytes.CopyTo(stackedFrames, savedFrame.Length);
+
+                IntPtr pcm16Pointer = Marshal.AllocHGlobal(stackedFrames.Length);
+                Marshal.Copy(stackedFrames, 0, pcm16Pointer, stackedFrames.Length);
+
+                var audioSendBuffer = new AudioSendBuffer(pcm16Pointer, (long)stackedFrames.Length, AudioFormat.Pcm16K);
+                this.Call.GetLocalMediaSession().AudioSocket.Send(audioSendBuffer);
+            }
+            else
+            {
+                this.savedFrame = pcm16Bytes;
+            }
         }
         
         private void OnCallUpdated(ICall sender, ResourceEventArgs<Call> args)

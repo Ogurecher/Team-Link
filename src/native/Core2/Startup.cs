@@ -5,6 +5,7 @@ namespace MediaServer
     using System.Linq;
     using System.IO;
     using System.Net.WebSockets;
+    using System.Runtime.InteropServices;
     using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Builder;
@@ -15,8 +16,10 @@ namespace MediaServer
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Graph.Communications.Common.Telemetry;
     using Microsoft.MixedReality.WebRTC;
+    using NAudio.Wave;
     using MediaServer.MediaBot;
     using WebSocketSignaler;
+
     public class Startup
     {
         private IGraphLogger logger = new GraphLogger(typeof(Program).Assembly.GetName().Name, redirectToTrace: true);
