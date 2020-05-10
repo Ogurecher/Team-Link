@@ -46,6 +46,8 @@
             // handles JSON.stringify/parse
             const selfView = document.getElementById("selfView");
             const remoteView = document.getElementById("remoteView");
+
+            const remoteStream = new MediaStream();
             
             const constraints = {
                 audio: {
@@ -81,9 +83,8 @@
     
             // once remote track media arrives, show it in remote video element
             pc.ontrack = (event) => {
-                // don't set srcObject again if it is already set.
-                if (remoteView.srcObject) return;
-                remoteView.srcObject = event.streams[0];
+                remoteStream.addTrack(event.track);
+                remoteView.srcObject = remoteStream;
             };
     
             // call start() to initiate

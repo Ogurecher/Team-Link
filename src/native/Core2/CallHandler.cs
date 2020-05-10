@@ -111,13 +111,15 @@ namespace MediaServer.MediaBot
             this.peerConnection.AudioTrackRemoved += this.OnClientAudioTrackRemoved;
 
             TransceiverInitSettings transceiverInitSettings = new TransceiverInitSettings();
-            transceiverInitSettings.InitialDesiredDirection = Transceiver.Direction.SendReceive;
+            transceiverInitSettings.InitialDesiredDirection = Transceiver.Direction.Inactive;
             
             this.teamsAudioTransceiver = this.peerConnection.AddTransceiver(MediaKind.Audio, transceiverInitSettings);
             this.teamsVideoTransceiver = this.peerConnection.AddTransceiver(MediaKind.Video, transceiverInitSettings);
             
             this.teamsVideoTrack = LocalVideoTrack.CreateFromExternalSource("TeamsVideoTrack", ExternalVideoTrackSource.CreateFromI420ACallback(this.CustomI420AFrameCallback));
             this.teamsVideoTransceiver.LocalVideoTrack = this.teamsVideoTrack;
+
+            this.teamsVideoTransceiver.DesiredDirection = Transceiver.Direction.SendOnly;
         }
 
         /// <summary>
