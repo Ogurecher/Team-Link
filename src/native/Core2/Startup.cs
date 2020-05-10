@@ -139,6 +139,10 @@ namespace MediaServer
                 Console.WriteLine($"!!! --- ICE state: {newState} --- !!!");
             };
 
+            this.peerConnection.RenegotiationNeeded += () => {
+                this.peerConnection.CreateOffer();
+            };
+
             /*peerConnection.TransceiverAdded += (Transceiver transceiver) => {
                 var redirectTransceiver = peerConnection.AddTransceiver(MediaKind.Video);
                 redirectTransceiver.LocalVideoTrack = transceiver.RemoteVideoTrack;

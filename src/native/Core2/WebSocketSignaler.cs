@@ -117,7 +117,7 @@ namespace WebSocketSignaler
         private async Task<string> ProcessIncomingMessage()
         {
             // ReadLine() will block while waiting for a new line
-            byte[] buffer = new byte[1024 * 8];
+            byte[] buffer = new byte[1024 * 20];
 
             WebSocketReceiveResult result = await WebSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
 
@@ -167,52 +167,6 @@ namespace WebSocketSignaler
 
                     IceCandidateReceived?.Invoke(candidate, Int32.Parse(sdpMLineIndex), sdpMid);
                 }
-
-                /*string line;
-            
-                while ((line = streamReader.ReadLine()) != null)
-                {
-                    Console.WriteLine($"[<-] {line}");
-                    if (line == "ice")
-                    {
-                        string sdpMid = streamReader.ReadLine();
-                        int sdpMlineindex = int.Parse(streamReader.ReadLine());
-
-                        // The ICE candidate is a multi-line field, ends with an empty line
-                        string candidate = "";
-                        while ((line = streamReader.ReadLine()) != null)
-                        {
-                            if (line.Length == 0)
-                            {
-                                break;
-                            }
-                            candidate += line;
-                            candidate += "\n";
-                        }
-
-                        Console.WriteLine($"[<-] ICE candidate: {sdpMid} {sdpMlineindex} {candidate}");
-                        IceCandidateReceived?.Invoke(sdpMid, sdpMlineindex, candidate);
-                    }
-                    else if (line == "sdp")
-                    {
-                        string type = streamReader.ReadLine();
-
-                        // The SDP message content is a multi-line field, ends with an empty line
-                        string sdp = "";
-                        while ((line = streamReader.ReadLine()) != null)
-                        {
-                            if (line.Length == 0)
-                            {
-                                break;
-                            }
-                            sdp += line;
-                            sdp += "\n";
-                        }
-
-                        Console.WriteLine($"[<-] SDP message: {type} {sdp}");
-                        SdpMessageReceived?.Invoke(type, sdp);
-                    }
-                }*/
             }
 
             Console.WriteLine("Finished processing message");

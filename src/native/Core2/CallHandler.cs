@@ -73,6 +73,14 @@ namespace MediaServer.MediaBot
 
         private RemoteAudioTrack clientAudioTrack;
 
+        private Transceiver teamsVideoTransceiver;
+        
+        private Transceiver teamsAudioTransceiver;
+        
+        private LocalVideoTrack teamsVideoTrack;
+        
+        private LocalAudioTrack teamsAudioTrack;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="CallHandler"/> class.
         /// </summary>
@@ -85,7 +93,7 @@ namespace MediaServer.MediaBot
             if (this.Call.GetLocalMediaSession() != null)
             {
                 this.Call.GetLocalMediaSession().AudioSocket.DominantSpeakerChanged += this.OnDominantSpeakerChanged;
-                this.Call.GetLocalMediaSession().VideoSocket.VideoMediaReceived += this.OnVideoMediaReceived;
+                this.Call.GetLocalMediaSession().VideoSocket.VideoMediaReceived += this.OnTeamsVideoReceived;
             }
 
             this.Call.Participants.OnUpdated += this.OnParticipantsUpdated;
@@ -101,6 +109,15 @@ namespace MediaServer.MediaBot
 
             this.peerConnection.AudioTrackAdded += this.OnClientAudioTrackAdded;
             this.peerConnection.AudioTrackRemoved += this.OnClientAudioTrackRemoved;
+
+            TransceiverInitSettings transceiverInitSettings = new TransceiverInitSettings();
+            transceiverInitSettings.InitialDesiredDirection = Transceiver.Direction.SendReceive;
+            
+            this.teamsAudioTransceiver = this.peerConnection.AddTransceiver(MediaKind.Audio, transceiverInitSettings);
+            this.teamsVideoTransceiver = this.peerConnection.AddTransceiver(MediaKind.Video, transceiverInitSettings);
+            
+            //this.teamsVideoTrack = LocalVideoTrack.CreateFromExternalSource("TeamsVideoTrack", ExternalVideoTrackSource.CreateFromI420ACallback(this.CustomI420AFrameCallback));
+            //this.teamsVideoTransceiver.LocalVideoTrack = this.teamsVideoTrack;
         }
 
         /// <summary>
@@ -121,7 +138,7 @@ namespace MediaServer.MediaBot
 
             this.Call.OnUpdated -= this.OnCallUpdated;
             this.Call.GetLocalMediaSession().AudioSocket.DominantSpeakerChanged -= this.OnDominantSpeakerChanged;
-            this.Call.GetLocalMediaSession().VideoSocket.VideoMediaReceived -= this.OnVideoMediaReceived;
+            this.Call.GetLocalMediaSession().VideoSocket.VideoMediaReceived -= this.OnTeamsVideoReceived;
             this.Call.Participants.OnUpdated -= this.OnParticipantsUpdated;
             foreach (var participant in this.Call.Participants)
             {
@@ -314,7 +331,7 @@ namespace MediaServer.MediaBot
             this.Subscribe(e.CurrentDominantSpeaker);
         }
 
-        private void OnVideoMediaReceived(object sender, VideoMediaReceivedEventArgs e)
+        private void OnTeamsVideoReceived(object sender, VideoMediaReceivedEventArgs e)
         {
             Console.WriteLine("MEDIA RECEIVED");
             /*try
