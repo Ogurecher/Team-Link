@@ -116,8 +116,8 @@ namespace MediaServer.MediaBot
             this.teamsAudioTransceiver = this.peerConnection.AddTransceiver(MediaKind.Audio, transceiverInitSettings);
             this.teamsVideoTransceiver = this.peerConnection.AddTransceiver(MediaKind.Video, transceiverInitSettings);
             
-            //this.teamsVideoTrack = LocalVideoTrack.CreateFromExternalSource("TeamsVideoTrack", ExternalVideoTrackSource.CreateFromI420ACallback(this.CustomI420AFrameCallback));
-            //this.teamsVideoTransceiver.LocalVideoTrack = this.teamsVideoTrack;
+            this.teamsVideoTrack = LocalVideoTrack.CreateFromExternalSource("TeamsVideoTrack", ExternalVideoTrackSource.CreateFromI420ACallback(this.CustomI420AFrameCallback));
+            this.teamsVideoTransceiver.LocalVideoTrack = this.teamsVideoTrack;
         }
 
         /// <summary>
@@ -268,6 +268,55 @@ namespace MediaServer.MediaBot
             {
                 this.savedFrame = pcm16Bytes;
             }
+        }
+
+        private void CustomI420AFrameCallback(in FrameRequest request)
+        {
+            byte[] data = new byte[32 * 16 + 16 * 8 * 2];
+            int k = 0;
+            for (int j = 0; j < 16; ++j)
+            {
+                for (int i = 0; i < 32; ++i)
+                {
+                    data[k++] = 0x7F;
+                }
+            }
+            
+            for (int j = 0; j < 8; ++j)
+            {
+                for (int i = 0; i < 16; ++i)
+                {
+                    data[k++] = 0x30;
+                }
+            }
+            
+            for (int j = 0; j < 8; ++j)
+            {
+                for (int i = 0; i < 16; ++i)
+                {
+                    data[k++] = 0xB2;
+                }
+            }
+            
+            IntPtr dataY = Marshal.AllocHGlobal(data.Length);
+            Marshal.Copy(data, 0, dataY, data.Length);
+            
+            var frame = new I420AVideoFrame
+            {
+                dataY = dataY,
+                dataU = dataY + (32 * 16),
+                dataV = dataY + (32 * 16) + (16 * 8),
+                dataA = IntPtr.Zero,
+                strideY = 32,
+                strideU = 16,
+                strideV = 16,
+                strideA = 0,
+                width = 32,
+                height = 16
+            };
+            request.CompleteRequest(frame);
+            
+            Marshal.FreeHGlobal(dataY);
         }
         
         private void OnCallUpdated(ICall sender, ResourceEventArgs<Call> args)
