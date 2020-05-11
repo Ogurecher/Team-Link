@@ -119,7 +119,7 @@ namespace MediaServer.MediaBot
             this.teamsVideoTrack = LocalVideoTrack.CreateFromExternalSource("TeamsVideoTrack", ExternalVideoTrackSource.CreateFromI420ACallback(this.CustomI420AFrameCallback));
             this.teamsVideoTransceiver.LocalVideoTrack = this.teamsVideoTrack;
 
-            this.teamsVideoTransceiver.DesiredDirection = Transceiver.Direction.SendOnly;
+            this.teamsVideoTransceiver.DesiredDirection = Transceiver.Direction.SendReceive;
         }
 
         /// <summary>
@@ -278,9 +278,17 @@ namespace MediaServer.MediaBot
             int k = 0;
             for (int j = 0; j < 16; ++j)
             {
-                for (int i = 0; i < 32; ++i)
+                byte[] i420Frame = new byte[this.nv12VideoFrameToSend.Length];
+                int pixelCount = this.nv12VideoFrameToSend.Length * 8 / 12;
+                int frameWidth = (int)Math.Sqrt(pixelCount / 0.5625);
+                int frameHeight = pixelCount / frameWidth;
+                
+                Array.Copy(this.nv12VideoFrameToSend, 0, i420Frame, 0, pixelCount);
+                
+                for (int i = 0; i < pixelCount / 4; i++)
                 {
-                    data[k++] = 0x7F;
+                    i420Frame[pixelCount + i] = this.nv12VideoFrameToSend[pixelCount + i * 2];
+                    i420Frame[pixelCount + pixelCount / 4 + i] = this.nv12VideoFrameToSend[pixelCount + i * 2 + 1];
                 }
             }
             
@@ -288,16 +296,20 @@ namespace MediaServer.MediaBot
             {
                 for (int i = 0; i < 16; ++i)
                 {
-                    data[k++] = 0x30;
-                }
-            }
-            
-            for (int j = 0; j < 8; ++j)
-            {
-                for (int i = 0; i < 16; ++i)
-                {
-                    data[k++] = 0xB2;
-                }
+                    dataY = dataY,
+                    dataU = dataY + pixelCount,
+                    dataV = dataY + pixelCount / 4 * 5,
+                    dataA = IntPtr.Zero,
+                    strideY = frameWidth,
+                    strideU = frameWidth / 2,
+                    strideV = frameWidth / 2,
+                    strideA = 0,
+                    width = (uint)frameWidth,
+                    height = (uint)frameHeight
+                };
+                request.CompleteRequest(frame);
+                
+                Marshal.FreeHGlobal(dataY);
             }
             
             IntPtr dataY = Marshal.AllocHGlobal(data.Length);
