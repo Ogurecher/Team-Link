@@ -117,7 +117,7 @@ namespace WebSocketSignaler
         private async Task<string> ProcessIncomingMessage()
         {
             // ReadLine() will block while waiting for a new line
-            byte[] buffer = new byte[1024 * 20];
+            byte[] buffer = new byte[1024 * 25];
 
             WebSocketReceiveResult result = await WebSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
 

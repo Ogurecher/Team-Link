@@ -45,7 +45,9 @@ namespace MediaServer.MediaBot
         /// <summary>
         /// The time stamp when video was sent last.
         /// </summary>
-        private DateTime lastVideoSentTimeUtc = DateTime.MinValue;
+        private DateTime lastVideoSentToClientTimeUtc = DateTime.MinValue;
+
+        private DateTime lastVideoSentToTeamsTimeUtc = DateTime.MinValue;
 
         /// <summary>
         /// The MediaStreamId of the last dominant speaker.
@@ -183,9 +185,9 @@ namespace MediaServer.MediaBot
 
         private void OnClientVideoReceived(I420AVideoFrame frame)
         {
-            if (DateTime.Now > this.lastVideoSentTimeUtc + TimeSpan.FromMilliseconds(33))
+            if (DateTime.Now > this.lastVideoSentToClientTimeUtc + TimeSpan.FromMilliseconds(33))
             {
-                this.lastVideoSentTimeUtc = DateTime.Now;
+                this.lastVideoSentToClientTimeUtc = DateTime.Now;
 
                 // Step 1: Send Video with added hue
                 byte[] i420Frame = new byte[frame.width * frame.height * 12 / 8];
@@ -274,63 +276,39 @@ namespace MediaServer.MediaBot
 
         private void CustomI420AFrameCallback(in FrameRequest request)
         {
-            byte[] data = new byte[32 * 16 + 16 * 8 * 2];
-            int k = 0;
-            for (int j = 0; j < 16; ++j)
+            if (this.nv12VideoFrameToSend != null)
             {
                 byte[] i420Frame = new byte[this.nv12VideoFrameToSend.Length];
                 int pixelCount = this.nv12VideoFrameToSend.Length * 8 / 12;
-                int frameWidth = (int)Math.Sqrt(pixelCount / 0.5625);
-                int frameHeight = pixelCount / frameWidth;
                 
                 Array.Copy(this.nv12VideoFrameToSend, 0, i420Frame, 0, pixelCount);
                 
                 for (int i = 0; i < pixelCount / 4; i++)
                 {
-                    i420Frame[pixelCount + i] = this.nv12VideoFrameToSend[pixelCount + i * 2];
-                    i420Frame[pixelCount + pixelCount / 4 + i] = this.nv12VideoFrameToSend[pixelCount + i * 2 + 1];
+                    i420Frame[pixelCount + i * 2] = this.nv12VideoFrameToSend[pixelCount + i];
+                    i420Frame[pixelCount + i * 2 + 1] = this.nv12VideoFrameToSend[pixelCount + pixelCount / 4 + i];
                 }
-            }
-            
-            for (int j = 0; j < 8; ++j)
-            {
-                for (int i = 0; i < 16; ++i)
+                
+                IntPtr dataY = Marshal.AllocHGlobal(i420Frame.Length);
+                Marshal.Copy(i420Frame, 0, dataY, i420Frame.Length);
+                
+                var frame = new I420AVideoFrame
                 {
                     dataY = dataY,
                     dataU = dataY + pixelCount,
                     dataV = dataY + pixelCount / 4 * 5,
                     dataA = IntPtr.Zero,
-                    strideY = frameWidth,
-                    strideU = frameWidth / 2,
-                    strideV = frameWidth / 2,
+                    strideY = 640,
+                    strideU = 320,
+                    strideV = 320,
                     strideA = 0,
-                    width = (uint)frameWidth,
-                    height = (uint)frameHeight
+                    width = 640,
+                    height = 360
                 };
                 request.CompleteRequest(frame);
                 
                 Marshal.FreeHGlobal(dataY);
             }
-            
-            IntPtr dataY = Marshal.AllocHGlobal(data.Length);
-            Marshal.Copy(data, 0, dataY, data.Length);
-            
-            var frame = new I420AVideoFrame
-            {
-                dataY = dataY,
-                dataU = dataY + (32 * 16),
-                dataV = dataY + (32 * 16) + (16 * 8),
-                dataA = IntPtr.Zero,
-                strideY = 32,
-                strideU = 16,
-                strideV = 16,
-                strideA = 0,
-                width = 32,
-                height = 16
-            };
-            request.CompleteRequest(frame);
-            
-            Marshal.FreeHGlobal(dataY);
         }
         
         private void OnCallUpdated(ICall sender, ResourceEventArgs<Call> args)
@@ -394,10 +372,13 @@ namespace MediaServer.MediaBot
             this.Subscribe(e.CurrentDominantSpeaker);
         }
 
+
+        private byte[] nv12VideoFrameToSend;
+
         private void OnTeamsVideoReceived(object sender, VideoMediaReceivedEventArgs e)
         {
             Console.WriteLine("MEDIA RECEIVED");
-            /*try
+            try
             {
                 if (Interlocked.Decrement(ref this.maxIngestFrameCount) > 0)
                 {
@@ -408,24 +389,21 @@ namespace MediaServer.MediaBot
                 }
 
                 // 33 ms frequency ~ 30 fps
-                if (DateTime.Now > this.lastVideoSentTimeUtc + TimeSpan.FromMilliseconds(33))
+                if (DateTime.Now > this.lastVideoSentToTeamsTimeUtc + TimeSpan.FromMilliseconds(33))
                 {
-                    this.lastVideoSentTimeUtc = DateTime.Now;
+                    this.lastVideoSentToTeamsTimeUtc = DateTime.Now;
 
                     // Step 1: Send Video with added hue
                     byte[] buffer = new byte[e.Buffer.VideoFormat.Width * e.Buffer.VideoFormat.Height * 12 / 8];
                     Marshal.Copy(e.Buffer.Data, buffer, 0, buffer.Length);
 
-                    // Use the real length of the data (Media may send us a larger buffer)
-                    VideoFormat sendVideoFormat = e.Buffer.VideoFormat.GetSendVideoFormat();
-                    var videoSendBuffer = new VideoSendBuffer(buffer, (uint)buffer.Length, sendVideoFormat);
-                    this.Call.GetLocalMediaSession().VideoSocket.Send(videoSendBuffer);
+                    this.nv12VideoFrameToSend = buffer;
                 }
             }
             catch (Exception ex)
             {
                 this.GraphLogger.Error(ex, $"[{this.Call.Id}] Exception in VideoMediaReceived");
-            }*/
+            }
 
             e.Buffer.Dispose();
         }
@@ -465,7 +443,7 @@ namespace MediaServer.MediaBot
 
                 if (uint.TryParse(participant.Resource.MediaStreams.FirstOrDefault(m => m.MediaType == Modality.Video)?.SourceId, out msi))
                 {
-                    this.Call.GetLocalMediaSession().VideoSocket.Subscribe(VideoResolution.HD1080p, msi);
+                    this.Call.GetLocalMediaSession().VideoSocket.Subscribe(VideoResolution.SD360p, msi);
                 }
 
                 this.subscribedToParticipant = participant.Resource;
