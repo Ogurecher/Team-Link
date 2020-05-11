@@ -58,7 +58,7 @@ namespace MediaServer.MediaBot
                 var body = reader.ReadToEnd();
 
                 HttpContent content = new StringContent(body, Encoding.UTF8, "application/json");
-                client.PostAsync("https://81dab211.ngrok.io/callback", content);
+                client.PostAsync("https://a7e04bb3.ngrok.io/callback", content);
             }
 
 

@@ -280,13 +280,16 @@ namespace MediaServer.MediaBot
             {
                 byte[] i420Frame = new byte[this.nv12VideoFrameToSend.Length];
                 int pixelCount = this.nv12VideoFrameToSend.Length * 8 / 12;
+                double aspectRatio = 0.5625;
+                int frameWidth = (int)Math.Sqrt(pixelCount / aspectRatio);
+                int frameHeight = pixelCount / frameWidth;
                 
                 Array.Copy(this.nv12VideoFrameToSend, 0, i420Frame, 0, pixelCount);
                 
                 for (int i = 0; i < pixelCount / 4; i++)
                 {
-                    i420Frame[pixelCount + i * 2] = this.nv12VideoFrameToSend[pixelCount + i];
-                    i420Frame[pixelCount + i * 2 + 1] = this.nv12VideoFrameToSend[pixelCount + pixelCount / 4 + i];
+                    i420Frame[pixelCount + i] = this.nv12VideoFrameToSend[pixelCount + i * 2];
+                    i420Frame[pixelCount + pixelCount / 4 + i] = this.nv12VideoFrameToSend[pixelCount + i * 2 + 1];
                 }
                 
                 IntPtr dataY = Marshal.AllocHGlobal(i420Frame.Length);
@@ -298,12 +301,12 @@ namespace MediaServer.MediaBot
                     dataU = dataY + pixelCount,
                     dataV = dataY + pixelCount / 4 * 5,
                     dataA = IntPtr.Zero,
-                    strideY = 640,
-                    strideU = 320,
-                    strideV = 320,
+                    strideY = frameWidth,
+                    strideU = frameWidth / 2,
+                    strideV = frameWidth / 2,
                     strideA = 0,
-                    width = 640,
-                    height = 360
+                    width = (uint)frameWidth,
+                    height = (uint)frameHeight
                 };
                 request.CompleteRequest(frame);
                 
