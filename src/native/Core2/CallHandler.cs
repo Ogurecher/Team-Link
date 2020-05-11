@@ -96,6 +96,7 @@ namespace MediaServer.MediaBot
             {
                 this.Call.GetLocalMediaSession().AudioSocket.DominantSpeakerChanged += this.OnDominantSpeakerChanged;
                 this.Call.GetLocalMediaSession().VideoSocket.VideoMediaReceived += this.OnTeamsVideoReceived;
+                this.Call.GetLocalMediaSession().AudioSocket.AudioMediaReceived += this.OnTeamsAudioReceived;
             }
 
             this.Call.Participants.OnUpdated += this.OnParticipantsUpdated;
@@ -122,6 +123,11 @@ namespace MediaServer.MediaBot
             this.teamsVideoTransceiver.LocalVideoTrack = this.teamsVideoTrack;
 
             this.teamsVideoTransceiver.DesiredDirection = Transceiver.Direction.SendReceive;
+
+            this.teamsAudioTrack = LocalAudioTrack.CreateFromExternalSource("TeamsAudioTrack", ExternalAudioTrackSource.CreateFromCallback(this.CustomAudioFrameCallback));
+            this.teamsAudioTransceiver.LocalAudioTrack = this.teamsAudioTrack;
+
+            this.teamsAudioTransceiver.DesiredDirection = Transceiver.Direction.SendReceive;
         }
 
         /// <summary>
@@ -274,6 +280,24 @@ namespace MediaServer.MediaBot
             }
         }
 
+        private void CustomAudioFrameCallback(in AudioFrameRequest request)
+        {
+            IntPtr framePointer = Marshal.AllocHGlobal(this.audioFrameToSend.Length);
+            Marshal.Copy(this.audioFrameToSend, 0, framePointer, this.audioFrameToSend.Length);
+
+            var frame = new AudioFrame
+                {
+                    audioData = framePointer,
+                    bitsPerSample = 16,
+                    sampleRate = 16000,
+                    channelCount = 1,
+                    sampleCount = (uint)this.audioFrameToSend.Length * 8 / 16
+                };
+            request.CompleteRequest(frame);
+
+            Marshal.FreeHGlobal(framePointer);
+        }
+
         private void CustomI420AFrameCallback(in FrameRequest request)
         {
             if (this.nv12VideoFrameToSend != null)
@@ -406,6 +430,26 @@ namespace MediaServer.MediaBot
             catch (Exception ex)
             {
                 this.GraphLogger.Error(ex, $"[{this.Call.Id}] Exception in VideoMediaReceived");
+            }
+
+            e.Buffer.Dispose();
+        }
+
+        private byte[] audioFrameToSend;
+
+        private void OnTeamsAudioReceived(object sender, AudioMediaReceivedEventArgs e)
+        {
+            Console.WriteLine("Audio MEDIA RECEIVED");
+            try
+            {
+                byte[] buffer = new byte[100]; // change to real length later
+                Marshal.Copy(e.Buffer.Data, buffer, 0, buffer.Length);
+
+                this.audioFrameToSend = buffer;
+            }
+            catch (Exception ex)
+            {
+                this.GraphLogger.Error(ex, $"[{this.Call.Id}] Exception in AudioMediaReceived");
             }
 
             e.Buffer.Dispose();
