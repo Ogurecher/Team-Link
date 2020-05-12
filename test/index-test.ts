@@ -2,6 +2,10 @@ import 'mocha';
 import path from 'path';
 import { expect } from 'chai';
 import got from 'got';
+import { setEnvVariables } from './util/setEnv';
+
+setEnvVariables();
+
 import { App, Config } from '../';
 
 describe('Server', () => {

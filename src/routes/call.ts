@@ -98,15 +98,21 @@ async function addParticipants ({ callId, userIds, accessToken }: { callId: stri
     const addParticipantsQuery = `/communications/calls/${callId}/participants/invite`;
     const addParticipantsURL = path.join(config.apiBaseURL, addParticipantsQuery);
 
-    await got.post(addParticipantsURL, {
-        headers: {
-            Authorization: `Bearer ${accessToken}`
-        },
-        json: {
-            'participants':  populateUsers({ userIds }),
-            'clientContext': config.clientId
-        }
-    });
+    const maxParticipantsPerRequest = 5;
+
+    for (let participantIndex = 0, numParticipants = userIds.length; participantIndex < numParticipants; participantIndex += maxParticipantsPerRequest) {
+        const participants = userIds.slice(participantIndex, participantIndex + maxParticipantsPerRequest);
+
+        await got.post(addParticipantsURL, {
+            headers: {
+                Authorization: `Bearer ${accessToken}`
+            },
+            json: {
+                'participants':  populateUsers({ userIds: participants }),
+                'clientContext': config.clientId
+            }
+        });
+    }
 }
 
 function populateUsers ({ userIds, organizer = false }: { userIds: string[]; organizer?: boolean }): UserInfo[] | OrganizerMeetingInfo[] {
