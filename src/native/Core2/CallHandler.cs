@@ -124,10 +124,10 @@ namespace MediaServer.MediaBot
 
             this.teamsVideoTransceiver.DesiredDirection = Transceiver.Direction.SendReceive;
 
-            this.teamsAudioTrack = LocalAudioTrack.CreateFromExternalSource("TeamsAudioTrack", ExternalAudioTrackSource.CreateFromCallback(this.CustomAudioFrameCallback));
+            /*this.teamsAudioTrack = LocalAudioTrack.CreateFromExternalSource("TeamsAudioTrack", ExternalAudioTrackSource.CreateFromCallback(this.CustomAudioFrameCallback));
             this.teamsAudioTransceiver.LocalAudioTrack = this.teamsAudioTrack;
 
-            this.teamsAudioTransceiver.DesiredDirection = Transceiver.Direction.SendReceive;
+            this.teamsAudioTransceiver.DesiredDirection = Transceiver.Direction.SendReceive;*/
         }
 
         /// <summary>
