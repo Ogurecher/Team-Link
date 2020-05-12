@@ -20,15 +20,21 @@ export async function createCall (req: CreateCallRequest, res: HTTPResponse): Pr
     const accessToken = await getAppAccessToken();
 
     const meetingInfo = await createOnlineMeeting();
-    const callParameters = await callMeeting(meetingInfo);
+    const callParameters = await callMeeting(meetingInfo, accessToken);
     const callId = callParameters.id;
 
     notifier.once('Call established', () => {
         addParticipants({ callId, userIds: req.body.userIds, accessToken });
     });
 
-    callIdEmitter.on('CallId requested', () => {
+    const callIdRequestedCallback = (): void => {
         callIdEmitter.emit('CallId provided', callId, accessToken);
+    };
+
+    callIdEmitter.on('CallId requested', callIdRequestedCallback);
+
+    notifier.once('Call terminated', () => {
+        callIdEmitter.removeListener('CallId requested', callIdRequestedCallback);
     });
 
     debug(JSON.stringify(callParameters, null, 4));
@@ -63,12 +69,10 @@ async function createOnlineMeeting (): Promise<MeetingInfo> {
     };
 }
 
-async function callMeeting ({ organizerId, chatInfo }: MeetingInfo): Promise<Call> {
+async function callMeeting ({ organizerId, chatInfo }: MeetingInfo, accessToken: string): Promise<Call> {
     const organizerMeetingInfo: OrganizerMeetingInfo = populateUsers({ userIds: [organizerId], organizer: true })[0];
 
     organizerMeetingInfo.allowConversationWithoutHost = true;
-
-    const accessToken = await getAppAccessToken();
 
     const callMeetingQuery = `/communications/calls`;
     const callMeetingURL = path.join(config.apiBaseURL, callMeetingQuery);

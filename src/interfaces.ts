@@ -1,4 +1,5 @@
 import events from 'events';
+import nock from 'nock';
 
 export interface HTTPPostRequest {
     body: {};
@@ -123,4 +124,13 @@ export interface Configuration extends DefaultConfiguration {
 
 export interface ExpressServer extends events.EventEmitter {
     close(): void;
+}
+
+export interface Nocks {
+    [name: string]: nock.Scope[];
+}
+
+export interface NockResponse {
+    status: number;
+    body?: {};
 }
