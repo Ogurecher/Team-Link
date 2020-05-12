@@ -79,12 +79,12 @@ async function callMeeting ({ organizerId, chatInfo }: MeetingInfo): Promise<Cal
 
     const callMeetingRes = await got.post(callMeetingURL, {
         json: {
-            'ChatInfo': JSON.stringify(chatInfo),
+            'ChatInfo':    JSON.stringify(chatInfo),
             'MeetingInfo': JSON.stringify(organizerMeetingInfo),
-            'TenantId': config.tenantId
+            'TenantId':    config.tenantId
         }
     });
-    
+
     /*"mediaConfig": {
         "@odata.type": "#microsoft.graph.appHostedMediaConfig",
         "blob": "{\"mpUri\":\"net.tcp://1.huebot.cf:28437/MediaProcessor\",\"audioRenderContexts\":[\"a9d685c9-22ed-4dbe-bfd7-58cc9ebdf254\"],\"videoRenderContexts\":[\"def2dc35-e8e2-421f-bce1-f35290d2beb9\"],\"audioSourceContexts\":[null],\"videoSourceContexts\":[\"c651c3f0-8304-4b73-a506-ba00cd2c2cf6\"],\"dataRenderContexts\":null,\"dataSourceContexts\":null,\"supportedAudioFormat\":\"Pcm16K\",\"videoSinkEncodingFormats\":[\"Yuv\"],\"mpMediaSessionId\":\"fca33a2d-a8d5-447f-b459-99fb1ac4ea21\",\"regionAffinity\":null,\"skypeMediaBotsVersion\":\"1.14.1.0234\",\"mediaStackVersion\":\"2019.45.1.7\",\"mpVersion\":\"7.2.0.6941\",\"callId\":\"3e3683db-74dc-4f6a-91ec-a78970972a0a\"}"

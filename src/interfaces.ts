@@ -110,6 +110,7 @@ export interface DefaultConfiguration {
     authorizationBaseURL: string;
     oauthVersion: string;
     callbackURI: string;
+    mediaModuleURI: string;
 }
 
 export interface Configuration extends DefaultConfiguration {
