@@ -106,6 +106,24 @@ export function nockUserPresencesOnce (config: interfaces.DefaultConfiguration):
         });
 }
 
+export function nockUserPresencesPersist (config: interfaces.DefaultConfiguration): void {
+    nock(config.apiBaseURL)
+        .persist()
+        .post(/\/communications\/getPresencesByUserId/)
+        .reply(200, {
+            value: [
+                {
+                    id:           'userId1',
+                    availability: 'Available'
+                },
+                {
+                    id:           'userId2',
+                    availability: 'Available'
+                }
+            ]
+        });
+}
+
 export function nockCallRejectionOnce (config: interfaces.DefaultConfiguration): nock.Scope {
     const callRejectionScope = nock(config.apiBaseURL)
         .post(/\/communications\/calls\/.*\/reject/)
