@@ -22,6 +22,26 @@ export interface CreateCallRequest extends HTTPPostRequest {
     };
 }
 
+export interface AddMeRequest extends HTTPPostRequest {
+    body: {
+        value: [
+            {
+                changeType: string;
+                resourceUrl: string;
+                resourceData: {
+                    source: {
+                        identity: {
+                            user: {
+                                id: string;
+                            };
+                        };
+                    };
+                };
+            }
+        ];
+    };
+}
+
 export interface MeetingInfo {
     organizerId: string;
     chatInfo: {};
@@ -69,6 +89,7 @@ export interface HTTPResponse {
     header(title: string, options: string | string[]): void;
     send(body: unknown): void;
     status(code: number): void;
+    sendStatus(code: number): void;
     end(): void;
 }
 

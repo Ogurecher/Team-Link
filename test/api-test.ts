@@ -2,7 +2,7 @@ import 'mocha';
 import path from 'path';
 import { expect } from 'chai';
 import got from 'got';
-import { nockRequests } from './util/nocks';
+import { nockRequests, nockCallRejectionOnce, nockInviteParticipantsOnce, cleanNocks } from './util/nocks';
 import { setEnvVariables } from './util/setEnv';
 
 setEnvVariables();
@@ -17,8 +17,7 @@ describe('API', () => {
     const rootPath = path.join(`http://${config.host}:${config.port}`);
     const usersURL = path.join(rootPath, '/users');
     const callURL = path.join(rootPath, '/call');
-
-    nockRequests(config);
+    const addMeURL = path.join(rootPath, '/addMe');
 
     before(async () => {
         app = await App.create();
@@ -26,6 +25,14 @@ describe('API', () => {
 
     after(async () => {
         await app.closeServer();
+    });
+
+    beforeEach(async () => {
+        nockRequests(config);
+    });
+
+    afterEach(async () => {
+        cleanNocks();
     });
 
     it(`Sends a response from the '/users' endpoint`, async () => {
@@ -46,10 +53,12 @@ describe('API', () => {
 
         const response = await got(usersURL);
 
+
         expect(JSON.parse(response.body)).eql(expectedResponse);
     });
 
     it(`Sends a response from the '/call' endpoint`, async () => {
+        nockInviteParticipantsOnce(config);
         const expectedStatus = 200;
 
 
@@ -60,6 +69,7 @@ describe('API', () => {
     });
 
     it(`Provides a correct response from the '/call' endpoint`, async () => {
+        nockInviteParticipantsOnce(config);
         const expectedResponse = { id: 'callId1' };
 
 
@@ -67,5 +77,67 @@ describe('API', () => {
 
 
         expect(JSON.parse(response.body)).eql(expectedResponse);
+    });
+
+    const addMeBody = {
+        value: [
+            {
+                changeType:   'created',
+                resourceUrl:  '/communications/calls/callId',
+                resourceData: {
+                    source: {
+                        identity: {
+                            user: {
+                                id: 'userId'
+                            }
+                        }
+                    }
+                }
+            }
+        ]
+    };
+
+    it(`Sends a response from the '/addMe' endpoint`, async () => {
+        nockInviteParticipantsOnce(config);
+        nockCallRejectionOnce(config);
+
+        const expectedStatus = 202;
+
+
+        const response = await got.post(addMeURL, {
+            json: addMeBody
+        });
+
+
+        expect(response.statusCode).equal(expectedStatus);
+    });
+
+    it(`Hangs up a call when calling the bot on the '/addMe' endpoint`, async () => {
+        nockInviteParticipantsOnce(config);
+        const callRejectionScope = nockCallRejectionOnce(config);
+
+
+        await got.post(addMeURL, {
+            json: addMeBody
+        });
+
+
+        expect(callRejectionScope.isDone()).eql(true);
+    });
+
+    it(`/addMe adds user to the previously created call`, async () => {
+        nockCallRejectionOnce(config);
+
+
+        await got.post(callURL);
+
+        const addParticipantsScope = nockInviteParticipantsOnce(config);
+
+        await got.post(addMeURL, {
+            json: addMeBody
+        });
+
+
+        expect(addParticipantsScope.isDone()).eql(true);
     });
 });

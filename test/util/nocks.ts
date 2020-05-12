@@ -81,15 +81,10 @@ export function nockRequests (config: interfaces.DefaultConfiguration): nock.Sco
 
     nock(config.apiBaseURL)
         .persist()
-        .post(/\/communications\/calls/)
+        .post(/\/communications\/calls$/)
         .reply(200, {
             id: 'callId1'
         });
-
-    nock(config.apiBaseURL)
-        .persist()
-        .post(/\/communications\/calls\/.*\/participants\/invite/)
-        .reply(200);
 
     return userPresences;
 }
@@ -127,4 +122,24 @@ export function nockUserPresencesPersist (config: interfaces.DefaultConfiguratio
                 }
             ]
         });
+}
+
+export function nockCallRejectionOnce (config: interfaces.DefaultConfiguration): nock.Scope {
+    const callRejectionScope = nock(config.apiBaseURL)
+        .post(/\/communications\/calls\/.*\/reject/)
+        .reply(202);
+
+    return callRejectionScope;
+}
+
+export function nockInviteParticipantsOnce (config: interfaces.DefaultConfiguration): nock.Scope {
+    const addParticipantsNock = nock(config.apiBaseURL)
+        .post(/\/communications\/calls\/.*\/participants\/invite/)
+        .reply(200);
+
+    return addParticipantsNock;
+}
+
+export function cleanNocks (): void {
+    nock.cleanAll();
 }
