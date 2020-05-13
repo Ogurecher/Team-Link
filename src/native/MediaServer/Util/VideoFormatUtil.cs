@@ -3,9 +3,6 @@ namespace MediaServer.Util.VideoFormat
     using System.Runtime.InteropServices;
     using Microsoft.Skype.Bots.Media;
 
-    /// <summary>
-    /// The utility class.
-    /// </summary>
     internal static class VideoFormatUtil
     {
         public static VideoFormat GetSendVideoFormat(int height, int width)

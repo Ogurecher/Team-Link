@@ -44,12 +44,10 @@ namespace MediaServer
             this.bot = new Bot(this.botOptions, this.logger, this.peerConnection);
         }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
             services.Configure<CookiePolicyOptions>(options =>
             {
-                // This lambda determines whether user consent for non-essential cookies is needed for a given request.
                 options.CheckConsentNeeded = context => true;
                 options.MinimumSameSitePolicy = SameSiteMode.None;
             });
@@ -61,7 +59,6 @@ namespace MediaServer
             services.AddMvc();
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
             if (env.IsDevelopment())
@@ -71,7 +68,6 @@ namespace MediaServer
             else
             {
                 app.UseExceptionHandler("/Error");
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
 
@@ -143,11 +139,7 @@ namespace MediaServer
                 this.peerConnection.CreateOffer();
             };
 
-            /*peerConnection.TransceiverAdded += (Transceiver transceiver) => {
-                var redirectTransceiver = peerConnection.AddTransceiver(MediaKind.Video);
-                redirectTransceiver.LocalVideoTrack = transceiver.RemoteVideoTrack;
-            };*/
-
+            // DEBUG CODE, MIGHT NOT NEED IT LATER
             int numFrames = 0;
             peerConnection.VideoTrackAdded += (RemoteVideoTrack track) => {
                 Console.WriteLine("VIDEO TRACK ADDED");
@@ -160,28 +152,7 @@ namespace MediaServer
                 };
             };
 
-            /*int numFrames = 0;
-            this.peerConnection.I420RemoteVideoFrameReady += (I420AVideoFrame frame) => {
-                ++numFrames;
-                if (numFrames % 60 == 0)
-                {
-                    Console.WriteLine($"Received video frames: {numFrames}");
-                }
-                byte[] convertedFrame = new byte[frame.width * frame.height * 12 / 8];
-                frame.CopyTo(convertedFrame);
-
-                byte[] nv12Frame = new byte[frame.width * frame.height * 12 / 8];
-                int pixelCount = convertedFrame.Length * 8 / 12;
-                
-                Array.Copy(convertedFrame, 0, nv12Frame, 0, pixelCount);
-
-                for (int i = 0; i < pixelCount / 4; i++)
-                {
-                    nv12Frame[pixelCount + i * 2] = convertedFrame[pixelCount + i];
-                    nv12Frame[pixelCount + i * 2 + 1] = convertedFrame[pixelCount + pixelCount / 4 + i];
-                }
-            };*/
-
+            // DEBUG CODE, MIGHT NOT NEED IT LATER
             int numAudioFrames = 0;
             this.peerConnection.AudioTrackAdded += (RemoteAudioTrack track) => {
                 Console.WriteLine("AUDIO TRACK ADDED");

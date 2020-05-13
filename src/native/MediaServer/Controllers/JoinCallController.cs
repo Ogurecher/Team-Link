@@ -52,21 +52,12 @@ namespace MediaServer.Controllers
 
         public class JoinCallResponseBody
         {
-            /// <summary>
-            /// Gets or sets the URL for the newly created call.
-            /// </summary>
             public string CallURL { get; set; }
 
-            /// <summary>
-            /// Gets or sets the URL for getting all the logs on this node.
-            /// </summary>
             public string CallsURL { get; set; }
 
-            /// <summary>
-            /// Gets or sets the URL for the service logs on this node.
-            /// </summary>
             public string ServiceLogsURL { get; set; }
-
+            
             public string id { get; set; }
         }
     }

@@ -6,32 +6,17 @@ namespace MediaServer.Util.OnlineMeetings
     using Microsoft.Graph.Communications.Client.Authentication;
     using Microsoft.Graph.Communications.Common;
 
-    /// <summary>
-    /// Online meeting class to fetch meeting info based of meeting id (ex: vtckey).
-    /// </summary>
     public class OnlineMeetingHelper
     {
         private readonly Uri graphEndpointUri;
         private readonly IRequestAuthenticationProvider requestAuthenticationProvider;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="OnlineMeetingHelper"/> class.
-        /// </summary>
-        /// <param name="requestAuthenticationProvider">The request authentication provider.</param>
-        /// <param name="graphUri">The graph url.</param>
         public OnlineMeetingHelper(IRequestAuthenticationProvider requestAuthenticationProvider, Uri graphUri)
         {
             this.requestAuthenticationProvider = requestAuthenticationProvider;
             this.graphEndpointUri = graphUri;
         }
 
-        /// <summary>
-        /// Gets the online meeting.
-        /// </summary>
-        /// <param name="tenantId">The tenant identifier.</param>
-        /// <param name="meetingId">The meeting identifier.</param>
-        /// <param name="scenarioId">The scenario identifier.</param>
-        /// <returns>The online meeting. </returns>
         public async Task<OnlineMeeting> GetOnlineMeetingAsync(string tenantId, string meetingId, Guid scenarioId)
         {
             IAuthenticationProvider GetAuthenticationProvider()

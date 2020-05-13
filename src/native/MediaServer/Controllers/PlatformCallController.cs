@@ -12,9 +12,6 @@ namespace MediaServer.MediaBot
     using MediaServer.Controllers;
     using MediaServer.Extensions;
 
-    /// <summary>
-    /// Entry point for handling call-related web hook requests from the stateful client.
-    /// </summary>
     public class PlatformCallContoller : Controller
     {
         private static readonly HttpClient client = new HttpClient();
@@ -22,23 +19,12 @@ namespace MediaServer.MediaBot
         private IGraphLogger logger;
         private Bot bot;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="PlatformCallContoller"/> class.
-        /// </summary>
-        /// <param name="logger">Logger instance.</param>
-        /// <param name="bot">Hue bot instance.</param>
         public PlatformCallContoller(IGraphLogger logger, Bot bot)
         {
             this.logger = logger;
             this.bot = bot;
         }
 
-        /// <summary>
-        /// Handle a callback for an existing call.
-        /// </summary>
-        /// <returns>
-        /// The <see cref="Task"/>.
-        /// </returns>
         [HttpPost]
         [Route(HttpRouteConstants.CallSignalingRoutePrefix + "/" + HttpRouteConstants.OnIncomingRequestRoute)]
         public async Task OnIncomingRequestAsync()
@@ -60,20 +46,6 @@ namespace MediaServer.MediaBot
                 HttpContent content = new StringContent(body, Encoding.UTF8, "application/json");
                 client.PostAsync("https://teamlink_main.ngrok.io/callback", content);
             }
-
-
-            //HttpContent content = new StringContent(JsonConvert.SerializeObject(bodyString), Encoding.UTF8, "application/json");
-            //HttpContent content = this.Request.CreateRequestMessage().Content;
-
-            //client.PostAsync("https://7477d595.ngrok.io/callback", content);
-
-            // Pass the incoming message to the sdk. The sdk takes care of what to do with it.
-            //var response = await this.bot.Client.ProcessNotificationAsync(this.Request.CreateRequestMessage()).ConfigureAwait(false);
-            //await response.CreateHttpResponseAsync(this.Response).ConfigureAwait(false);
-
-            // Enforce the connection close to ensure that requests are evenly load balanced so
-            // calls do no stick to one instance of the worker role.
-            //response.Headers.ConnectionClose = true;
         }
     }
 }

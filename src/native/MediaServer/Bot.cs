@@ -22,16 +22,6 @@ namespace MediaServer.MediaBot
     using MediaServer.Util.OnlineMeetings;
     using MediaServer.Util.Meetings;
 
-    //using Sample.Common;
-    //using Sample.Common.Authentication;
-    //using Sample.Common.Meetings;
-    //using Sample.Common.OnlineMeetings;
-    //using Sample.HueBot.Controllers;
-    //using Sample.HueBot.Extensions;
-
-    /// <summary>
-    /// The core bot logic.
-    /// </summary>
     public class Bot
     {
         private readonly IGraphLogger logger;
@@ -146,7 +136,6 @@ namespace MediaServer.MediaBot
                     StreamDirections = StreamDirection.Sendrecv,
                     ReceiveColorFormat = VideoColorFormat.NV12,
 
-                    // We loop back the video in this sample. The MediaPlatform always sends only NV12 frames. So include only NV12 video in supportedSendVideoFormats
                     SupportedSendVideoFormats = new List<VideoFormat>
                     {
                         VideoFormat.NV12_270x480_15Fps,

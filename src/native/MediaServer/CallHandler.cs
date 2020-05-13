@@ -27,46 +27,21 @@ namespace MediaServer.MediaBot
     {
         public const uint DominantSpeakerNone = DominantSpeakerChangedEventArgs.None;
 
-        /// <summary>
-        /// How long the timer should wait before ending the call.
-        /// </summary>
         private const double WaitForMs = 1000 * 60 * 5;
 
-        /// <summary>
-        /// The time between each video frame capturing.
-        /// </summary>
         private readonly TimeSpan videoCaptureFrequency = TimeSpan.FromMilliseconds(2000);
 
-        /// <summary>
-        /// The time stamp when video image was updated last.
-        /// </summary>
         private DateTime lastVideoCapturedTimeUtc = DateTime.MinValue;
 
-        /// <summary>
-        /// The time stamp when video was sent last.
-        /// </summary>
         private DateTime lastVideoSentToClientTimeUtc = DateTime.MinValue;
 
         private DateTime lastVideoSentToTeamsTimeUtc = DateTime.MinValue;
 
-        /// <summary>
-        /// The MediaStreamId of the last dominant speaker.
-        /// </summary>
         private uint subscribedToMsi = DominantSpeakerNone;
 
-        /// <summary>
-        /// The MediaStreamId of the participant to which the video channel is currently subscribed to.
-        /// </summary>
         private Participant subscribedToParticipant;
 
-        /// <summary>
-        /// Count of incoming messages to log.
-        /// </summary>
         private int maxIngestFrameCount = 100;
-
-        /// <summary>
-        /// The Timer to end the call.
-        /// </summary>
         private Timer endCallTimer;
 
         private PeerConnection peerConnection;
@@ -83,10 +58,6 @@ namespace MediaServer.MediaBot
         
         private LocalAudioTrack teamsAudioTrack;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="CallHandler"/> class.
-        /// </summary>
-        /// <param name="statefulCall">Stateful call instance.</param>
         public CallHandler(ICall statefulCall, PeerConnection peerConnection)
             : base(TimeSpan.FromMinutes(10), statefulCall?.GraphLogger)
         {
@@ -123,25 +94,15 @@ namespace MediaServer.MediaBot
             this.teamsVideoTransceiver.LocalVideoTrack = this.teamsVideoTrack;
 
             this.teamsVideoTransceiver.DesiredDirection = Transceiver.Direction.SendReceive;
-
-            /*this.teamsAudioTrack = LocalAudioTrack.CreateFromExternalSource("TeamsAudioTrack", ExternalAudioTrackSource.CreateFromCallback(this.CustomAudioFrameCallback));
-            this.teamsAudioTransceiver.LocalAudioTrack = this.teamsAudioTrack;
-
-            this.teamsAudioTransceiver.DesiredDirection = Transceiver.Direction.SendReceive;*/
         }
 
-        /// <summary>
-        /// Gets the call object.
-        /// </summary>
         public ICall Call { get; }
 
-        /// <inheritdoc/>
         protected override Task HeartbeatAsync(ElapsedEventArgs args)
         {
             return this.Call.KeepAliveAsync();
         }
 
-        /// <inheritdoc />
         protected override void Dispose(bool disposing)
         {
             base.Dispose(disposing);
@@ -195,7 +156,6 @@ namespace MediaServer.MediaBot
             {
                 this.lastVideoSentToClientTimeUtc = DateTime.Now;
 
-                // Step 1: Send Video with added hue
                 byte[] i420Frame = new byte[frame.width * frame.height * 12 / 8];
                 frame.CopyTo(i420Frame);
 
@@ -210,7 +170,6 @@ namespace MediaServer.MediaBot
                     nv12Frame[pixelCount + i * 2 + 1] = i420Frame[pixelCount + pixelCount / 4 + i];
                 }
 
-                // Use the real length of the data (Media may send us a larger buffer)
                 VideoFormat sendVideoFormat = VideoFormatUtil.GetSendVideoFormat((int)frame.height, (int)frame.width);
                 var videoSendBuffer = new VideoSendBuffer(nv12Frame, (uint)nv12Frame.Length, sendVideoFormat);
                 this.Call.GetLocalMediaSession().VideoSocket.Send(videoSendBuffer);
@@ -340,7 +299,6 @@ namespace MediaServer.MediaBot
         
         private void OnCallUpdated(ICall sender, ResourceEventArgs<Call> args)
         {
-            // Call state might have changed to established.
             this.Subscribe();
         }
 
@@ -415,12 +373,10 @@ namespace MediaServer.MediaBot
                         $"Height={e.Buffer.VideoFormat.Height}, ColorFormat={e.Buffer.VideoFormat.VideoColorFormat}, FrameRate={e.Buffer.VideoFormat.FrameRate})]");
                 }
 
-                // 33 ms frequency ~ 30 fps
                 if (DateTime.Now > this.lastVideoSentToTeamsTimeUtc + TimeSpan.FromMilliseconds(33))
                 {
                     this.lastVideoSentToTeamsTimeUtc = DateTime.Now;
 
-                    // Step 1: Send Video with added hue
                     byte[] buffer = new byte[e.Buffer.VideoFormat.Width * e.Buffer.VideoFormat.Height * 12 / 8];
                     Marshal.Copy(e.Buffer.Data, buffer, 0, buffer.Length);
 

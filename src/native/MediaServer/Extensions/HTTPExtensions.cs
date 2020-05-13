@@ -6,16 +6,8 @@ namespace MediaServer.Extensions
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Http.Extensions;
 
-    /// <summary>
-    /// Extensions for ASP.NET HTTP request and response.
-    /// </summary>
     public static class HttpExtensions
     {
-        /// <summary>
-        /// Creates the request message asynchronous.
-        /// </summary>
-        /// <param name="request">The request.</param>
-        /// <returns>Http Request Message.</returns>
         public static HttpRequestMessage CreateRequestMessage(this HttpRequest request)
         {
             var displayUri = request.GetDisplayUrl();
@@ -30,7 +22,6 @@ namespace MediaServer.Extensions
                 httpRequest.Content = new StreamContent(request.Body);
             }
 
-            // Copy headers
             foreach (var header in request.Headers)
             {
                 httpRequest.Headers.TryAddWithoutValidation(header.Key, header.Value.ToArray());
@@ -39,17 +30,10 @@ namespace MediaServer.Extensions
             return httpRequest;
         }
 
-        /// <summary>
-        /// Creates the HTTP response.
-        /// </summary>
-        /// <param name="response">The response.</param>
-        /// <param name="httpResponse">The HTTP response.</param>
-        /// <returns>The populated <see cref="HttpResponse"/>.</returns>
         public static async Task<HttpResponse> CreateHttpResponseAsync(this HttpResponseMessage response, HttpResponse httpResponse)
         {
             httpResponse.StatusCode = (int)response.StatusCode;
 
-            // Copy headers
             foreach (var header in response.Headers)
             {
                 response.Headers.Add(header.Key, header.Value);

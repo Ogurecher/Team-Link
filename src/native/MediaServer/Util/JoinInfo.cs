@@ -9,22 +9,11 @@ namespace MediaServer.Util.Meetings
     using System.Text.RegularExpressions;
     using Microsoft.Graph;
 
-    /// <summary>
-    /// Gets the join information.
-    /// </summary>
     public class JoinInfo
     {
-        /// <summary>
-        /// Parse Join URL into its components.
-        /// </summary>
-        /// <param name="joinURL">Join URL from Team's meeting body.</param>
-        /// <returns>Parsed data.</returns>
         public static (ChatInfo, MeetingInfo) ParseJoinURL(string joinURL)
         {
             var decodedURL = WebUtility.UrlDecode(joinURL);
-
-            //// URL being needs to be in this format.
-            //// https://teams.microsoft.com/l/meetup-join/19:cd9ce3da56624fe69c9d7cd026f9126d@thread.skype/1509579179399?context={"Tid":"72f988bf-86f1-41af-91ab-2d7cd011db47","Oid":"550fae72-d251-43ec-868c-373732c2704f","MessageId":"1536978844957"}
 
             var regex = new Regex("https://teams\\.microsoft\\.com.*/(?<thread>[^/]+)/(?<message>[^/]+)\\?context=(?<context>{.*})");
             var match = regex.Match(decodedURL);
@@ -56,27 +45,15 @@ namespace MediaServer.Util.Meetings
             }
         }
 
-        /// <summary>
-        /// Join URL context.
-        /// </summary>
         [DataContract]
         private class Context
         {
-            /// <summary>
-            /// Gets or sets the Tenant Id.
-            /// </summary>
             [DataMember]
             public string Tid { get; set; }
 
-            /// <summary>
-            /// Gets or sets the AAD object id of the user.
-            /// </summary>
             [DataMember]
             public string Oid { get; set; }
 
-            /// <summary>
-            /// Gets or sets the chat message id.
-            /// </summary>
             [DataMember]
             public string MessageId { get; set; }
         }
