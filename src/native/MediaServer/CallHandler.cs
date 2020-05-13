@@ -19,6 +19,7 @@ namespace MediaServer.MediaBot
     using NAudio.Wave;
     using Timer = System.Timers.Timer;
     using MediaServer;
+    using MediaServer.Converters;
     using MediaServer.Util;
     using MediaServer.Util.HeartBeat;
     using MediaServer.Util.VideoFormat;
@@ -106,7 +107,7 @@ namespace MediaServer.MediaBot
 
             this.Call.OnUpdated -= this.OnCallUpdated;
             this.Call.Participants.OnUpdated -= this.OnParticipantsUpdated;
-            
+
             this.Call.GetLocalMediaSession().AudioSocket.DominantSpeakerChanged -= this.OnDominantSpeakerChanged;
             this.Call.GetLocalMediaSession().VideoSocket.VideoMediaReceived -= this.OnTeamsVideoReceived;
             this.Call.GetLocalMediaSession().AudioSocket.AudioMediaReceived -= this.OnTeamsAudioReceived;
@@ -159,16 +160,7 @@ namespace MediaServer.MediaBot
                 byte[] i420Frame = new byte[frame.width * frame.height * 12 / 8];
                 frame.CopyTo(i420Frame);
 
-                byte[] nv12Frame = new byte[frame.width * frame.height * 12 / 8];
-                int pixelCount = i420Frame.Length * 8 / 12;
-                
-                Array.Copy(i420Frame, 0, nv12Frame, 0, pixelCount);
-
-                for (int i = 0; i < pixelCount / 4; i++)
-                {
-                    nv12Frame[pixelCount + i * 2] = i420Frame[pixelCount + i];
-                    nv12Frame[pixelCount + i * 2 + 1] = i420Frame[pixelCount + pixelCount / 4 + i];
-                }
+                byte[] nv12Frame = VideoConverter.I420ToNV12(i420Frame);
 
                 VideoFormat sendVideoFormat = VideoFormatUtil.GetSendVideoFormat((int)frame.height, (int)frame.width);
                 var videoSendBuffer = new VideoSendBuffer(nv12Frame, (uint)nv12Frame.Length, sendVideoFormat);
@@ -261,22 +253,15 @@ namespace MediaServer.MediaBot
         {
             if (this.nv12VideoFrameToSend != null)
             {
-                byte[] i420Frame = new byte[this.nv12VideoFrameToSend.Length];
+                byte[] i420Frame = VideoConverter.NV12ToI420(this.nv12VideoFrameToSend);
+                
+                IntPtr dataY = Marshal.AllocHGlobal(i420Frame.Length);
+                Marshal.Copy(i420Frame, 0, dataY, i420Frame.Length);
+
                 int pixelCount = this.nv12VideoFrameToSend.Length * 8 / 12;
                 double aspectRatio = 0.5625;
                 int frameWidth = (int)Math.Sqrt(pixelCount / aspectRatio);
                 int frameHeight = pixelCount / frameWidth;
-                
-                Array.Copy(this.nv12VideoFrameToSend, 0, i420Frame, 0, pixelCount);
-                
-                for (int i = 0; i < pixelCount / 4; i++)
-                {
-                    i420Frame[pixelCount + i] = this.nv12VideoFrameToSend[pixelCount + i * 2];
-                    i420Frame[pixelCount + pixelCount / 4 + i] = this.nv12VideoFrameToSend[pixelCount + i * 2 + 1];
-                }
-                
-                IntPtr dataY = Marshal.AllocHGlobal(i420Frame.Length);
-                Marshal.Copy(i420Frame, 0, dataY, i420Frame.Length);
                 
                 var frame = new I420AVideoFrame
                 {
