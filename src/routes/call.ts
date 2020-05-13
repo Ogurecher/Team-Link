@@ -75,7 +75,7 @@ async function callMeeting ({ organizerId, chatInfo }: MeetingInfo): Promise<Cal
     organizerMeetingInfo.allowConversationWithoutHost = true;
 
     const callMeetingQuery = `/joinCall`;
-    const callMeetingURL = path.join('https://teamlink_media.ngrok.io', callMeetingQuery);
+    const callMeetingURL = path.join(config.mediaModuleURI, callMeetingQuery);
 
     const callMeetingRes = await got.post(callMeetingURL, {
         json: {

@@ -65,8 +65,7 @@ namespace MediaServer.MediaBot
                 Marshal.Copy(i420Frame, 0, dataY, i420Frame.Length);
 
                 int pixelCount = this.nv12VideoFrameToSend.Length * 8 / 12;
-                double aspectRatio = 0.5625;
-                int frameWidth = (int)Math.Sqrt(pixelCount / aspectRatio);
+                int frameWidth = (int)Math.Sqrt(pixelCount / Config.VideoSettings.ASPECT_RATIO);
                 int frameHeight = pixelCount / frameWidth;
                 
                 var frame = new I420AVideoFrame

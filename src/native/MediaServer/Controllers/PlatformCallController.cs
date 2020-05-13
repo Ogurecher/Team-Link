@@ -43,7 +43,7 @@ namespace MediaServer.MediaBot
                 var body = reader.ReadToEnd();
 
                 HttpContent content = new StringContent(body, Encoding.UTF8, "application/json");
-                client.PostAsync("https://teamlink_main.ngrok.io/callback", content);
+                client.PostAsync(Config.CALLBACK_URI, content);
             }
         }
     }

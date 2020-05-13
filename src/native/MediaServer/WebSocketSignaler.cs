@@ -9,6 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.MixedReality.WebRTC;
 using Newtonsoft.Json;
+using MediaServer;
 
 namespace WebSocketSignaler
 {
@@ -62,7 +63,7 @@ namespace WebSocketSignaler
 
         private async Task<string> ProcessIncomingMessage()
         {
-            byte[] buffer = new byte[1024 * 25];
+            byte[] buffer = new byte[Config.SIGNALING_BUFFER_SIZE];
 
             WebSocketReceiveResult result = await this.webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
 

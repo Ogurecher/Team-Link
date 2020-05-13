@@ -12,6 +12,7 @@ namespace MediaServer.MediaBot
     using Microsoft.Skype.Bots.Media;
     using Microsoft.MixedReality.WebRTC;
     using Timer = System.Timers.Timer;
+    using MediaServer;
     using MediaServer.Util;
     using MediaServer.Util.HeartBeat;
 
@@ -21,7 +22,7 @@ namespace MediaServer.MediaBot
 
         public const uint DominantSpeakerNone = DominantSpeakerChangedEventArgs.None;
 
-        private const double WaitForMs = 1000 * 60 * 5;
+        private const double WaitForMs = Config.END_CALL_TIMER;
 
         private uint subscribedToMsi = DominantSpeakerNone;
 

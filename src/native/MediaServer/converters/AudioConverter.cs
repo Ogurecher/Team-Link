@@ -22,7 +22,7 @@ namespace MediaServer.Converters
                 {
                     resampler.ResamplerQuality = 1;
 
-                    int wavHeaderSize = 44;
+                    int wavHeaderSize = Config.AudioSettings.WAV_HEADER_SIZE;
                     int outBufferLength = outFormat.AverageBytesPerSecond / 100;
                     int wavBufferLength = outBufferLength + wavHeaderSize;
                     MemoryStream outStream = new MemoryStream(wavBufferLength);
