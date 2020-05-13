@@ -29,10 +29,6 @@ namespace MediaServer.MediaBot
 
         private const double WaitForMs = 1000 * 60 * 5;
 
-        private readonly TimeSpan videoCaptureFrequency = TimeSpan.FromMilliseconds(2000);
-
-        private DateTime lastVideoCapturedTimeUtc = DateTime.MinValue;
-
         private DateTime lastVideoSentToClientTimeUtc = DateTime.MinValue;
 
         private DateTime lastVideoSentToTeamsTimeUtc = DateTime.MinValue;
@@ -42,6 +38,7 @@ namespace MediaServer.MediaBot
         private Participant subscribedToParticipant;
 
         private int maxIngestFrameCount = 100;
+
         private Timer endCallTimer;
 
         private PeerConnection peerConnection;
@@ -108,9 +105,12 @@ namespace MediaServer.MediaBot
             base.Dispose(disposing);
 
             this.Call.OnUpdated -= this.OnCallUpdated;
+            this.Call.Participants.OnUpdated -= this.OnParticipantsUpdated;
+            
             this.Call.GetLocalMediaSession().AudioSocket.DominantSpeakerChanged -= this.OnDominantSpeakerChanged;
             this.Call.GetLocalMediaSession().VideoSocket.VideoMediaReceived -= this.OnTeamsVideoReceived;
-            this.Call.Participants.OnUpdated -= this.OnParticipantsUpdated;
+            this.Call.GetLocalMediaSession().AudioSocket.AudioMediaReceived -= this.OnTeamsAudioReceived;
+            
             foreach (var participant in this.Call.Participants)
             {
                 participant.OnUpdated -= this.OnParticipantUpdated;

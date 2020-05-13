@@ -16,57 +16,38 @@ namespace WebSocketSignaler
 {
     public class WebSocketSignaler
     {
-        public PeerConnection PeerConnection { get; }
+        public PeerConnection peerConnection { get; }
 
-        public WebSocket WebSocket { get; }
-
-        public bool IsClient { get; }
+        public WebSocket webSocket { get; }
 
         public PeerConnection.IceCandidateReadytoSendDelegate IceCandidateReceived;
 
         public PeerConnection.LocalSdpReadyToSendDelegate SdpMessageReceived;
 
-        private NamedPipeClientStream _clientPipe = null;
-
-        private NamedPipeServerStream _serverPipe = null;
-
-        private string _basePipeName;
-
-        private StreamWriter _sendStream = null;
-
-        private StreamReader _recvStream = null;
-
-        private readonly string _serverName = ".";
-
-        private readonly BlockingCollection<string> _incomingMessages = new BlockingCollection<string>(new ConcurrentQueue<string>());
-
-        private readonly BlockingCollection<string> _outgoingMessages = new BlockingCollection<string>(new ConcurrentQueue<string>());
+        private readonly BlockingCollection<string> outgoingMessages = new BlockingCollection<string>(new ConcurrentQueue<string>());
 
         public WebSocketSignaler(PeerConnection peerConnection, WebSocket webSocket)
         {
-            PeerConnection = peerConnection;
-            WebSocket = webSocket;
+            this.peerConnection = peerConnection;
+            this.webSocket = webSocket;
         }
 
         public async Task StartAsync()
         {
-            PeerConnection.LocalSdpReadytoSend += PeerConnection_LocalSdpReadytoSend;
-            PeerConnection.IceCandidateReadytoSend += PeerConnection_IceCandidateReadytoSend;
+            this.peerConnection.LocalSdpReadytoSend += LocalSdpReadytoSend;
+            this.peerConnection.IceCandidateReadytoSend += IceCandidateReadytoSend;
+
             _ = Task.Factory.StartNew(ProcessIncomingMessages, TaskCreationOptions.LongRunning);
             _ = Task.Factory.StartNew(WriteOutgoingMessages, TaskCreationOptions.LongRunning);
         }
 
         public void Stop()
         {
-            _recvStream.Close();
-            _outgoingMessages.CompleteAdding();
-            _outgoingMessages.Dispose();
-            PeerConnection.LocalSdpReadytoSend -= PeerConnection_LocalSdpReadytoSend;
-            PeerConnection.IceCandidateReadytoSend -= PeerConnection_IceCandidateReadytoSend;
-            _sendStream.Dispose();
-            _recvStream.Dispose();
-            _clientPipe.Dispose();
-            _serverPipe.Dispose();
+            outgoingMessages.CompleteAdding();
+            outgoingMessages.Dispose();
+
+            this.peerConnection.LocalSdpReadytoSend -= LocalSdpReadytoSend;
+            this.peerConnection.IceCandidateReadytoSend -= IceCandidateReadytoSend;
         }
 
         private async Task ProcessIncomingMessages()
@@ -78,18 +59,16 @@ namespace WebSocketSignaler
                 connectionStatus = await ProcessIncomingMessage();
             }
 
-            await WebSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Normal closure", CancellationToken.None);
+            await this.webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Normal closure", CancellationToken.None);
         }
 
         private async Task<string> ProcessIncomingMessage()
         {
             byte[] buffer = new byte[1024 * 25];
 
-            WebSocketReceiveResult result = await WebSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+            WebSocketReceiveResult result = await this.webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
 
             var messageBytes = new ArraySegment<byte>(buffer, 0, result.Count).ToArray();
-
-            
 
             using(MemoryStream ms = new MemoryStream(messageBytes))
             {
@@ -135,8 +114,6 @@ namespace WebSocketSignaler
                 }
             }
 
-            Console.WriteLine("Finished processing message");
-
             if (result.CloseStatus.HasValue)
             {
                 return "end";
@@ -149,10 +126,10 @@ namespace WebSocketSignaler
 
         private async Task WriteOutgoingMessages()
         {
-            foreach (var msg in _outgoingMessages.GetConsumingEnumerable())
+            foreach (var msg in outgoingMessages.GetConsumingEnumerable())
             {
                 byte[] buffer = Encoding.ASCII.GetBytes(msg);
-                await WebSocket.SendAsync(new ArraySegment<byte>(buffer), WebSocketMessageType.Text, false, CancellationToken.None);
+                await this.webSocket.SendAsync(new ArraySegment<byte>(buffer), WebSocketMessageType.Text, false, CancellationToken.None);
             }
         }
 
@@ -162,7 +139,7 @@ namespace WebSocketSignaler
             {
                 Console.WriteLine($"[->] {msg}");
                 byte[] buffer = Encoding.ASCII.GetBytes(msg);
-                await WebSocket.SendAsync(new ArraySegment<byte>(buffer), WebSocketMessageType.Text, true, CancellationToken.None);
+                await this.webSocket.SendAsync(new ArraySegment<byte>(buffer), WebSocketMessageType.Text, true, CancellationToken.None);
             }
             catch (Exception e)
             {
@@ -171,7 +148,7 @@ namespace WebSocketSignaler
             }
         }
 
-        private void PeerConnection_IceCandidateReadytoSend(string candidate, int sdpMlineindex, string sdpMid)
+        private void IceCandidateReadytoSend(string candidate, int sdpMlineindex, string sdpMid)
         {
             Dictionary<string, string> message = new Dictionary<string, string>
             {
@@ -184,7 +161,7 @@ namespace WebSocketSignaler
             SendMessage(serializedMessage);
         }
 
-        private void PeerConnection_LocalSdpReadytoSend(string type, string sdp)
+        private void LocalSdpReadytoSend(string type, string sdp)
         {
             Dictionary<string, string> message = new Dictionary<string, string>
             {

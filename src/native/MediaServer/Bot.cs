@@ -110,7 +110,6 @@ namespace MediaServer.MediaBot
         
         private void CallsOnUpdated(ICallCollection sender, CollectionEventArgs<ICall> args)
         {
-            Console.WriteLine("BOT CALLSONUPDATED");
             foreach (var call in args.AddedResources)
             {
                 Console.WriteLine(call);

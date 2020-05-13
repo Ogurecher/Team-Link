@@ -29,8 +29,6 @@ namespace MediaServer
 
         private PeerConnection peerConnection;
 
-        public WebSocket webSocket { get; }
-
         public Startup()
         {
             this.configuration = new ConfigurationBuilder()
@@ -168,12 +166,10 @@ namespace MediaServer
             await signaler.StartAsync();
 
             Console.WriteLine("Signaler started");
-
-            Console.WriteLine("Press a key to terminate the application...");
             Console.Read();
             signaler.Stop();
             this.peerConnection.Close();
-            Console.WriteLine("Program termined.");
+            Console.WriteLine("Program terminated.");
         }
     }
 }
