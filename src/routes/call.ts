@@ -20,7 +20,7 @@ export async function createCall (req: CreateCallRequest, res: HTTPResponse): Pr
     const accessToken = await getAppAccessToken();
 
     const meetingInfo = await createOnlineMeeting();
-    const callParameters = await callMeeting(meetingInfo, accessToken);
+    const callParameters = await callMeeting(meetingInfo);
     const callId = callParameters.id;
 
     notifier.once('Call established', () => {
@@ -69,27 +69,19 @@ async function createOnlineMeeting (): Promise<MeetingInfo> {
     };
 }
 
-async function callMeeting ({ organizerId, chatInfo }: MeetingInfo, accessToken: string): Promise<Call> {
+async function callMeeting ({ organizerId, chatInfo }: MeetingInfo): Promise<Call> {
     const organizerMeetingInfo: OrganizerMeetingInfo = populateUsers({ userIds: [organizerId], organizer: true })[0];
 
     organizerMeetingInfo.allowConversationWithoutHost = true;
 
-    const callMeetingQuery = `/communications/calls`;
-    const callMeetingURL = path.join(config.apiBaseURL, callMeetingQuery);
+    const callMeetingQuery = `/joinCall`;
+    const callMeetingURL = path.join('https://teamlink_media.ngrok.io', callMeetingQuery);
 
     const callMeetingRes = await got.post(callMeetingURL, {
-        headers: {
-            Authorization: `Bearer ${accessToken}`
-        },
         json: {
-            '@odata.type': '#microsoft.graph.call',
-            'callbackUri': `${config.callbackURI}`,
-            'chatInfo':    chatInfo,
-            'meetingInfo': organizerMeetingInfo,
-            'mediaConfig': {
-                '@odata.type': '#microsoft.graph.serviceHostedMediaConfig'
-            },
-            'tenantId': `${config.tenantId}`
+            'ChatInfo':    JSON.stringify(chatInfo),
+            'MeetingInfo': JSON.stringify(organizerMeetingInfo),
+            'TenantId':    config.tenantId
         }
     });
 
@@ -99,6 +91,8 @@ async function callMeeting ({ organizerId, chatInfo }: MeetingInfo, accessToken:
 }
 
 async function addParticipants ({ callId, userIds, accessToken }: { callId: string; userIds: string[]; accessToken: string}): Promise<void> {
+    debug(`Adding ${userIds} to call ${callId}`);
+
     const addParticipantsQuery = `/communications/calls/${callId}/participants/invite`;
     const addParticipantsURL = path.join(config.apiBaseURL, addParticipantsQuery);
 

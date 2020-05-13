@@ -15,7 +15,8 @@ export default class Config {
             apiBaseURL:           'https://graph.microsoft.com/beta',
             authorizationBaseURL: 'https://login.microsoftonline.com',
             oauthVersion:         '/oauth2/v2.0',
-            callbackURI:          'https://174e52c4.ngrok.io/callback'
+            callbackURI:          'https://174e52c4.ngrok.io/callback',
+            mediaModuleURI:       'https://teamlink_media.ngrok.io'
         };
     }
 
@@ -29,6 +30,7 @@ export default class Config {
             authorizationBaseURL: process.env.OAUTH_BASE_URL || this.defaults.authorizationBaseURL,
             oauthVersion:         process.env.OAUTH_VERSION || this.defaults.oauthVersion,
             callbackURI:          process.env.CALLBACK_URI || this.defaults.callbackURI,
+            mediaModuleURI:       process.env.MEDIA_MODULE_URI || this.defaults.mediaModuleURI,
             accessToken:          process.env.OAUTH_ACCESS_TOKEN_USER || '',
             tenantId:             process.env.OAUTH_TENANT_ID || '',
             clientId:             process.env.OAUTH_CLIENT_ID || '',

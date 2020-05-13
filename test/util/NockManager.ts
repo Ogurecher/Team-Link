@@ -1,7 +1,6 @@
 import nock from 'nock';
 import { interfaces } from '../../';
 
-
 export class NockManager {
     private config: interfaces.DefaultConfiguration;
     private regExpMap: {[name: string]: RegExp}
@@ -15,6 +14,7 @@ export class NockManager {
             'getPresencesNocks':       /\/communications\/getPresencesByUserId/,
             'createMeetingNocks':      /\/me\/onlineMeetings/,
             'createCallNocks':         /\/communications\/calls$/,
+            'joinCallNocks':           /\/joinCall/,
             'hangUpNocks':             /\/communications\/calls\/.*/,
             'inviteParticipantsNocks': /\/communications\/calls\/.*\/participants\/invite/,
             'rejectCallNocks':         /\/communications\/calls\/.*\/reject/
@@ -30,6 +30,7 @@ export class NockManager {
             'getPresencesNocks':       [],
             'createMeetingNocks':      [],
             'createCallNocks':         [],
+            'joinCallNocks':           [],
             'hangUpNocks':             [],
             'inviteParticipantsNocks': [],
             'rejectCallNocks':         []
@@ -171,7 +172,9 @@ export class NockManager {
                             }
                         }
                     },
-                    chatInfo: 'chatInfo1'
+                    chatInfo: {
+                        threadId: 'threadId1'
+                    }
                 }
             }
         });
@@ -182,6 +185,16 @@ export class NockManager {
             response: {
                 status: 200,
                 body:   { id: 'callId1' }
+            }
+        });
+
+        this.nocks['joinCallNocks'] = this.setupNock({
+            url:      this.config.mediaModuleURI,
+            method:   'post',
+            name:     'joinCallNocks',
+            response: {
+                body:   { id: 'callId1' },
+                status: 200
             }
         });
 

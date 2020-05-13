@@ -112,3 +112,16 @@ types
 # Ngrok
 ngrok.exe
 ngrok.yml
+
+# C# generated files
+src/native/HTTPServer/bin/
+src/native/HTTPServer/obj/
+
+src/native/Core2/bin/
+src/native/Core2/obj/
+src/native/Core2/.vs/
+src/native/Core2/cache/
+
+# Unnecessary bot parts
+src/native/Core2/Pages/
+src/native/Core2/wwwroot/
