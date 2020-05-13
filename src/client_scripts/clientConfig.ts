@@ -8,5 +8,16 @@ export default {
     callDOMElementId:         'call_button',
     callRootDOMElementId:     'call_button_root',
     callInfoDOMElementId:     'call_info',
-    callInfoRootDOMElementId: 'call_info_root'
+    callInfoRootDOMElementId: 'call_info_root',
+    selfViewDOMElementId:     'self_view',
+    remoteViewDOMElementId:   'remote_view',
+    stunURL:                  'stun:stun.l.google.com:19302',
+    websocketURL:             'wss://teamlink_media.ngrok.io/websocket',
+    audioConstraints:         {
+        sampleRate: 16000
+    },
+    videoConstraints: {
+        width:  640,
+        height: 360
+    }
 };
