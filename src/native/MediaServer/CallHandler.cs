@@ -25,46 +25,48 @@ namespace MediaServer.MediaBot
 
     public class CallHandler : HeartbeatHandler
     {
+        public ICall Call { get; }
+
         public const uint DominantSpeakerNone = DominantSpeakerChangedEventArgs.None;
 
         private const double WaitForMs = 1000 * 60 * 5;
-
-        private DateTime lastVideoSentToClientTimeUtc = DateTime.MinValue;
-
-        private DateTime lastVideoSentToTeamsTimeUtc = DateTime.MinValue;
 
         private uint subscribedToMsi = DominantSpeakerNone;
 
         private Participant subscribedToParticipant;
 
-        private int maxIngestFrameCount = 100;
-
         private Timer endCallTimer;
 
         private PeerConnection peerConnection;
 
-        private RemoteVideoTrack clientVideoTrack;
-
-        private RemoteAudioTrack clientAudioTrack;
-
         private Transceiver teamsVideoTransceiver;
         
         private Transceiver teamsAudioTransceiver;
-        
-        private LocalVideoTrack teamsVideoTrack;
-        
-        private LocalAudioTrack teamsAudioTrack;
+
+        private CallHandlerVideo callHandlerVideo;
+
+        private CallHandlerAudio callHandlerAudio;
+
+        protected override Task HeartbeatAsync(ElapsedEventArgs args)
+        {
+            return this.Call.KeepAliveAsync();
+        }
 
         public CallHandler(ICall statefulCall, PeerConnection peerConnection)
             : base(TimeSpan.FromMinutes(10), statefulCall?.GraphLogger)
         {
             this.Call = statefulCall;
+
+            this.callHandlerVideo = new CallHandlerVideo(this.Call);
+            this.callHandlerAudio = new CallHandlerAudio(this.Call);
+
+
             this.Call.OnUpdated += this.OnCallUpdated;
             if (this.Call.GetLocalMediaSession() != null)
             {
                 this.Call.GetLocalMediaSession().AudioSocket.DominantSpeakerChanged += this.OnDominantSpeakerChanged;
-                this.Call.GetLocalMediaSession().VideoSocket.VideoMediaReceived += this.OnTeamsVideoReceived;
-                this.Call.GetLocalMediaSession().AudioSocket.AudioMediaReceived += this.OnTeamsAudioReceived;
+                this.Call.GetLocalMediaSession().VideoSocket.VideoMediaReceived += this.callHandlerVideo.OnTeamsVideoReceived;
+                this.Call.GetLocalMediaSession().AudioSocket.AudioMediaReceived += this.callHandlerAudio.OnTeamsAudioReceived;
             }
 
             this.Call.Participants.OnUpdated += this.OnParticipantsUpdated;
@@ -75,11 +77,11 @@ namespace MediaServer.MediaBot
 
             this.peerConnection = peerConnection;
 
-            this.peerConnection.VideoTrackAdded += this.OnClientVideoTrackAdded;
-            this.peerConnection.VideoTrackRemoved += this.OnClientVideoTrackRemoved;
+            this.peerConnection.VideoTrackAdded += this.callHandlerVideo.OnClientVideoTrackAdded;
+            this.peerConnection.VideoTrackRemoved += this.callHandlerVideo.OnClientVideoTrackRemoved;
 
-            this.peerConnection.AudioTrackAdded += this.OnClientAudioTrackAdded;
-            this.peerConnection.AudioTrackRemoved += this.OnClientAudioTrackRemoved;
+            this.peerConnection.AudioTrackAdded += this.callHandlerAudio.OnClientAudioTrackAdded;
+            this.peerConnection.AudioTrackRemoved += this.callHandlerAudio.OnClientAudioTrackRemoved;
 
             TransceiverInitSettings transceiverInitSettings = new TransceiverInitSettings();
             transceiverInitSettings.InitialDesiredDirection = Transceiver.Direction.Inactive;
@@ -87,17 +89,11 @@ namespace MediaServer.MediaBot
             this.teamsAudioTransceiver = this.peerConnection.AddTransceiver(MediaKind.Audio, transceiverInitSettings);
             this.teamsVideoTransceiver = this.peerConnection.AddTransceiver(MediaKind.Video, transceiverInitSettings);
             
-            this.teamsVideoTrack = LocalVideoTrack.CreateFromExternalSource("TeamsVideoTrack", ExternalVideoTrackSource.CreateFromI420ACallback(this.CustomI420AFrameCallback));
-            this.teamsVideoTransceiver.LocalVideoTrack = this.teamsVideoTrack;
+            LocalVideoTrack teamsVideoTrack = LocalVideoTrack.CreateFromExternalSource("TeamsVideoTrack",
+                ExternalVideoTrackSource.CreateFromI420ACallback(this.callHandlerVideo.CustomI420AFrameCallback));
+            this.teamsVideoTransceiver.LocalVideoTrack = teamsVideoTrack;
 
             this.teamsVideoTransceiver.DesiredDirection = Transceiver.Direction.SendReceive;
-        }
-
-        public ICall Call { get; }
-
-        protected override Task HeartbeatAsync(ElapsedEventArgs args)
-        {
-            return this.Call.KeepAliveAsync();
         }
 
         protected override void Dispose(bool disposing)
@@ -108,8 +104,8 @@ namespace MediaServer.MediaBot
             this.Call.Participants.OnUpdated -= this.OnParticipantsUpdated;
 
             this.Call.GetLocalMediaSession().AudioSocket.DominantSpeakerChanged -= this.OnDominantSpeakerChanged;
-            this.Call.GetLocalMediaSession().VideoSocket.VideoMediaReceived -= this.OnTeamsVideoReceived;
-            this.Call.GetLocalMediaSession().AudioSocket.AudioMediaReceived -= this.OnTeamsAudioReceived;
+            this.Call.GetLocalMediaSession().VideoSocket.VideoMediaReceived -= this.callHandlerVideo.OnTeamsVideoReceived;
+            this.Call.GetLocalMediaSession().AudioSocket.AudioMediaReceived -= this.callHandlerAudio.OnTeamsAudioReceived;
             
             foreach (var participant in this.Call.Participants)
             {
@@ -118,140 +114,13 @@ namespace MediaServer.MediaBot
 
             this.endCallTimer.Elapsed -= this.OnTimerElapsed;
 
-            this.peerConnection.VideoTrackAdded -= this.OnClientVideoTrackAdded;
-            this.peerConnection.VideoTrackRemoved -= this.OnClientVideoTrackRemoved;
+            this.peerConnection.VideoTrackAdded -= this.callHandlerVideo.OnClientVideoTrackAdded;
+            this.peerConnection.VideoTrackRemoved -= this.callHandlerVideo.OnClientVideoTrackRemoved;
 
-            this.peerConnection.AudioTrackAdded -= this.OnClientAudioTrackAdded;
-            this.peerConnection.AudioTrackRemoved -= this.OnClientAudioTrackRemoved;
+            this.peerConnection.AudioTrackAdded -= this.callHandlerAudio.OnClientAudioTrackAdded;
+            this.peerConnection.AudioTrackRemoved -= this.callHandlerAudio.OnClientAudioTrackRemoved;
         }
 
-        private void OnClientVideoTrackAdded(RemoteVideoTrack track)
-        {
-            this.clientVideoTrack = track;
-            this.clientVideoTrack.I420AVideoFrameReady += this.OnClientVideoReceived;
-        }
-
-        private void OnClientAudioTrackAdded(RemoteAudioTrack track)
-        {
-            this.clientAudioTrack = track;
-            this.clientAudioTrack.AudioFrameReady += this.OnClientAudioReceived;
-        }
-
-        private void OnClientVideoTrackRemoved(Transceiver transceiver, RemoteVideoTrack track)
-        {
-            this.clientVideoTrack.I420AVideoFrameReady -= this.OnClientVideoReceived;
-            this.clientVideoTrack = null;
-        }
-
-        private void OnClientAudioTrackRemoved(Transceiver transceiver, RemoteAudioTrack track)
-        {
-            this.clientAudioTrack.AudioFrameReady -= this.OnClientAudioReceived;
-            this.clientAudioTrack = null;
-        }
-
-
-        private void OnClientVideoReceived(I420AVideoFrame frame)
-        {
-            if (DateTime.Now > this.lastVideoSentToClientTimeUtc + TimeSpan.FromMilliseconds(33))
-            {
-                this.lastVideoSentToClientTimeUtc = DateTime.Now;
-
-                byte[] i420Frame = new byte[frame.width * frame.height * 12 / 8];
-                frame.CopyTo(i420Frame);
-
-                byte[] nv12Frame = VideoConverter.I420ToNV12(i420Frame);
-
-                VideoFormat sendVideoFormat = VideoFormatUtil.GetSendVideoFormat((int)frame.height, (int)frame.width);
-                var videoSendBuffer = new VideoSendBuffer(nv12Frame, (uint)nv12Frame.Length, sendVideoFormat);
-                this.Call.GetLocalMediaSession().VideoSocket.Send(videoSendBuffer);
-            }
-        }
-
-
-        private byte[] savedFrame;
-
-        private int maxAudioFramesToSend = 2;
-
-        private int audioFrameCounter = 0;
-
-        private void OnClientAudioReceived(AudioFrame frame)
-        {
-            this.audioFrameCounter += 1;
-            int outRate = 16000;
-
-            int inputBufferLength = (int)(frame.sampleRate / 100 * frame.bitsPerSample / 8 * frame.channelCount);
-            byte[] inputBuffer = new byte[inputBufferLength];
-            Marshal.Copy(frame.audioData, inputBuffer, 0, inputBufferLength);
-
-            byte[] pcm16Bytes = AudioConverter.ResampleAudio(inputBuffer, (int)frame.sampleRate, (int)frame.bitsPerSample, (int)frame.channelCount, outRate);
-
-            if (this.audioFrameCounter % this.maxAudioFramesToSend == 0)
-            {
-                byte[] stackedFrames = AudioConverter.MergeFrames(this.savedFrame, pcm16Bytes);
-
-                IntPtr pcm16Pointer = Marshal.AllocHGlobal(stackedFrames.Length);
-                Marshal.Copy(stackedFrames, 0, pcm16Pointer, stackedFrames.Length);
-
-                var audioSendBuffer = new AudioSendBuffer(pcm16Pointer, (long)stackedFrames.Length, AudioFormat.Pcm16K);
-                this.Call.GetLocalMediaSession().AudioSocket.Send(audioSendBuffer);
-            }
-            else
-            {
-                this.savedFrame = pcm16Bytes;
-            }
-        }
-
-        private void CustomAudioFrameCallback(in AudioFrameRequest request)
-        {
-            IntPtr framePointer = Marshal.AllocHGlobal(this.audioFrameToSend.Length);
-            Marshal.Copy(this.audioFrameToSend, 0, framePointer, this.audioFrameToSend.Length);
-
-            var frame = new AudioFrame
-                {
-                    audioData = framePointer,
-                    bitsPerSample = 16,
-                    sampleRate = 16000,
-                    channelCount = 1,
-                    sampleCount = (uint)this.audioFrameToSend.Length * 8 / 16
-                };
-            request.CompleteRequest(frame);
-
-            Marshal.FreeHGlobal(framePointer);
-        }
-
-        private void CustomI420AFrameCallback(in FrameRequest request)
-        {
-            if (this.nv12VideoFrameToSend != null)
-            {
-                byte[] i420Frame = VideoConverter.NV12ToI420(this.nv12VideoFrameToSend);
-                
-                IntPtr dataY = Marshal.AllocHGlobal(i420Frame.Length);
-                Marshal.Copy(i420Frame, 0, dataY, i420Frame.Length);
-
-                int pixelCount = this.nv12VideoFrameToSend.Length * 8 / 12;
-                double aspectRatio = 0.5625;
-                int frameWidth = (int)Math.Sqrt(pixelCount / aspectRatio);
-                int frameHeight = pixelCount / frameWidth;
-                
-                var frame = new I420AVideoFrame
-                {
-                    dataY = dataY,
-                    dataU = dataY + pixelCount,
-                    dataV = dataY + pixelCount / 4 * 5,
-                    dataA = IntPtr.Zero,
-                    strideY = frameWidth,
-                    strideU = frameWidth / 2,
-                    strideV = frameWidth / 2,
-                    strideA = 0,
-                    width = (uint)frameWidth,
-                    height = (uint)frameHeight
-                };
-                request.CompleteRequest(frame);
-                
-                Marshal.FreeHGlobal(dataY);
-            }
-        }
-        
         private void OnCallUpdated(ICall sender, ResourceEventArgs<Call> args)
         {
             this.Subscribe();
@@ -310,60 +179,6 @@ namespace MediaServer.MediaBot
             this.subscribedToMsi = e.CurrentDominantSpeaker;
 
             this.Subscribe(e.CurrentDominantSpeaker);
-        }
-
-
-        private byte[] nv12VideoFrameToSend;
-
-        private void OnTeamsVideoReceived(object sender, VideoMediaReceivedEventArgs e)
-        {
-            Console.WriteLine("MEDIA RECEIVED");
-            try
-            {
-                if (Interlocked.Decrement(ref this.maxIngestFrameCount) > 0)
-                {
-                    this.GraphLogger.Info(
-                        $"[{this.Call.Id}]: Capturing image: [VideoMediaReceivedEventArgs(Data=<{e.Buffer.Data.ToString()}>, " +
-                        $"Length={e.Buffer.Length}, Timestamp={e.Buffer.Timestamp}, Width={e.Buffer.VideoFormat.Width}, " +
-                        $"Height={e.Buffer.VideoFormat.Height}, ColorFormat={e.Buffer.VideoFormat.VideoColorFormat}, FrameRate={e.Buffer.VideoFormat.FrameRate})]");
-                }
-
-                if (DateTime.Now > this.lastVideoSentToTeamsTimeUtc + TimeSpan.FromMilliseconds(33))
-                {
-                    this.lastVideoSentToTeamsTimeUtc = DateTime.Now;
-
-                    byte[] buffer = new byte[e.Buffer.VideoFormat.Width * e.Buffer.VideoFormat.Height * 12 / 8];
-                    Marshal.Copy(e.Buffer.Data, buffer, 0, buffer.Length);
-
-                    this.nv12VideoFrameToSend = buffer;
-                }
-            }
-            catch (Exception ex)
-            {
-                this.GraphLogger.Error(ex, $"[{this.Call.Id}] Exception in VideoMediaReceived");
-            }
-
-            e.Buffer.Dispose();
-        }
-
-        private byte[] audioFrameToSend;
-
-        private void OnTeamsAudioReceived(object sender, AudioMediaReceivedEventArgs e)
-        {
-            Console.WriteLine("Audio MEDIA RECEIVED");
-            try
-            {
-                byte[] buffer = new byte[100]; // change to real length later
-                Marshal.Copy(e.Buffer.Data, buffer, 0, buffer.Length);
-
-                this.audioFrameToSend = buffer;
-            }
-            catch (Exception ex)
-            {
-                this.GraphLogger.Error(ex, $"[{this.Call.Id}] Exception in AudioMediaReceived");
-            }
-
-            e.Buffer.Dispose();
         }
 
         private void Subscribe(uint msi)
