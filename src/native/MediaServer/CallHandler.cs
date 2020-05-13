@@ -1,12 +1,7 @@
 namespace MediaServer.MediaBot
 {
     using System;
-    using System.Collections.Generic;
-    using System.Drawing;
-    using System.IO;
     using System.Linq;
-    using System.Runtime.InteropServices;
-    using System.Threading;
     using System.Threading.Tasks;
     using System.Timers;
     using Microsoft.Graph;
@@ -17,11 +12,8 @@ namespace MediaServer.MediaBot
     using Microsoft.Skype.Bots.Media;
     using Microsoft.MixedReality.WebRTC;
     using Timer = System.Timers.Timer;
-    using MediaServer;
-    using MediaServer.Converters;
     using MediaServer.Util;
     using MediaServer.Util.HeartBeat;
-    using MediaServer.Util.VideoFormat;
 
     public class CallHandler : HeartbeatHandler
     {

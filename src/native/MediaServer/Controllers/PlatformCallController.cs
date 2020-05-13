@@ -8,7 +8,6 @@ namespace MediaServer.MediaBot
     using Microsoft.AspNetCore.Http.Internal;
     using Microsoft.Graph.Communications.Client;
     using Microsoft.Graph.Communications.Common.Telemetry;
-    using Newtonsoft.Json;
     using MediaServer.Controllers;
     using MediaServer.Extensions;
 

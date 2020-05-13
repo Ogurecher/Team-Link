@@ -3,15 +3,12 @@ namespace MediaServer.MediaBot
     using System;
     using System.Collections.Concurrent;
     using System.Collections.Generic;
-    using System.Drawing;
-    using System.Fabric;
     using System.Net;
     using System.Threading.Tasks;
     using Microsoft.Graph;
     using Microsoft.Graph.Communications.Calls;
     using Microsoft.Graph.Communications.Calls.Media;
     using Microsoft.Graph.Communications.Client;
-    using Microsoft.Graph.Communications.Common;
     using Microsoft.Graph.Communications.Common.Telemetry;
     using Microsoft.Graph.Communications.Resources;
     using Microsoft.MixedReality.WebRTC;

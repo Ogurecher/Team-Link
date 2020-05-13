@@ -1,10 +1,8 @@
 namespace MediaServer.Controllers
 {
     using System;
-    using System.Fabric;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Mvc;
-    using Microsoft.MixedReality.WebRTC;
     using MediaServer.MediaBot;
 
     public class JoinCallController : Controller
