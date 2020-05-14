@@ -59,6 +59,8 @@ export async function setUpMedia (): Promise<void> {
             selfView.srcObject = stream;
         }
     };
-
-    start();
+    
+    signaling.onopen = () => {
+        start();
+    }
 }
