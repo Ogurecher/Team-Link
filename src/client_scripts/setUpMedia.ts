@@ -1,5 +1,7 @@
 import config from './clientConfig';
 
+export let pc: RTCPeerConnection;
+
 export async function setUpMedia (): Promise<void> {
     const selfView = document.getElementById(config.selfViewDOMElementId) as HTMLVideoElement;
     const remoteView = document.getElementById(config.remoteViewDOMElementId) as HTMLVideoElement;
@@ -13,7 +15,8 @@ export async function setUpMedia (): Promise<void> {
 
     const signaling = new WebSocket(config.websocketURL);
     const configuration = { iceServers: [{ urls: config.stunURL }] };
-    const pc = new RTCPeerConnection(configuration);
+
+    pc = new RTCPeerConnection(configuration);
 
     pc.onicecandidate = ({ candidate }) => signaling.send(JSON.stringify(candidate));
 
