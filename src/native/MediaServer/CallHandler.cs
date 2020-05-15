@@ -79,15 +79,15 @@ namespace MediaServer.MediaBot
             TransceiverInitSettings transceiverInitSettings = new TransceiverInitSettings();
             transceiverInitSettings.InitialDesiredDirection = Transceiver.Direction.Inactive;
             
-            if (this.peerConnection.AssociatedTransceivers != null)
+            if (this.peerConnection.AssociatedTransceivers.ToList().Count != 0)
             {
                 this.teamsAudioTransceiver = this.peerConnection.AssociatedTransceivers.ToList()[0];
-                this.clientAudioTrack = this.peerConnection.AssociatedTransceivers.ToList()[0].RemoteAudioTrack;
-                this.clientAudioTrack.AudioFrameReady += this.OnClientAudioReceived;
+                this.callHandlerAudio.clientAudioTrack = this.peerConnection.AssociatedTransceivers.ToList()[0].RemoteAudioTrack;
+                this.callHandlerAudio.clientAudioTrack.AudioFrameReady += this.callHandlerAudio.OnClientAudioReceived;
 
                 this.teamsVideoTransceiver = this.peerConnection.AssociatedTransceivers.ToList()[1];
-                this.clientVideoTrack = this.peerConnection.AssociatedTransceivers.ToList()[1].RemoteVideoTrack;
-                this.clientVideoTrack.I420AVideoFrameReady += this.OnClientVideoReceived;
+                this.callHandlerVideo.clientVideoTrack = this.peerConnection.AssociatedTransceivers.ToList()[1].RemoteVideoTrack;
+                this.callHandlerVideo.clientVideoTrack.I420AVideoFrameReady += this.callHandlerVideo.OnClientVideoReceived;
             }
             else
             {
@@ -137,6 +137,12 @@ namespace MediaServer.MediaBot
             foreach (var participant in args.AddedResources)
             {
                 participant.OnUpdated += this.OnParticipantUpdated;
+
+                uint msi = (uint)Int32.Parse(participant.Resource.MediaStreams.FirstOrDefault(stream => stream.MediaType == Modality.Audio).SourceId);
+
+                this.subscribedToMsi = msi;
+
+                this.Subscribe(msi);
             }
 
             foreach (var participant in args.RemovedResources)
