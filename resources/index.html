@@ -20,6 +20,7 @@
         <div id="root"></div>
         <div id="call_button_root"></div>
         <div id="call_info_root"></div>
+        <div id="video_player_root"></div>
 
         <script type="text/javascript">
             (async () => {
@@ -28,94 +29,18 @@
                 const { subscribe, getOnlineUsers } = await System.import('index');
                 const { fireCreateCallRequest } =  await System.import('fireCreateCallRequest');
                 const { hangUpCall } =  await System.import('hangUpCall');
-                const { renderButton } = await System.import('reactRenderer');
+                const { renderButton, renderVideoPlayer } = await System.import('reactRenderer');
+                const { setUpMedia } = await System.import('setUpMedia');
 
                 renderButton();
+                renderVideoPlayer();
 
                 window.fireCreateCallRequest = fireCreateCallRequest;
                 window.hangUpCall = hangUpCall;
 
                 subscribe({ func: getOnlineUsers });
+                setUpMedia();
             })();
-        </script>
-
-        <video id="selfView" autoplay></video>
-        <video id="remoteView" autoplay></video>
-
-        <script>
-            const selfView = document.getElementById("selfView");
-            const remoteView = document.getElementById("remoteView");
-
-            const remoteStream = new MediaStream();
-            
-            const constraints = {
-                audio: {
-                    sampleSize: 16
-                },
-                video: {
-                    mandatory: {
-                        minWidth: 640,
-                        maxWidth: 640,
-                        minHeight: 360,
-                        maxHeight: 360
-                    }
-                }
-            };
-            
-            const signaling = new WebSocket('wss://teamlink_media.ngrok.io/websocket');
-            const configuration = {iceServers: [{urls: 'stun:stun.l.google.com:19302'}]};
-            const pc = new RTCPeerConnection(configuration);
-    
-            pc.onicecandidate = ({candidate}) => signaling.send(JSON.stringify(candidate));
-    
-            pc.onnegotiationneeded = async () => {
-                try {
-                    await pc.setLocalDescription(await pc.createOffer());
-                    signaling.send(JSON.stringify(pc.localDescription));
-                } catch (err) {
-                    console.error(err);
-                }
-            };
-    
-            pc.ontrack = (event) => {
-                remoteStream.addTrack(event.track);
-                remoteView.srcObject = remoteStream;
-            };
-    
-            async function start() {
-                try {
-                    const stream = await navigator.mediaDevices.getUserMedia(constraints);
-                    stream.getTracks().forEach((track) => pc.addTrack(track, stream));
-                    selfView.srcObject = stream;
-                } catch (err) {
-                    console.error(err);
-                }
-            }
-    
-            signaling.onmessage = async (event) => {
-                try {
-                    data = JSON.parse(event.data);
-    
-                    if (data.type) {
-                        if (data.type === 'offer') {
-                            await pc.setRemoteDescription(data);
-                            await pc.setLocalDescription(await pc.createAnswer());
-    
-                            signaling.send(JSON.stringify(pc.localDescription));
-                        } else if (data.type === 'answer') {
-                            await pc.setRemoteDescription(data);
-                        } else {
-                            console.log('Unsupported SDP type.');
-                        }
-                    } else if (data.candidate) {
-                        await pc.addIceCandidate(data);
-                    }
-                } catch (err) {
-                    console.error(err);
-                }
-            };
-    
-            start();
         </script>
     </body>
 </html>
