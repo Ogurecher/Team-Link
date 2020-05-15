@@ -189,11 +189,11 @@ namespace MediaServer.MediaBot
                 this.GraphLogger.Info($"[{this.Call.Id}] Received subscribe request for Msi {msi}");
 
                 IParticipant participant = this.GetParticipantForParticipantsChange(msi);
-                if (participant == null)
+                if (participant == null || participant.Resource.Info.Identity.Application != null)
                 {
                     this.subscribedToParticipant = null;
 
-                    this.GraphLogger.Info($"[{this.Call.Id}] Could not find valid participant using MSI {msi}");
+                    this.GraphLogger.Info($"[{this.Call.Id}] Could not find valid non-bot participant using MSI {msi}");
 
                     return;
                 }
