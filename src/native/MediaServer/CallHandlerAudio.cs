@@ -6,6 +6,7 @@ namespace MediaServer.MediaBot
     using Microsoft.Graph.Communications.Calls.Media;
     using Microsoft.Skype.Bots.Media;
     using Microsoft.MixedReality.WebRTC;
+    using MediaServer;
     using MediaServer.Converters;
 
     public class CallHandlerAudio
@@ -17,7 +18,7 @@ namespace MediaServer.MediaBot
 
         private byte[] savedFrame;
 
-        private int maxAudioFramesToSend = 2;
+        private int maxAudioFramesToSend = Config.AudioSettings.MAX_FRAMES_TO_SEND;
 
         private int audioFrameCounter = 0;
 
@@ -43,13 +44,13 @@ namespace MediaServer.MediaBot
         public void OnClientAudioReceived(AudioFrame frame)
         {
             this.audioFrameCounter += 1;
-            int outRate = 16000;
 
             int inputBufferLength = (int)(frame.sampleRate / 100 * frame.bitsPerSample / 8 * frame.channelCount);
             byte[] inputBuffer = new byte[inputBufferLength];
             Marshal.Copy(frame.audioData, inputBuffer, 0, inputBufferLength);
 
-            byte[] pcm16Bytes = AudioConverter.ResampleAudio(inputBuffer, (int)frame.sampleRate, (int)frame.bitsPerSample, (int)frame.channelCount, outRate);
+            byte[] pcm16Bytes = AudioConverter.ResampleAudio(inputBuffer, (int)frame.sampleRate,
+                (int)frame.bitsPerSample, (int)frame.channelCount, Config.AudioSettings.OUTGOING_SAMPLE_RATE);
 
             if (this.audioFrameCounter % this.maxAudioFramesToSend == 0)
             {
@@ -75,10 +76,10 @@ namespace MediaServer.MediaBot
             var frame = new AudioFrame
                 {
                     audioData = framePointer,
-                    bitsPerSample = 16,
-                    sampleRate = 16000,
-                    channelCount = 1,
-                    sampleCount = (uint)this.audioFrameToSend.Length * 8 / 16
+                    bitsPerSample = Config.AudioSettings.OUTGOING_BITS_PER_SAMPLE,
+                    sampleRate = Config.AudioSettings.OUTGOING_SAMPLE_RATE,
+                    channelCount = Config.AudioSettings.OUTGOING_CHANNEL_COUNT,
+                    sampleCount = (uint)this.audioFrameToSend.Length * 8 / Config.AudioSettings.OUTGOING_BITS_PER_SAMPLE
                 };
             request.CompleteRequest(frame);
 

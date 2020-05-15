@@ -14,6 +14,7 @@ namespace MediaServer.MediaBot
     using Microsoft.MixedReality.WebRTC;
     using Microsoft.Skype.Bots.Media;
     using Newtonsoft.Json;
+    using MediaServer;
     using MediaServer.Authentication;
     using MediaServer.Controllers;
     using MediaServer.Util.OnlineMeetings;
@@ -163,7 +164,7 @@ namespace MediaServer.MediaBot
             return new MediaPlatformSettings() {
                 MediaPlatformInstanceSettings = new MediaPlatformInstanceSettings() {
                     CertificateThumbprint = options.Certificate,
-                    InstanceInternalPort = 8445,
+                    InstanceInternalPort = Config.MEDIA_PORT,
                     InstancePublicIPAddress = instanceAddresses[0],
                     InstancePublicPort = publicMediaUrl.Port,
                     ServiceFqdn = publicMediaUrl.Host,
