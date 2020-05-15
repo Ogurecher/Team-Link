@@ -106,6 +106,14 @@ namespace MediaServer.MediaBot
         {
             base.Dispose(disposing);
 
+            this.peerConnection.VideoTrackAdded -= this.callHandlerVideo.OnClientVideoTrackAdded;
+            this.peerConnection.VideoTrackRemoved -= this.callHandlerVideo.OnClientVideoTrackRemoved;
+            this.callHandlerVideo.clientVideoTrack.I420AVideoFrameReady -= this.callHandlerVideo.OnClientVideoReceived;
+
+            this.peerConnection.AudioTrackAdded -= this.callHandlerAudio.OnClientAudioTrackAdded;
+            this.peerConnection.AudioTrackRemoved -= this.callHandlerAudio.OnClientAudioTrackRemoved;
+            this.callHandlerAudio.clientAudioTrack.AudioFrameReady -= this.callHandlerAudio.OnClientAudioReceived;
+
             this.Call.OnUpdated -= this.OnCallUpdated;
             this.Call.Participants.OnUpdated -= this.OnParticipantsUpdated;
 
@@ -119,12 +127,6 @@ namespace MediaServer.MediaBot
             }
 
             this.endCallTimer.Elapsed -= this.OnTimerElapsed;
-
-            this.peerConnection.VideoTrackAdded -= this.callHandlerVideo.OnClientVideoTrackAdded;
-            this.peerConnection.VideoTrackRemoved -= this.callHandlerVideo.OnClientVideoTrackRemoved;
-
-            this.peerConnection.AudioTrackAdded -= this.callHandlerAudio.OnClientAudioTrackAdded;
-            this.peerConnection.AudioTrackRemoved -= this.callHandlerAudio.OnClientAudioTrackRemoved;
         }
 
         private void OnCallUpdated(ICall sender, ResourceEventArgs<Call> args)
