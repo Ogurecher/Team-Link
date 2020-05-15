@@ -79,8 +79,21 @@ namespace MediaServer.MediaBot
             TransceiverInitSettings transceiverInitSettings = new TransceiverInitSettings();
             transceiverInitSettings.InitialDesiredDirection = Transceiver.Direction.Inactive;
             
-            this.teamsAudioTransceiver = this.peerConnection.AddTransceiver(MediaKind.Audio, transceiverInitSettings);
-            this.teamsVideoTransceiver = this.peerConnection.AddTransceiver(MediaKind.Video, transceiverInitSettings);
+            if (this.peerConnection.AssociatedTransceivers != null)
+            {
+                this.teamsAudioTransceiver = this.peerConnection.AssociatedTransceivers.ToList()[0];
+                this.clientAudioTrack = this.peerConnection.AssociatedTransceivers.ToList()[0].RemoteAudioTrack;
+                this.clientAudioTrack.AudioFrameReady += this.OnClientAudioReceived;
+
+                this.teamsVideoTransceiver = this.peerConnection.AssociatedTransceivers.ToList()[1];
+                this.clientVideoTrack = this.peerConnection.AssociatedTransceivers.ToList()[1].RemoteVideoTrack;
+                this.clientVideoTrack.I420AVideoFrameReady += this.OnClientVideoReceived;
+            }
+            else
+            {
+                this.teamsAudioTransceiver = this.peerConnection.AddTransceiver(MediaKind.Audio, transceiverInitSettings);
+                this.teamsVideoTransceiver = this.peerConnection.AddTransceiver(MediaKind.Video, transceiverInitSettings);
+            }
             
             LocalVideoTrack teamsVideoTrack = LocalVideoTrack.CreateFromExternalSource("TeamsVideoTrack",
                 ExternalVideoTrackSource.CreateFromI420ACallback(this.callHandlerVideo.CustomI420AFrameCallback));
