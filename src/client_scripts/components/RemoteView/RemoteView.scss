@@ -1,4 +1,9 @@
 #remote_view {
     width: 640px;
     height: 360px;
+    background-color: darkslategray;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: -1;
 }
