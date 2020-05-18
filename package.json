@@ -12,7 +12,8 @@
     "debug": "node --inspect-brk src/index.js",
     "watch": "npm test -- -w",
     "build": "tsc && tsc -p ./src/client_scripts && tsc -p ./src/client_scripts/error",
-    "start-cs": "dotnet run --project ./src/native/HTTPServer/"
+    "start-cs": "dotnet run --project ./src/native/HTTPServer/",
+    "compile-css": "sass ./src/client_scripts/styles/stylesheet.scss:./lib/client/stylesheet.css"
   },
   "repository": {
     "type": "git",

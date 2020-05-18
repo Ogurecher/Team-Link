@@ -1,8 +1,8 @@
 import React, { ReactNode } from 'react';
 import ToggleAudioButton from './ToggleAudioButton';
 import ToggleVideoButton from './ToggleVideoButton';
-import SelfView from './SelfView';
-import RemoteView from './RemoteView';
+import SelfView from './SelfView/SelfView';
+import RemoteView from './RemoteView/RemoteView';
 
 interface VideoPlayerProps {
     videoPlayerDOMElementId: string;
