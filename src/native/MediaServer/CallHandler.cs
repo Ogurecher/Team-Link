@@ -100,6 +100,12 @@ namespace MediaServer.MediaBot
             this.teamsVideoTransceiver.LocalVideoTrack = teamsVideoTrack;
 
             this.teamsVideoTransceiver.DesiredDirection = Transceiver.Direction.SendReceive;
+
+            LocalAudioTrack teamsAudioTrack = LocalAudioTrack.CreateFromExternalSource("TeamsAudioTrack",
+                ExternalAudioTrackSource.CreateFromCallback(this.callHandlerAudio.CustomAudioFrameCallback));
+            this.teamsAudioTransceiver.LocalAudioTrack = teamsAudioTrack;
+
+            this.teamsAudioTransceiver.DesiredDirection = Transceiver.Direction.SendReceive;
         }
 
         protected override void Dispose(bool disposing)

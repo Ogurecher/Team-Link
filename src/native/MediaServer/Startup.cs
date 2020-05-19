@@ -108,16 +108,16 @@ namespace MediaServer
 
             var signaler = new WebSocketSignaler(this.peerConnection, webSocket);
 
-            signaler.SdpMessageReceived += async (string type, string sdp) => {
-                await this.peerConnection.SetRemoteDescriptionAsync(type, sdp);
-                if (type == "offer")
+            signaler.SdpMessageReceived += async (SdpMessage message) => {
+                await this.peerConnection.SetRemoteDescriptionAsync(message);
+                if (message.Type == SdpMessageType.Offer)
                 {
                     this.peerConnection.CreateAnswer();
                 }
             };
 
-            signaler.IceCandidateReceived += (string candidate, int sdpMlineindex, string sdpMid) => {
-                this.peerConnection.AddIceCandidate(sdpMid, sdpMlineindex, candidate);
+            signaler.IceCandidateReceived += (IceCandidate candidate) => {
+                this.peerConnection.AddIceCandidate(candidate);
             };
 
             this.peerConnection.Connected += () => {

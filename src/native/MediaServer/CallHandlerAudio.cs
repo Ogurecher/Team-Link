@@ -1,6 +1,7 @@
 namespace MediaServer.MediaBot
 {
     using System;
+    using System.Collections.Generic;
     using System.Runtime.InteropServices;
     using Microsoft.Graph.Communications.Calls;
     using Microsoft.Graph.Communications.Calls.Media;
@@ -14,7 +15,7 @@ namespace MediaServer.MediaBot
 
         public RemoteAudioTrack clientAudioTrack;
 
-        private byte[] audioFrameToSend;
+        private Queue<byte[]> audioFrameQueue = new Queue<byte[]>();
 
         private byte[] savedFrame;
 
@@ -54,13 +55,20 @@ namespace MediaServer.MediaBot
 
             if (this.audioFrameCounter % this.maxAudioFramesToSend == 0)
             {
-                byte[] stackedFrames = AudioConverter.MergeFrames(this.savedFrame, pcm16Bytes);
+                try
+                {
+                    byte[] stackedFrames = AudioConverter.MergeFrames(this.savedFrame, pcm16Bytes);
 
-                IntPtr pcm16Pointer = Marshal.AllocHGlobal(stackedFrames.Length);
-                Marshal.Copy(stackedFrames, 0, pcm16Pointer, stackedFrames.Length);
+                    IntPtr pcm16Pointer = Marshal.AllocHGlobal(stackedFrames.Length);
+                    Marshal.Copy(stackedFrames, 0, pcm16Pointer, stackedFrames.Length);
 
-                var audioSendBuffer = new AudioSendBuffer(pcm16Pointer, (long)stackedFrames.Length, AudioFormat.Pcm16K);
-                this.Call.GetLocalMediaSession().AudioSocket.Send(audioSendBuffer);
+                    var audioSendBuffer = new AudioSendBuffer(pcm16Pointer, (long)stackedFrames.Length, AudioFormat.Pcm16K);
+                    this.Call.GetLocalMediaSession().AudioSocket.Send(audioSendBuffer);
+                }
+                catch(Exception e)
+                {
+                    Console.WriteLine(e.Message);
+                }
             }
             else
             {
@@ -70,8 +78,10 @@ namespace MediaServer.MediaBot
 
         public void CustomAudioFrameCallback(in AudioFrameRequest request)
         {
-            IntPtr framePointer = Marshal.AllocHGlobal(this.audioFrameToSend.Length);
-            Marshal.Copy(this.audioFrameToSend, 0, framePointer, this.audioFrameToSend.Length);
+            byte[] audioFrameToSend = this.audioFrameQueue.Dequeue();
+
+            IntPtr framePointer = Marshal.AllocHGlobal(audioFrameToSend.Length);
+            Marshal.Copy(audioFrameToSend, 0, framePointer, audioFrameToSend.Length);
 
             var frame = new AudioFrame
                 {
@@ -79,7 +89,7 @@ namespace MediaServer.MediaBot
                     bitsPerSample = Config.AudioSettings.OUTGOING_BITS_PER_SAMPLE,
                     sampleRate = Config.AudioSettings.OUTGOING_SAMPLE_RATE,
                     channelCount = Config.AudioSettings.OUTGOING_CHANNEL_COUNT,
-                    sampleCount = (uint)this.audioFrameToSend.Length * 8 / Config.AudioSettings.OUTGOING_BITS_PER_SAMPLE
+                    sampleCount = (uint)audioFrameToSend.Length * 8 / Config.AudioSettings.OUTGOING_BITS_PER_SAMPLE
                 };
             request.CompleteRequest(frame);
 
@@ -91,10 +101,15 @@ namespace MediaServer.MediaBot
             Console.WriteLine("Audio MEDIA RECEIVED");
             try
             {
-                byte[] buffer = new byte[100]; // change to real length later
+                IntPtr secondFramePointer = e.Buffer.Data + (int)(e.Buffer.Length / 2);
+                byte[] buffer = new byte[e.Buffer.Length / 2]; // change to real length later
                 Marshal.Copy(e.Buffer.Data, buffer, 0, buffer.Length);
 
-                this.audioFrameToSend = buffer;
+                this.audioFrameQueue.Enqueue(buffer);
+
+                Marshal.Copy(secondFramePointer, buffer, 0, buffer.Length);
+
+                this.audioFrameQueue.Enqueue(buffer);
             }
             catch (Exception ex)
             {

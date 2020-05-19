@@ -96,7 +96,11 @@ namespace WebSocketSignaler
                     Console.WriteLine(type);
                     Console.WriteLine(sdp);
 
-                    SdpMessageReceived?.Invoke(type, sdp);
+                    SdpMessage msg = new SdpMessage();
+                    msg.Type = SdpMessage.StringToType(type);
+                    msg.Content = sdp;
+
+                    SdpMessageReceived?.Invoke(msg);
                 }
                 else if (messageJson.ContainsKey("candidate"))
                 {
@@ -109,7 +113,12 @@ namespace WebSocketSignaler
                     Console.WriteLine(sdpMLineIndex);
                     Console.WriteLine(sdpMid);
 
-                    IceCandidateReceived?.Invoke(candidate, Int32.Parse(sdpMLineIndex), sdpMid);
+                    IceCandidate msg = new IceCandidate();
+                    msg.SdpMid = sdpMid;
+                    msg.SdpMlineIndex = Int32.Parse(sdpMLineIndex);
+                    msg.Content = candidate;
+
+                    IceCandidateReceived?.Invoke(msg);
                 }
             }
 
@@ -147,28 +156,28 @@ namespace WebSocketSignaler
             }
         }
 
-        private void IceCandidateReadytoSend(string candidate, int sdpMlineindex, string sdpMid)
+        private void IceCandidateReadytoSend(IceCandidate candidate)
         {
             Dictionary<string, string> message = new Dictionary<string, string>
             {
-                {"candidate", candidate},
-                {"sdpMlineindex", sdpMlineindex.ToString()},
-                {"sdpMid", sdpMid}
+                {"candidate", candidate.Content},
+                {"sdpMlineindex", candidate.SdpMlineIndex.ToString()},
+                {"sdpMid", candidate.SdpMid}
             };
 
             string serializedMessage = JsonConvert.SerializeObject(message);
             SendMessage(serializedMessage);
         }
 
-        private void LocalSdpReadytoSend(string type, string sdp)
+        private void LocalSdpReadytoSend(SdpMessage message)
         {
-            Dictionary<string, string> message = new Dictionary<string, string>
+            Dictionary<string, string> outMessage = new Dictionary<string, string>
             {
-                {"type", type},
-                {"sdp", sdp}
+                {"type", SdpMessage.TypeToString(message.Type)},
+                {"sdp", message.Content}
             };
 
-            string serializedMessage = JsonConvert.SerializeObject(message);
+            string serializedMessage = JsonConvert.SerializeObject(outMessage);
             SendMessage(serializedMessage);
         }
     }
