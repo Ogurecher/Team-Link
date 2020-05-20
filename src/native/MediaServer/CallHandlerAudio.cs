@@ -9,13 +9,16 @@ namespace MediaServer.MediaBot
     using Microsoft.MixedReality.WebRTC;
     using MediaServer;
     using MediaServer.Converters;
+    using MediaServer.Util;
+
+    using System.Threading;
 
     public class CallHandlerAudio
     {
 
         public RemoteAudioTrack clientAudioTrack;
 
-        private Queue<byte[]> audioFrameQueue = new Queue<byte[]>();
+        private FixedSizeQueue<byte[]> audioFrameQueue = new FixedSizeQueue<byte[]>(6);
 
         private byte[] savedFrame;
 
@@ -86,8 +89,8 @@ namespace MediaServer.MediaBot
 
         public void CustomAudioFrameCallback(in AudioFrameRequest request)
         {
-            //if (DateTime.Now > this.lastAudioSentToClientTimeUtc + TimeSpan.FromMilliseconds(10))
-            //{
+            if (DateTime.Now > this.lastAudioSentToClientTimeUtc + TimeSpan.FromMilliseconds(8))
+            {
                 this.timeDeltasFromCallback.Add(DateTime.Now - this.lastAudioSentToClientTimeUtc);
                 this.lastAudioSentToClientTimeUtc = DateTime.Now;
 
@@ -112,7 +115,7 @@ namespace MediaServer.MediaBot
 
                     Marshal.FreeHGlobal(framePointer);
                 }
-            //}
+            }
         }
 
         public void OnTeamsAudioReceived(object sender, AudioMediaReceivedEventArgs e)
