@@ -53,21 +53,6 @@ namespace MediaServer.MediaBot
             this.callHandlerVideo = new CallHandlerVideo(this.Call);
             this.callHandlerAudio = new CallHandlerAudio(this.Call);
 
-
-            this.Call.OnUpdated += this.OnCallUpdated;
-            if (this.Call.GetLocalMediaSession() != null)
-            {
-                this.Call.GetLocalMediaSession().AudioSocket.DominantSpeakerChanged += this.OnDominantSpeakerChanged;
-                this.Call.GetLocalMediaSession().VideoSocket.VideoMediaReceived += this.callHandlerVideo.OnTeamsVideoReceived;
-                this.Call.GetLocalMediaSession().AudioSocket.AudioMediaReceived += this.callHandlerAudio.OnTeamsAudioReceived;
-            }
-
-            this.Call.Participants.OnUpdated += this.OnParticipantsUpdated;
-            this.endCallTimer = new Timer(CallHandler.WaitForMs);
-            this.endCallTimer.Enabled = false;
-            this.endCallTimer.AutoReset = false;
-            this.endCallTimer.Elapsed += this.OnTimerElapsed;
-
             this.peerConnection = peerConnection;
 
             this.peerConnection.VideoTrackAdded += this.callHandlerVideo.OnClientVideoTrackAdded;
@@ -106,6 +91,20 @@ namespace MediaServer.MediaBot
             this.teamsAudioTransceiver.LocalAudioTrack = teamsAudioTrack;
 
             this.teamsAudioTransceiver.DesiredDirection = Transceiver.Direction.SendReceive;
+
+            this.Call.OnUpdated += this.OnCallUpdated;
+            if (this.Call.GetLocalMediaSession() != null)
+            {
+                this.Call.GetLocalMediaSession().AudioSocket.DominantSpeakerChanged += this.OnDominantSpeakerChanged;
+                this.Call.GetLocalMediaSession().VideoSocket.VideoMediaReceived += this.callHandlerVideo.OnTeamsVideoReceived;
+                this.Call.GetLocalMediaSession().AudioSocket.AudioMediaReceived += this.callHandlerAudio.OnTeamsAudioReceived;
+            }
+
+            this.Call.Participants.OnUpdated += this.OnParticipantsUpdated;
+            this.endCallTimer = new Timer(CallHandler.WaitForMs);
+            this.endCallTimer.Enabled = false;
+            this.endCallTimer.AutoReset = false;
+            this.endCallTimer.Elapsed += this.OnTimerElapsed;
         }
 
         protected override void Dispose(bool disposing)

@@ -53,10 +53,17 @@ export async function setUpMedia (): Promise<void> {
 
     const start = async (): Promise<void> => {
         if (navigator.mediaDevices) {
-            const stream = await navigator.mediaDevices.getUserMedia(constraints);
+            const deviceStream = await navigator.mediaDevices.getUserMedia(constraints);
+            const selfStream = new MediaStream();
 
-            stream.getTracks().forEach(track => pc.addTrack(track, stream));
-            selfView.srcObject = stream;
+            deviceStream.getTracks().forEach(track => {
+                pc.addTrack(track, deviceStream);
+
+                if (track.kind === 'video')
+                    selfStream.addTrack(track);
+            });
+
+            selfView.srcObject = selfStream;
         }
     };
 

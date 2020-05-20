@@ -23,6 +23,14 @@ namespace MediaServer.MediaBot
 
         private int audioFrameCounter = 0;
 
+        private DateTime lastAudioGotFromTeamsTimeUtc = DateTime.MinValue;
+
+        private List<TimeSpan> timeDeltasFromTeams = new List<TimeSpan>();
+
+        private DateTime lastAudioSentToClientTimeUtc = DateTime.MinValue;
+
+        private List<TimeSpan> timeDeltasFromCallback = new List<TimeSpan>();
+
         private ICall Call;
 
         public CallHandlerAudio(ICall call)
@@ -78,45 +86,66 @@ namespace MediaServer.MediaBot
 
         public void CustomAudioFrameCallback(in AudioFrameRequest request)
         {
-            byte[] audioFrameToSend = this.audioFrameQueue.Dequeue();
+            //if (DateTime.Now > this.lastAudioSentToClientTimeUtc + TimeSpan.FromMilliseconds(10))
+            //{
+                this.timeDeltasFromCallback.Add(DateTime.Now - this.lastAudioSentToClientTimeUtc);
+                this.lastAudioSentToClientTimeUtc = DateTime.Now;
 
-            IntPtr framePointer = Marshal.AllocHGlobal(audioFrameToSend.Length);
-            Marshal.Copy(audioFrameToSend, 0, framePointer, audioFrameToSend.Length);
-
-            var frame = new AudioFrame
+                if (this.audioFrameQueue.Count > 0)
                 {
-                    audioData = framePointer,
-                    bitsPerSample = Config.AudioSettings.OUTGOING_BITS_PER_SAMPLE,
-                    sampleRate = Config.AudioSettings.OUTGOING_SAMPLE_RATE,
-                    channelCount = Config.AudioSettings.OUTGOING_CHANNEL_COUNT,
-                    sampleCount = (uint)audioFrameToSend.Length * 8 / Config.AudioSettings.OUTGOING_BITS_PER_SAMPLE
-                };
-            request.CompleteRequest(frame);
+                    byte[] pcm16AudioFrame = this.audioFrameQueue.Dequeue();
 
-            Marshal.FreeHGlobal(framePointer);
+                    byte[] audioFrameToSend = AudioConverter.ResampleAudio(pcm16AudioFrame, 16000, 16, 1, Config.AudioSettings.WEBRTC_SAMPLE_RATE);
+
+                    IntPtr framePointer = Marshal.AllocHGlobal(audioFrameToSend.Length);
+                    Marshal.Copy(audioFrameToSend, 0, framePointer, audioFrameToSend.Length);
+
+                    var frame = new AudioFrame
+                        {
+                            audioData = framePointer,
+                            bitsPerSample = Config.AudioSettings.OUTGOING_BITS_PER_SAMPLE,
+                            sampleRate = Config.AudioSettings.WEBRTC_SAMPLE_RATE,
+                            channelCount = Config.AudioSettings.OUTGOING_CHANNEL_COUNT,
+                            sampleCount = (uint)audioFrameToSend.Length * 8 / Config.AudioSettings.OUTGOING_BITS_PER_SAMPLE
+                        };
+                    request.CompleteRequest(frame);
+
+                    Marshal.FreeHGlobal(framePointer);
+                }
+            //}
         }
 
         public void OnTeamsAudioReceived(object sender, AudioMediaReceivedEventArgs e)
         {
-            Console.WriteLine("Audio MEDIA RECEIVED");
-            try
+            if (DateTime.Now > this.lastAudioGotFromTeamsTimeUtc + TimeSpan.FromMilliseconds(20))
             {
-                IntPtr secondFramePointer = e.Buffer.Data + (int)(e.Buffer.Length / 2);
-                byte[] buffer = new byte[e.Buffer.Length / 2]; // change to real length later
-                Marshal.Copy(e.Buffer.Data, buffer, 0, buffer.Length);
+                this.timeDeltasFromTeams.Add(DateTime.Now - this.lastAudioGotFromTeamsTimeUtc);
+                this.lastAudioGotFromTeamsTimeUtc = DateTime.Now;
+                Console.WriteLine("Audio MEDIA RECEIVED");
+                try
+                {
+                    byte[][] pcm16Frames = new byte[][]
+                    {
+                        new byte[e.Buffer.Length / 2],
+                        new byte[e.Buffer.Length / 2]
+                    };
+                    
+                    byte[] buffer = new byte[e.Buffer.Length];
+                    Marshal.Copy(e.Buffer.Data, buffer, 0, buffer.Length);
 
-                this.audioFrameQueue.Enqueue(buffer);
+                    for (int i = 0; i < 2; i++)
+                    {
+                        Array.Copy(buffer, i * pcm16Frames[i].Length, pcm16Frames[i], 0, pcm16Frames[i].Length);
+                        this.audioFrameQueue.Enqueue(pcm16Frames[i]);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                }
 
-                Marshal.Copy(secondFramePointer, buffer, 0, buffer.Length);
-
-                this.audioFrameQueue.Enqueue(buffer);
+                e.Buffer.Dispose();
             }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-            }
-
-            e.Buffer.Dispose();
         }
     }
 }
