@@ -11,14 +11,12 @@ namespace MediaServer.MediaBot
     using MediaServer.Converters;
     using MediaServer.Util;
 
-    using System.Threading;
-
     public class CallHandlerAudio
     {
 
         public RemoteAudioTrack clientAudioTrack;
 
-        private FixedSizeQueue<byte[]> audioFrameQueue = new FixedSizeQueue<byte[]>(6);
+        private FixedSizeQueue<byte[]> audioFrameQueue = new FixedSizeQueue<byte[]>(Config.AudioSettings.MAX_AUDIO_FRAMES_IN_QUEUE);
 
         private byte[] savedFrame;
 
@@ -28,11 +26,7 @@ namespace MediaServer.MediaBot
 
         private DateTime lastAudioGotFromTeamsTimeUtc = DateTime.MinValue;
 
-        private List<TimeSpan> timeDeltasFromTeams = new List<TimeSpan>();
-
         private DateTime lastAudioSentToClientTimeUtc = DateTime.MinValue;
-
-        private List<TimeSpan> timeDeltasFromCallback = new List<TimeSpan>();
 
         private ICall Call;
 
@@ -91,14 +85,14 @@ namespace MediaServer.MediaBot
         {
             if (DateTime.Now > this.lastAudioSentToClientTimeUtc + TimeSpan.FromMilliseconds(8))
             {
-                this.timeDeltasFromCallback.Add(DateTime.Now - this.lastAudioSentToClientTimeUtc);
                 this.lastAudioSentToClientTimeUtc = DateTime.Now;
 
                 if (this.audioFrameQueue.Count > 0)
                 {
                     byte[] pcm16AudioFrame = this.audioFrameQueue.Dequeue();
 
-                    byte[] audioFrameToSend = AudioConverter.ResampleAudio(pcm16AudioFrame, 16000, 16, 1, Config.AudioSettings.WEBRTC_SAMPLE_RATE);
+                    byte[] audioFrameToSend = AudioConverter.ResampleAudio(pcm16AudioFrame, Config.AudioSettings.OUTGOING_SAMPLE_RATE,
+                        Config.AudioSettings.OUTGOING_BITS_PER_SAMPLE, Config.AudioSettings.OUTGOING_CHANNEL_COUNT, Config.AudioSettings.WEBRTC_SAMPLE_RATE);
 
                     IntPtr framePointer = Marshal.AllocHGlobal(audioFrameToSend.Length);
                     Marshal.Copy(audioFrameToSend, 0, framePointer, audioFrameToSend.Length);
@@ -122,7 +116,6 @@ namespace MediaServer.MediaBot
         {
             if (DateTime.Now > this.lastAudioGotFromTeamsTimeUtc + TimeSpan.FromMilliseconds(20))
             {
-                this.timeDeltasFromTeams.Add(DateTime.Now - this.lastAudioGotFromTeamsTimeUtc);
                 this.lastAudioGotFromTeamsTimeUtc = DateTime.Now;
                 Console.WriteLine("Audio MEDIA RECEIVED");
                 try

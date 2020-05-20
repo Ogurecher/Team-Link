@@ -19,6 +19,8 @@ namespace MediaServer
             public const int WEBRTC_SAMPLE_RATE = 48000;
 
             public const int WAV_HEADER_SIZE = 44;
+
+            public const int MAX_AUDIO_FRAMES_IN_QUEUE = 6;
         }
 
         public static class VideoSettings

@@ -16,8 +16,6 @@ namespace MediaServer.MediaBot
     using MediaServer.Util;
     using MediaServer.Util.HeartBeat;
 
-    using System.Threading;
-
     public class CallHandler : HeartbeatHandler
     {
         public ICall Call { get; }

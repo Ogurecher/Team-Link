@@ -5,8 +5,6 @@ namespace MediaServer.Converters
     using System.Linq;
     using NAudio.Wave;
 
-    using System.Threading;
-
     public class AudioConverter
     {
         public static byte[] ResampleAudio(byte[] inputFrame, int inputSampleRate, int inputBitsPerSample, int inputChannelCount, int outSampleRate)
