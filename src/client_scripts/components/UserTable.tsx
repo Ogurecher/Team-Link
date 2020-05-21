@@ -1,4 +1,5 @@
 import React, { ReactNode } from 'react';
+import ReactBootstrap from 'react-bootstrap';
 import UserTableRow from './UserTableRow';
 import { User } from '../interfaces';
 
@@ -18,12 +19,12 @@ export default class UserTable extends React.Component<UserTableProps> {
 
     public render (): ReactNode {
         return (
-            <table id={this.props.tableDOMElementId}>
+            <ReactBootstrap.Table striped bordered hover size="sm" id={this.props.tableDOMElementId}>
                 <tbody>
                     <UserTableRow key='-1' cellType='th' displayName='Display Name' id='ID' status='Status'></UserTableRow>
                     {this.populateTable()}
                 </tbody>
-            </table>
+            </ReactBootstrap.Table>
         );
     }
 }
