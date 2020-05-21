@@ -16,7 +16,7 @@ namespace MediaServer
 
             public const int OUTGOING_CHANNEL_COUNT = 1;
 
-            public const int WEBRTC_SAMPLE_RATE = 48000;
+            public const int WEBRTC_SAMPLE_RATE = 16000;
 
             public const int WAV_HEADER_SIZE = 44;
 
