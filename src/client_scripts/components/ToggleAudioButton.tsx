@@ -1,13 +1,15 @@
 import React, { ReactNode } from 'react';
-import ToggleButton from 'react-bootstrap/ToggleButton';
+import ReactBootstrap from 'react-bootstrap';
 import { toggleAudio } from '../toggleAudio';
 
 export default class ToggleAudioButton extends React.Component {
     public render (): ReactNode {
         return (
-            <ToggleButton type="checkbox" defaultChecked value="1" onChange={toggleAudio}>
-                Toggle Audio
-            </ToggleButton>
+            <ReactBootstrap.ToggleButtonGroup type="checkbox" onChange={toggleAudio}>
+                <ReactBootstrap.ToggleButton type="checkbox" value="1">
+                    Toggle Audio
+                </ReactBootstrap.ToggleButton>
+            </ReactBootstrap.ToggleButtonGroup>
         );
     }
 }
