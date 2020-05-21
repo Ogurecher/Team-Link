@@ -4,7 +4,6 @@ import config from './clientConfig';
 import { User } from './interfaces';
 import UserTable from './components/UserTable';
 import CallButton from './components/CallButton';
-import HangUpButton from './components/HangUpButton';
 import CallInfo from './components/CallInfo';
 import VideoPlayer from './components/VideoPlayer/VideoPlayer';
 
