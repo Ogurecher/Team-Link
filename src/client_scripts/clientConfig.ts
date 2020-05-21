@@ -11,7 +11,7 @@ export default {
     callInfoRootDOMElementId:    'call_info_root',
     videoPlayerDOMElementId:     'video_player',
     videoPlayerRootDOMElementId: 'video_player_root',
-    buttonPanelDOMElementId: 'button_panel',
+    buttonPanelDOMElementId:     'button_panel',
     selfViewDOMElementId:        'self_view',
     remoteViewDOMElementId:      'remote_view',
     stunURL:                     'stun:stun.l.google.com:19302',
