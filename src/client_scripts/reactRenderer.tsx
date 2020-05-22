@@ -3,23 +3,13 @@ import ReactDOM from 'react-dom';
 import config from './clientConfig';
 import { User } from './interfaces';
 import UserTable from './components/UserTable/UserTable';
-import CallButton from './components/CallButton';
 import CallInfo from './components/CallInfo/CallInfo';
 import VideoPlayer from './components/VideoPlayer/VideoPlayer';
 
 export function renderTable (onlineUsers: User[]): void {
     ReactDOM.render(
-        <UserTable tableDOMElementId={config.tableDOMElementId} users={onlineUsers}></UserTable>,
+        <UserTable tableDOMElementId={config.tableDOMElementId} users={onlineUsers} callDOMElementId={config.callDOMElementId}></UserTable>,
         document.getElementById(config.rootDOMElementId)
-    );
-}
-
-export function renderButton (): void {
-    ReactDOM.render(
-        <div>
-            <CallButton callDOMElementId={config.callDOMElementId}></CallButton>
-        </div>,
-        document.getElementById(config.callRootDOMElementId)
     );
 }
 

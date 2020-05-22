@@ -1,6 +1,6 @@
 import React, { ReactNode } from 'react';
 import ReactBootstrap from 'react-bootstrap';
-import { hangUpCall } from '../hangUpCall';
+import { hangUpCall } from '../../hangUpCall';
 
 
 export default class CallButton extends React.Component {

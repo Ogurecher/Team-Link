@@ -1,6 +1,6 @@
 import React, { ReactNode } from 'react';
 import ReactBootstrap from 'react-bootstrap';
-import { fireCreateCallRequest } from '../fireCreateCallRequest';
+import { fireCreateCallRequest } from '../../fireCreateCallRequest';
 
 interface CallButtonProps {
     callDOMElementId: string;

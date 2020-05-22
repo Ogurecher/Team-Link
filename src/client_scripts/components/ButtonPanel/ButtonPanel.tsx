@@ -1,7 +1,7 @@
 import React, { ReactNode } from 'react';
-import ToggleAudioButton from '../ToggleAudioButton';
-import ToggleVideoButton from '../ToggleVideoButton';
-import HangUpButton from '../HangUpButton';
+import ToggleAudioButton from '../ToggleAudioButton/ToggleAudioButton';
+import ToggleVideoButton from '../ToggleVideoButton/ToggleVideoButton';
+import HangUpButton from '../HangUpButton/HangUpButton';
 
 interface ButtonPanelProps {
     buttonPanelDOMElementId: string;

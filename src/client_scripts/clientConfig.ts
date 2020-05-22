@@ -6,7 +6,6 @@ export default {
     rootDOMElementId:            'root',
     tableDOMElementId:           'available_users',
     callDOMElementId:            'call_button',
-    callRootDOMElementId:        'call_button_root',
     callInfoDOMElementId:        'call_info',
     callInfoRootDOMElementId:    'call_info_root',
     videoPlayerDOMElementId:     'video_player',
