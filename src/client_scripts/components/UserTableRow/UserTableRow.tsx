@@ -12,17 +12,17 @@ export default class UserTableRow extends React.Component<UserTableRowProps> {
         if (this.props.cellType === 'th') {
             return (
                 <tr>
-                    <th>{this.props.displayName}</th>
-                    <th>{this.props.id}</th>
-                    <th>{this.props.status}</th>
+                    <th className='display_name_header'>{this.props.displayName}</th>
+                    <th className='id_header'>{this.props.id}</th>
+                    <th className='status_header'>{this.props.status}</th>
                 </tr>
             );
         }
         return (
             <tr>
-                <td>{this.props.displayName}</td>
-                <td>{this.props.id}</td>
-                <td>{this.props.status}</td>
+                <td className='display_name_cell'>{this.props.displayName}</td>
+                <td className='id_cell'>{this.props.id}</td>
+                <td className='status_cell'>{this.props.status}</td>
             </tr>
         );
 

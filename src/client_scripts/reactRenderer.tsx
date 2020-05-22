@@ -2,9 +2,9 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import config from './clientConfig';
 import { User } from './interfaces';
-import UserTable from './components/UserTable';
+import UserTable from './components/UserTable/UserTable';
 import CallButton from './components/CallButton';
-import CallInfo from './components/CallInfo';
+import CallInfo from './components/CallInfo/CallInfo';
 import VideoPlayer from './components/VideoPlayer/VideoPlayer';
 
 export function renderTable (onlineUsers: User[]): void {

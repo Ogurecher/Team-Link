@@ -1,7 +1,7 @@
 import React, { ReactNode } from 'react';
 import ReactBootstrap from 'react-bootstrap';
-import UserTableRow from './UserTableRow';
-import { User } from '../interfaces';
+import UserTableRow from '../UserTableRow/UserTableRow';
+import { User } from '../../interfaces';
 
 interface UserTableProps {
     tableDOMElementId: string;
