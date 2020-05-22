@@ -34,7 +34,7 @@ describe('Server', () => {
     });
 
     it(`Sends the correct html`, async () => {
-        const expectedTitle = 'Available users';
+        const expectedTitle = 'Team Link';
         const TitleRegex = /<title.*?>([\s\S]*)<\/title>/;
 
 
