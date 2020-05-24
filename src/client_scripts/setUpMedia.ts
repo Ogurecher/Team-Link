@@ -60,5 +60,7 @@ export async function setUpMedia (): Promise<void> {
         }
     };
 
-    start();
+    signaling.onopen = () => {
+        start();
+    };
 }

@@ -12,7 +12,7 @@ namespace MediaServer.MediaBot
     public class CallHandlerAudio
     {
 
-        private RemoteAudioTrack clientAudioTrack;
+        public RemoteAudioTrack clientAudioTrack;
 
         private byte[] audioFrameToSend;
 

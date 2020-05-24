@@ -11,7 +11,7 @@ namespace MediaServer.MediaBot
 
     public class CallHandlerVideo
     {
-        private RemoteVideoTrack clientVideoTrack;
+        public RemoteVideoTrack clientVideoTrack;
 
         private byte[] nv12VideoFrameToSend;
 

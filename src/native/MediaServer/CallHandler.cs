@@ -79,8 +79,21 @@ namespace MediaServer.MediaBot
             TransceiverInitSettings transceiverInitSettings = new TransceiverInitSettings();
             transceiverInitSettings.InitialDesiredDirection = Transceiver.Direction.Inactive;
             
-            this.teamsAudioTransceiver = this.peerConnection.AddTransceiver(MediaKind.Audio, transceiverInitSettings);
-            this.teamsVideoTransceiver = this.peerConnection.AddTransceiver(MediaKind.Video, transceiverInitSettings);
+            if (this.peerConnection.AssociatedTransceivers.ToList().Count != 0)
+            {
+                this.teamsAudioTransceiver = this.peerConnection.AssociatedTransceivers.ToList()[0];
+                this.callHandlerAudio.clientAudioTrack = this.peerConnection.AssociatedTransceivers.ToList()[0].RemoteAudioTrack;
+                this.callHandlerAudio.clientAudioTrack.AudioFrameReady += this.callHandlerAudio.OnClientAudioReceived;
+
+                this.teamsVideoTransceiver = this.peerConnection.AssociatedTransceivers.ToList()[1];
+                this.callHandlerVideo.clientVideoTrack = this.peerConnection.AssociatedTransceivers.ToList()[1].RemoteVideoTrack;
+                this.callHandlerVideo.clientVideoTrack.I420AVideoFrameReady += this.callHandlerVideo.OnClientVideoReceived;
+            }
+            else
+            {
+                this.teamsAudioTransceiver = this.peerConnection.AddTransceiver(MediaKind.Audio, transceiverInitSettings);
+                this.teamsVideoTransceiver = this.peerConnection.AddTransceiver(MediaKind.Video, transceiverInitSettings);
+            }
             
             LocalVideoTrack teamsVideoTrack = LocalVideoTrack.CreateFromExternalSource("TeamsVideoTrack",
                 ExternalVideoTrackSource.CreateFromI420ACallback(this.callHandlerVideo.CustomI420AFrameCallback));
@@ -92,6 +105,14 @@ namespace MediaServer.MediaBot
         protected override void Dispose(bool disposing)
         {
             base.Dispose(disposing);
+
+            this.peerConnection.VideoTrackAdded -= this.callHandlerVideo.OnClientVideoTrackAdded;
+            this.peerConnection.VideoTrackRemoved -= this.callHandlerVideo.OnClientVideoTrackRemoved;
+            this.callHandlerVideo.clientVideoTrack.I420AVideoFrameReady -= this.callHandlerVideo.OnClientVideoReceived;
+
+            this.peerConnection.AudioTrackAdded -= this.callHandlerAudio.OnClientAudioTrackAdded;
+            this.peerConnection.AudioTrackRemoved -= this.callHandlerAudio.OnClientAudioTrackRemoved;
+            this.callHandlerAudio.clientAudioTrack.AudioFrameReady -= this.callHandlerAudio.OnClientAudioReceived;
 
             this.Call.OnUpdated -= this.OnCallUpdated;
             this.Call.Participants.OnUpdated -= this.OnParticipantsUpdated;
@@ -106,12 +127,6 @@ namespace MediaServer.MediaBot
             }
 
             this.endCallTimer.Elapsed -= this.OnTimerElapsed;
-
-            this.peerConnection.VideoTrackAdded -= this.callHandlerVideo.OnClientVideoTrackAdded;
-            this.peerConnection.VideoTrackRemoved -= this.callHandlerVideo.OnClientVideoTrackRemoved;
-
-            this.peerConnection.AudioTrackAdded -= this.callHandlerAudio.OnClientAudioTrackAdded;
-            this.peerConnection.AudioTrackRemoved -= this.callHandlerAudio.OnClientAudioTrackRemoved;
         }
 
         private void OnCallUpdated(ICall sender, ResourceEventArgs<Call> args)
@@ -124,6 +139,12 @@ namespace MediaServer.MediaBot
             foreach (var participant in args.AddedResources)
             {
                 participant.OnUpdated += this.OnParticipantUpdated;
+
+                uint msi = (uint)Int32.Parse(participant.Resource.MediaStreams.FirstOrDefault(stream => stream.MediaType == Modality.Audio).SourceId);
+
+                this.subscribedToMsi = msi;
+
+                this.Subscribe(msi);
             }
 
             foreach (var participant in args.RemovedResources)
