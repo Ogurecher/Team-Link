@@ -31,6 +31,8 @@
                 const { hangUpCall } =  await System.import('hangUpCall');
                 const { renderButton, renderVideoPlayer } = await System.import('reactRenderer');
                 const { setUpMedia } = await System.import('setUpMedia');
+                const { toggleAudio } = await System.import('toggleAudio');
+                const { toggleVideo } = await System.import('toggleVideo');
 
                 renderButton();
                 renderVideoPlayer();
@@ -40,6 +42,9 @@
 
                 subscribe({ func: getOnlineUsers });
                 setUpMedia();
+
+                window.toggleAudio = toggleAudio;
+                window.toggleVideo = toggleVideo;
             })();
         </script>
     </body>
