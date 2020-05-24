@@ -1,0 +1,13 @@
+.id_header, .id_cell {
+    display: none;
+}
+
+.status_header, .status_cell {
+    display: none;
+}
+
+.display_name_header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}

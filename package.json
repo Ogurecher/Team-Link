@@ -12,7 +12,8 @@
     "debug": "node --inspect-brk src/index.js",
     "watch": "npm test -- -w",
     "build": "tsc && tsc -p ./src/client_scripts && tsc -p ./src/client_scripts/error",
-    "start-cs": "dotnet run --project ./src/native/HTTPServer/"
+    "start-cs": "dotnet run --project ./src/native/HTTPServer/",
+    "compile-css": "sass ./src/client_scripts/styles/stylesheet.scss:./lib/client/stylesheet.css"
   },
   "repository": {
     "type": "git",
@@ -51,6 +52,7 @@
     "debug": "^4.1.1",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
-    "got": "^10.4.0"
+    "got": "^10.4.0",
+    "react-bootstrap": "^1.0.1"
   }
 }

@@ -1,10 +1,12 @@
 import React, { ReactNode } from 'react';
-import UserTableRow from './UserTableRow';
-import { User } from '../interfaces';
+import ReactBootstrap from 'react-bootstrap';
+import UserTableRow from '../UserTableRow/UserTableRow';
+import { User } from '../../interfaces';
 
 interface UserTableProps {
     tableDOMElementId: string;
     users: User[];
+    callDOMElementId: string;
 }
 
 export default class UserTable extends React.Component<UserTableProps> {
@@ -18,12 +20,12 @@ export default class UserTable extends React.Component<UserTableProps> {
 
     public render (): ReactNode {
         return (
-            <table id={this.props.tableDOMElementId}>
+            <ReactBootstrap.Table striped bordered hover size="sm" id={this.props.tableDOMElementId} >
                 <tbody>
-                    <UserTableRow key='-1' cellType='th' displayName='Display Name' id='ID' status='Status'></UserTableRow>
+                    <UserTableRow key='-1' cellType='th' displayName='Display Name' id='ID' status='Status' callDOMElementId={this.props.callDOMElementId}></UserTableRow>
                     {this.populateTable()}
                 </tbody>
-            </table>
+            </ReactBootstrap.Table>
         );
     }
 }

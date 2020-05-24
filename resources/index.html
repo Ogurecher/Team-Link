@@ -1,13 +1,14 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>Available users</title>
+        <title>Team Link</title>
+        <script src="https://unpkg.com/react@16/umd/react.development.js"></script>
+        <script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"></script>
         <script type="systemjs-importmap">
             {
                 "imports": {
                     "debug": "https://unpkg.com/debug@4.1.1/dist/debug.js",
-                    "react": "https://unpkg.com/react@16/umd/react.development.js",
-                    "react-dom": "https://unpkg.com/react-dom@16/umd/react-dom.development.js"
+                    "react-bootstrap": "https://unpkg.com/react-bootstrap@1.0.1/dist/react-bootstrap.js"
                 }
             }
         </script>
@@ -15,15 +16,35 @@
         <script src="https://unpkg.com/systemjs@6.2.5/dist/extras/named-register.js"></script>
         <script type="text/javascript" src="errorHandling.js"></script>
         <script type="text/javascript" src="index.js"></script>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+        <link rel="stylesheet" type="text/css" href="stylesheet.css" />
     </head>
     <body>
         <div id="root"></div>
-        <div id="call_button_root"></div>
         <div id="call_info_root"></div>
         <div id="video_player_root"></div>
 
         <script type="text/javascript">
             (async () => {
+                System.register("react", [], function (exports, context) {
+                    "use strict";
+                    return {
+                        execute: function () {
+                            exports("default", React);
+                        }
+                    };
+                });
+
+                System.register("react-dom", [], function (exports, context) {
+                    "use strict";
+                    return {
+                        execute: function () {
+                            exports("default", ReactDOM);
+                        }
+                    };
+                    
+                });
+
                 await System.import('./errorHandling.js');
                 await System.import('./index.js');
                 const { subscribe, getOnlineUsers } = await System.import('index');
@@ -34,7 +55,6 @@
                 const { toggleAudio } = await System.import('toggleAudio');
                 const { toggleVideo } = await System.import('toggleVideo');
 
-                renderButton();
                 renderVideoPlayer();
 
                 window.fireCreateCallRequest = fireCreateCallRequest;
