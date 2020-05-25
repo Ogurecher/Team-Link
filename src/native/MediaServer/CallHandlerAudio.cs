@@ -89,7 +89,8 @@ namespace MediaServer.MediaBot
 
                 if (this.audioFrameQueue.Count > 0)
                 {
-                    byte[] pcm16AudioFrame = this.audioFrameQueue.Dequeue();
+                    byte[] pcm16AudioFrame;
+                    this.audioFrameQueue.TryDequeue(out pcm16AudioFrame);
 
                     byte[] audioFrameToSend = AudioConverter.ResampleAudio(pcm16AudioFrame, Config.AudioSettings.OUTGOING_SAMPLE_RATE,
                         Config.AudioSettings.OUTGOING_BITS_PER_SAMPLE, Config.AudioSettings.OUTGOING_CHANNEL_COUNT, Config.AudioSettings.WEBRTC_SAMPLE_RATE);

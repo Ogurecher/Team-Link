@@ -1,8 +1,8 @@
 namespace MediaServer.Util
 {
     using System;
-    using System.Collections.Generic;
-    public class FixedSizeQueue<T> : Queue<T>
+    using System.Collections.Concurrent;
+    public class FixedSizeQueue<T> : ConcurrentQueue<T>
     {
         private readonly object syncObject = new object();
 
@@ -17,9 +17,13 @@ namespace MediaServer.Util
         {
             base.Enqueue(obj);
 
-            if (base.Count > Size)
+            lock (syncObject)
             {
-                base.Dequeue();
+                while (base.Count > Size)
+                {
+                    T outObj;
+                    base.TryDequeue(out outObj);
+                }
             }
         }
     }
