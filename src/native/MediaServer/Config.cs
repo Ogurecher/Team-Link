@@ -30,7 +30,9 @@ namespace MediaServer
 
         public const int SIGNALING_BUFFER_SIZE = 1024 * 25;
 
-        public const string CALLBACK_URI = "https://teamlink_main.ngrok.io/callback";
+        public const string MAIN_SERVER_URI = "https://teamlink_main.ngrok.io";
+
+        public const string CALLBACK_URI = MAIN_SERVER_URI + "/callback";
 
         public const string STUN_URI = "stun:stun.l.google.com:19302";
     }

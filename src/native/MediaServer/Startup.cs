@@ -65,81 +65,19 @@ namespace MediaServer
                 app.UseHsts();
             }
 
+            WebSocketOptions webSocketOptions = new WebSocketOptions() 
+            {
+                KeepAliveInterval = TimeSpan.FromSeconds(120),
+                ReceiveBufferSize = 4 * 1024
+            };
+            webSocketOptions.AllowedOrigins.Add(Config.MAIN_SERVER_URI);
+
             app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseCookiePolicy();
+            app.UseWebSockets(webSocketOptions);
             app.UseMvc();
-            app.UseWebSockets();
-
-            app.Use(async (context, next) =>
-            {
-                if (context.Request.Path == HttpRouteConstants.WebSocketRoute)
-                {
-                    if (context.WebSockets.IsWebSocketRequest)
-                    {
-                        WebSocket webSocket = await context.WebSockets.AcceptWebSocketAsync();
-                        await InitializeWebRTC(context, webSocket);
-                    }
-                    else
-                    {
-                        context.Response.StatusCode = 400;
-                    }
-                }
-                else
-                {
-                    await next();
-                }
-
-            });
         }
 
-        private async Task InitializeWebRTC(HttpContext context, WebSocket webSocket)
-        {
-            Console.WriteLine("Initializing WebRTC");
-
-            var config = new PeerConnectionConfiguration
-            {
-                IceServers = new List<IceServer> {
-                        new IceServer{ Urls = { Config.STUN_URI } }
-                    }
-            };
-
-            await this.peerConnection.InitializeAsync(config);
-            Console.WriteLine("Peer connection initialized.");
-
-            var signaler = new WebSocketSignaler(this.peerConnection, webSocket);
-
-            signaler.SdpMessageReceived += async (SdpMessage message) => {
-                await this.peerConnection.SetRemoteDescriptionAsync(message);
-                if (message.Type == SdpMessageType.Offer)
-                {
-                    this.peerConnection.CreateAnswer();
-                }
-            };
-
-            signaler.IceCandidateReceived += (IceCandidate candidate) => {
-                this.peerConnection.AddIceCandidate(candidate);
-            };
-
-            this.peerConnection.Connected += () => {
-                Console.WriteLine("!!! --- PeerConnection: connected --- !!!");
-            };
-
-            this.peerConnection.IceStateChanged += (IceConnectionState newState) => {
-                Console.WriteLine($"!!! --- ICE state: {newState} --- !!!");
-            };
-
-            this.peerConnection.RenegotiationNeeded += () => {
-                this.peerConnection.CreateOffer();
-            };
-
-            await signaler.StartAsync();
-
-            Console.WriteLine("Signaler started");
-            Console.Read();
-            signaler.Stop();
-            this.peerConnection.Close();
-            Console.WriteLine("Program terminated.");
-        }
     }
 }

@@ -3,6 +3,7 @@ namespace MediaServer.Controllers
     using System;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Mvc;
+    using MediaServer.Controllers;
     using MediaServer.MediaBot;
 
     public class JoinCallController : Controller
@@ -17,7 +18,7 @@ namespace MediaServer.Controllers
         }
 
         [HttpPost]
-        [Route("joinCall")]
+        [Route(HttpRouteConstants.OnJoinCallRoute)]
         public async Task<IActionResult> JoinCallAsync([FromBody] JoinCallBody joinCallBody)
         {
             var call = await this.bot.JoinCallAsync(joinCallBody).ConfigureAwait(false);
