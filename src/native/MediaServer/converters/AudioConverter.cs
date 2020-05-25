@@ -28,7 +28,15 @@ namespace MediaServer.Converters
                     MemoryStream outStream = new MemoryStream(wavBufferLength);
                     WaveFileWriter.WriteWavFileToStream(outStream, resampler);
 
-                    byte[] wavBytes = outStream.ToArray();
+                    byte[] wavBytes = new byte[wavBufferLength];
+
+                    Array.Copy(outStream.ToArray(), wavBytes, outStream.Length);
+                    
+                    if (outStream.Length < wavBufferLength)
+                    {
+                        Array.Copy(new byte[wavBufferLength - outStream.Length], 0, wavBytes, outStream.Length, wavBufferLength - outStream.Length);
+                    }
+
                     ArraySegment<byte> outArraySegment = new ArraySegment<byte>(wavBytes, wavHeaderSize, outBufferLength);
                     outFrame = outArraySegment.ToArray();
                 }

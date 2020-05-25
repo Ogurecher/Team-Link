@@ -42,16 +42,23 @@ namespace MediaServer.MediaBot
         {
             if (DateTime.Now > this.lastVideoSentToClientTimeUtc + TimeSpan.FromMilliseconds(33))
             {
-                this.lastVideoSentToClientTimeUtc = DateTime.Now;
+                try
+                {
+                    this.lastVideoSentToClientTimeUtc = DateTime.Now;
 
-                byte[] i420Frame = new byte[frame.width * frame.height * 12 / 8];
-                frame.CopyTo(i420Frame);
+                    byte[] i420Frame = new byte[frame.width * frame.height * 12 / 8];
+                    frame.CopyTo(i420Frame);
 
-                byte[] nv12Frame = VideoConverter.I420ToNV12(i420Frame);
+                    byte[] nv12Frame = VideoConverter.I420ToNV12(i420Frame);
 
-                VideoFormat sendVideoFormat = VideoFormatUtil.GetSendVideoFormat((int)frame.height, (int)frame.width);
-                var videoSendBuffer = new VideoSendBuffer(nv12Frame, (uint)nv12Frame.Length, sendVideoFormat);
-                this.Call.GetLocalMediaSession().VideoSocket.Send(videoSendBuffer);
+                    VideoFormat sendVideoFormat = VideoFormatUtil.GetSendVideoFormat((int)frame.height, (int)frame.width);
+                    var videoSendBuffer = new VideoSendBuffer(nv12Frame, (uint)nv12Frame.Length, sendVideoFormat);
+                    this.Call.GetLocalMediaSession().VideoSocket.Send(videoSendBuffer);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e.Message);
+                }
             }
         }
 

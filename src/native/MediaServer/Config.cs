@@ -16,7 +16,11 @@ namespace MediaServer
 
             public const int OUTGOING_CHANNEL_COUNT = 1;
 
+            public const int WEBRTC_SAMPLE_RATE = 16000;
+
             public const int WAV_HEADER_SIZE = 44;
+
+            public const int MAX_AUDIO_FRAMES_IN_QUEUE = 6;
         }
 
         public static class VideoSettings
@@ -27,5 +31,7 @@ namespace MediaServer
         public const int SIGNALING_BUFFER_SIZE = 1024 * 25;
 
         public const string CALLBACK_URI = "https://teamlink_main.ngrok.io/callback";
+
+        public const string STUN_URI = "stun:stun.l.google.com:19302";
     }
 }

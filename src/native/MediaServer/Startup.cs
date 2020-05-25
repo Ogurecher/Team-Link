@@ -13,6 +13,7 @@ namespace MediaServer
     using Microsoft.Graph.Communications.Common.Telemetry;
     using Microsoft.MixedReality.WebRTC;
     using MediaServer.MediaBot;
+    using MediaServer.Controllers;
     using WebSocketSignaler;
 
     public class Startup
@@ -70,9 +71,9 @@ namespace MediaServer
             app.UseMvc();
             app.UseWebSockets();
 
-            app.Use(async (context, next) =>  // MOVE TO CONTROLLERS LATER
+            app.Use(async (context, next) =>
             {
-                if (context.Request.Path == "/websocket")
+                if (context.Request.Path == HttpRouteConstants.WebSocketRoute)
                 {
                     if (context.WebSockets.IsWebSocketRequest)
                     {
@@ -92,14 +93,14 @@ namespace MediaServer
             });
         }
 
-        private async Task InitializeWebRTC(HttpContext context, WebSocket webSocket) // MOVE TO CONTROLLERS LATER
+        private async Task InitializeWebRTC(HttpContext context, WebSocket webSocket)
         {
             Console.WriteLine("Initializing WebRTC");
 
             var config = new PeerConnectionConfiguration
             {
                 IceServers = new List<IceServer> {
-                        new IceServer{ Urls = { "stun:stun.l.google.com:19302" } }
+                        new IceServer{ Urls = { Config.STUN_URI } }
                     }
             };
 
@@ -108,16 +109,16 @@ namespace MediaServer
 
             var signaler = new WebSocketSignaler(this.peerConnection, webSocket);
 
-            signaler.SdpMessageReceived += async (string type, string sdp) => {
-                await this.peerConnection.SetRemoteDescriptionAsync(type, sdp);
-                if (type == "offer")
+            signaler.SdpMessageReceived += async (SdpMessage message) => {
+                await this.peerConnection.SetRemoteDescriptionAsync(message);
+                if (message.Type == SdpMessageType.Offer)
                 {
                     this.peerConnection.CreateAnswer();
                 }
             };
 
-            signaler.IceCandidateReceived += (string candidate, int sdpMlineindex, string sdpMid) => {
-                this.peerConnection.AddIceCandidate(sdpMid, sdpMlineindex, candidate);
+            signaler.IceCandidateReceived += (IceCandidate candidate) => {
+                this.peerConnection.AddIceCandidate(candidate);
             };
 
             this.peerConnection.Connected += () => {
@@ -130,32 +131,6 @@ namespace MediaServer
 
             this.peerConnection.RenegotiationNeeded += () => {
                 this.peerConnection.CreateOffer();
-            };
-
-            // DEBUG CODE, MIGHT NOT NEED IT LATER
-            int numFrames = 0;
-            peerConnection.VideoTrackAdded += (RemoteVideoTrack track) => {
-                Console.WriteLine("VIDEO TRACK ADDED");
-                track.I420AVideoFrameReady += (I420AVideoFrame frame) => {
-                    ++numFrames;
-                    if (numFrames % 60 == 0)
-                    {
-                        Console.WriteLine($"Received video frames: {numFrames}");
-                    }
-                };
-            };
-
-            // DEBUG CODE, MIGHT NOT NEED IT LATER
-            int numAudioFrames = 0;
-            this.peerConnection.AudioTrackAdded += (RemoteAudioTrack track) => {
-                Console.WriteLine("AUDIO TRACK ADDED");
-                track.AudioFrameReady += (AudioFrame frame) => {
-                    ++numAudioFrames;
-                    if (numAudioFrames % 100 == 0)
-                    {
-                        Console.WriteLine($"Received audio frames: {numAudioFrames}");
-                    }
-                };
             };
 
             await signaler.StartAsync();
