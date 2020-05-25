@@ -8,6 +8,8 @@ namespace MediaServer.Controllers
 
         public const string OnJoinCallRoute = "joinCall";
 
+        public const string WebSocketRoute = "/websocket";
+
         public const string Calls = "calls/";
 
         public const string Logs = "logs/";
