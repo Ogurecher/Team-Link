@@ -33,10 +33,6 @@ export async function createCall (req: CreateCallRequest, res: HTTPResponse): Pr
 
     callIdEmitter.on('CallId requested', callIdRequestedCallback);
 
-    notifier.once('Call terminated', () => {
-        callIdEmitter.removeListener('CallId requested', callIdRequestedCallback);
-    });
-
     debug(JSON.stringify(callParameters, null, 4));
 
     res.send(callParameters);
