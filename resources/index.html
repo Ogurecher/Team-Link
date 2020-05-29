@@ -50,11 +50,12 @@
                 const { subscribe, getOnlineUsers } = await System.import('index');
                 const { fireCreateCallRequest } =  await System.import('fireCreateCallRequest');
                 const { hangUpCall } =  await System.import('hangUpCall');
-                const { renderButton, renderVideoPlayer } = await System.import('reactRenderer');
+                const { renderButton, renderVideoPlayer, renderTable } = await System.import('reactRenderer');
                 const { setUpMedia } = await System.import('setUpMedia');
                 const { toggleAudio } = await System.import('toggleAudio');
                 const { toggleVideo } = await System.import('toggleVideo');
 
+                renderTable([]);
                 renderVideoPlayer();
 
                 window.fireCreateCallRequest = fireCreateCallRequest;
