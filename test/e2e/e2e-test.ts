@@ -52,15 +52,17 @@ test('Polls repeatedly', async t => {
 
     nockManager.setupAllNocks();
 
-    const expectedInitialUsersTable = 'Display Name ID Status \n username1 userId1 Available'.replace(/\s/g, '');
+    const expectedInitialUsersTable = 'Display NameIDStatus';
+    const expectedFirstUsersTable = 'Display NameIDStatususername1userId1Available';
 
 
     const initialUsersTable = await Selector('#available_users').textContent;
 
 
     await t
-        .expect(initialUsersTable.replace(/\s/g, '')).eql(expectedInitialUsersTable)
-        .expect(Selector('#available_users').textContent).notEql(initialUsersTable, { timeout: 10000 });
+        .expect(initialUsersTable).eql(expectedInitialUsersTable)
+        .expect(Selector('#available_users').textContent).eql(expectedFirstUsersTable, { timeout: 10000 })
+        .expect(Selector('#available_users').textContent).notEql(expectedFirstUsersTable, { timeout: 10000 });
 });
 
 test('Calls when the "call" button is clicked', async t => {
