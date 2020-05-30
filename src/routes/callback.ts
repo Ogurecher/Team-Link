@@ -12,9 +12,13 @@ export async function callback (req: CallbackRequest, res: HTTPResponse): Promis
     if (req.body.value[0].resourceData.state === 'established')
         notifier.emit('Call established');
 
-    if (req.body.value[0].resourceData.state === 'terminated') {
-        debug('call terminated');
-        notifier.emit('Call terminated');
+    const resultInfo = req.body.value[0].resourceData.resultInfo;
+
+    if (resultInfo) {
+        if (resultInfo.message === 'Call ended by media agent.') {
+            debug('call terminated');
+            notifier.emit('Call terminated');
+        }
     }
 
     res.status(200);

@@ -30,7 +30,9 @@ describe('API', () => {
                 value: [
                     {
                         resourceData: {
-                            state: 'terminated'
+                            resultInfo: {
+                                message: 'Call ended by media agent.'
+                            }
                         }
                     }
                 ]

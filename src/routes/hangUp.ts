@@ -10,8 +10,6 @@ const config = configInstance.config();
 const debug = debugModule('team-link:debug');
 
 export async function hangUp (req: unknown, res: HTTPResponse): Promise<void> {
-    callIdEmitter.emit('CallId requested');
-
     callIdEmitter.once('CallId provided', async (callId, accessToken) => {
         const hangUpQuery = `/communications/calls/${callId}`;
         const hangUpURL = path.join(config.apiBaseURL, hangUpQuery);
@@ -24,6 +22,8 @@ export async function hangUp (req: unknown, res: HTTPResponse): Promise<void> {
 
         debug(`Hang up callId: ${callId}`);
     });
+
+    callIdEmitter.emit('CallId requested');
 
     res.sendStatus(204);
 }

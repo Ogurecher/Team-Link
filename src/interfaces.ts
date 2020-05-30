@@ -11,6 +11,9 @@ export interface CallbackRequest {
             {
                 resourceData: {
                     state: string;
+                    resultInfo?: {
+                        message?: string;
+                    };
                 };
             }
         ];
